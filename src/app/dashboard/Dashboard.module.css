@@ -1,0 +1,140 @@
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: var(--spacing-xl) var(--spacing-md);
+}
+
+.header {
+    margin-bottom: var(--spacing-xl);
+}
+
+.header h1 {
+    font-size: 1.75rem;
+    color: var(--text-primary);
+}
+
+.header p {
+    color: var(--text-secondary);
+}
+
+.statsGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-xl);
+}
+
+.statCard {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+}
+
+.statIcon {
+    width: 48px;
+    height: 48px;
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.statCard h3 {
+    font-size: 1.5rem;
+    line-height: 1;
+    color: var(--text-primary);
+}
+
+.statCard p {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+}
+
+.mainGrid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--spacing-xl);
+}
+
+.progressSection h2,
+.continueSection h2 {
+    font-size: 1.25rem;
+    margin-bottom: var(--spacing-md);
+}
+
+.progressCard {
+    padding: var(--spacing-lg) !important;
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-lg);
+}
+
+.subjectRow {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+}
+
+.subjectInfo {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.progressBar {
+    height: 8px;
+    background-color: #eee;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.progressFill {
+    height: 100%;
+    border-radius: 4px;
+}
+
+.continueSection {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+}
+
+.continueCard {
+    padding: var(--spacing-md) !important;
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+}
+
+.continueHeader {
+    display: flex;
+    gap: var(--spacing-md);
+    align-items: center;
+}
+
+.iconCircle {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--bg-body);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-secondary);
+}
+
+.continueHeader h4 {
+    font-size: 1rem;
+}
+
+.continueHeader p {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+@media (min-width: 768px) {
+    .mainGrid {
+        grid-template-columns: 2fr 1fr;
+    }
+}
