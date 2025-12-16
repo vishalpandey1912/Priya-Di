@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { FileText, PlayCircle, HelpCircle, PenTool } from 'lucide-react';
 import { Card, Button } from '@/components/ui';
+import { useContent } from '@/context/ContentContext';
 import styles from './ExamTabs.module.css';
 
 const tabs = [
@@ -15,6 +16,13 @@ const tabs = [
 
 export const ExamTabs = () => {
     const [activeTab, setActiveTab] = useState('notes');
+
+    const { chapters } = useContent();
+
+    // Get recent 3 chapters with materials
+    const recentNotes = chapters
+        .filter(c => c.topics.some(t => t.materials.length > 0))
+        .slice(0, 3);
 
     return (
         <div className={styles.container}>
@@ -37,12 +45,15 @@ export const ExamTabs = () => {
                 {activeTab === 'notes' && (
                     <div className={styles.grid}>
                         <h3>Recent Notes</h3>
-                        <Link href="/neet/biology/1" className={styles.placeholderItem}>
-                            Chapter 1: The Living World (PDF)
-                        </Link>
-                        <Link href="/neet/biology/2" className={styles.placeholderItem}>
-                            Chapter 2: Biological Classification (PDF)
-                        </Link>
+                        {recentNotes.length > 0 ? (
+                            recentNotes.map(chapter => (
+                                <Link key={chapter.id} href={`/neet/${chapter.subjectId}/${chapter.id}`} className={styles.placeholderItem}>
+                                    {chapter.title} (PDF)
+                                </Link>
+                            ))
+                        ) : (
+                            <p>No recent notes found.</p>
+                        )}
                     </div>
                 )}
                 {activeTab === 'videos' && (
