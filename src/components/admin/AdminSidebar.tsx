@@ -15,7 +15,12 @@ import {
 import styles from './AdminSidebar.module.css';
 import { useAuth } from '@/context/AuthContext';
 
-export const AdminSidebar = () => {
+interface AdminSidebarProps {
+    isOpen?: boolean;
+    onClose?: () => void;
+}
+
+export const AdminSidebar = ({ isOpen = false, onClose }: AdminSidebarProps) => {
     const pathname = usePathname();
     const { logout } = useAuth();
 
@@ -30,31 +35,38 @@ export const AdminSidebar = () => {
     ];
 
     return (
-        <aside className={styles.sidebar}>
-            <div className={styles.header}>
-                <GraduationCap size={28} color="var(--primary-color)" />
-                <span className={styles.brand}>Desi Admin</span>
-            </div>
+        <>
+            <div
+                className={`${styles.backdrop} ${isOpen ? styles.visible : ''}`}
+                onClick={onClose}
+            />
+            <aside className={`${styles.sidebar} ${isOpen ? styles.open : ''}`}>
+                <div className={styles.header}>
+                    <GraduationCap size={28} color="var(--primary-color)" />
+                    <span className={styles.brand}>Desi Admin</span>
+                </div>
 
-            <nav className={styles.nav}>
-                {links.map((link) => (
-                    <Link
-                        key={link.href}
-                        href={link.href}
-                        className={`${styles.link} ${pathname === link.href ? styles.active : ''}`}
-                    >
-                        {link.icon}
-                        <span>{link.name}</span>
-                    </Link>
-                ))}
-            </nav>
+                <nav className={styles.nav}>
+                    {links.map((link) => (
+                        <Link
+                            key={link.href}
+                            href={link.href}
+                            className={`${styles.link} ${pathname === link.href ? styles.active : ''}`}
+                            onClick={onClose}
+                        >
+                            {link.icon}
+                            <span>{link.name}</span>
+                        </Link>
+                    ))}
+                </nav>
 
-            <div className={styles.footer}>
-                <button onClick={logout} className={styles.logoutBtn}>
-                    <LogOut size={20} />
-                    <span>Logout</span>
-                </button>
-            </div>
-        </aside>
+                <div className={styles.footer}>
+                    <button onClick={logout} className={styles.logoutBtn}>
+                        <LogOut size={20} />
+                        <span>Logout</span>
+                    </button>
+                </div>
+            </aside>
+        </>
     );
 };

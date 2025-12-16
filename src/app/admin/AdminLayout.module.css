@@ -20,3 +20,13 @@
         padding: var(--spacing-xl);
     }
 }
+
+.mobileToggle {
+    display: none;
+}
+
+@media (max-width: 768px) {
+    .mobileToggle {
+        display: flex;
+    }
+}
