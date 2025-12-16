@@ -152,6 +152,15 @@ export const Navbar = () => {
                                         <UserCircle size={20} />
                                         <span>{user.name}</span>
                                     </Link>
+
+                                    {user.role === 'admin' && (
+                                        <Link href="/admin/dashboard" onClick={() => setIsMenuOpen(false)}>
+                                            <Button size="sm" variant="outline" className={styles.fullWidth}>
+                                                Admin Panel
+                                            </Button>
+                                        </Link>
+                                    )}
+
                                     <Button size="sm" onClick={() => { logout(); setIsMenuOpen(false); }}>
                                         Log Out
                                     </Button>

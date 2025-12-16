@@ -176,39 +176,41 @@ export default function ProfilePage() {
                     </div>
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '280px 1fr', gap: '32px' }}>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '32px', alignItems: 'flex-start' }}>
                     {/* Sidebar Tabs */}
-                    <Card padding="none" style={{ height: 'fit-content', overflow: 'hidden' }}>
-                        <div style={{ display: 'flex', flexDirection: 'column' }}>
-                            {tabs.map(tab => (
-                                <button
-                                    key={tab.id}
-                                    onClick={() => setActiveTab(tab.id)}
-                                    style={{
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        gap: '12px',
-                                        padding: '16px 24px',
-                                        width: '100%',
-                                        border: 'none',
-                                        backgroundColor: activeTab === tab.id ? '#f0fdfa' : 'white',
-                                        color: activeTab === tab.id ? '#00A99D' : '#64748b',
-                                        fontWeight: activeTab === tab.id ? 600 : 500,
-                                        cursor: 'pointer',
-                                        textAlign: 'left',
-                                        borderLeft: activeTab === tab.id ? '4px solid #00A99D' : '4px solid transparent',
-                                        transition: 'all 0.2s ease'
-                                    }}
-                                >
-                                    {tab.icon}
-                                    {tab.label}
-                                </button>
-                            ))}
-                        </div>
-                    </Card>
+                    <div style={{ flex: '1 1 280px', minWidth: '250px' }}>
+                        <Card padding="none" style={{ height: 'fit-content', overflow: 'hidden' }}>
+                            <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                {tabs.map(tab => (
+                                    <button
+                                        key={tab.id}
+                                        onClick={() => setActiveTab(tab.id)}
+                                        style={{
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: '12px',
+                                            padding: '16px 24px',
+                                            width: '100%',
+                                            border: 'none',
+                                            backgroundColor: activeTab === tab.id ? '#f0fdfa' : 'white',
+                                            color: activeTab === tab.id ? '#00A99D' : '#64748b',
+                                            fontWeight: activeTab === tab.id ? 600 : 500,
+                                            cursor: 'pointer',
+                                            textAlign: 'left',
+                                            borderLeft: activeTab === tab.id ? '4px solid #00A99D' : '4px solid transparent',
+                                            transition: 'all 0.2s ease'
+                                        }}
+                                    >
+                                        {tab.icon}
+                                        {tab.label}
+                                    </button>
+                                ))}
+                            </div>
+                        </Card>
+                    </div>
 
                     {/* Content Area */}
-                    <div style={{ minHeight: '500px' }}>
+                    <div style={{ flex: '999 1 300px', minHeight: '500px', maxWidth: '100%' }}>
 
                         {/* OVERVIEW TAB */}
                         {activeTab === 'overview' && (
