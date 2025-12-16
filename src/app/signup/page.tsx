@@ -16,6 +16,7 @@ export default function SignupPage() {
 
     // Form states
     const [name, setName] = useState('');
+    const [phone, setPhone] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
@@ -26,14 +27,14 @@ export default function SignupPage() {
         setError('');
 
         try {
-            const success = await signup(name, email, password);
+            const success = await signup(name, email, password, phone);
             if (success) {
-                router.push('/dashboard');
+                router.push('/verify');
             } else {
                 setError('Email already exists. Please login.');
             }
         } catch (err) {
-            setError('Something went wrong. Try again.');
+            setError('Failed to create account');
         } finally {
             setIsLoading(false);
         }
@@ -58,6 +59,14 @@ export default function SignupPage() {
                         required
                     />
                     <Input
+                        label="Phone Number"
+                        type="tel"
+                        placeholder="Enter mobile number"
+                        icon={<Phone size={18} />}
+                        value={phone}
+                        onChange={(e) => setPhone(e.target.value)}
+                    />
+                    <Input
                         label="Email Address"
                         type="email"
                         placeholder="Enter your email"
@@ -66,12 +75,7 @@ export default function SignupPage() {
                         onChange={(e) => setEmail(e.target.value)}
                         required
                     />
-                    <Input
-                        label="Phone Number"
-                        type="tel"
-                        placeholder="Enter mobile number"
-                        icon={<Phone size={18} />}
-                    />
+
                     <Input
                         label="Password"
                         type="password"

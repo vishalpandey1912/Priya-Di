@@ -6,6 +6,14 @@ import { User, Mail, Save, UserCircle, BookOpen, ShoppingBag, LayoutDashboard, C
 import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { INDIAN_STATES, CITIES_BY_STATE } from '@/data/locations';
+
+const DAYS = Array.from({ length: 31 }, (_, i) => (i + 1).toString());
+const MONTHS = [
+    'January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December'
+];
+const YEARS = Array.from({ length: 60 }, (_, i) => (2025 - i).toString()); // 2025 down to 1966
 
 export default function ProfilePage() {
     const { user, updateUser, isLoading } = useAuth();
@@ -16,18 +24,31 @@ export default function ProfilePage() {
     const [email, setEmail] = useState('');
 
     // Extended Details State
-    const [targetExam, setTargetExam] = useState('NEET');
-    const [currentClass, setCurrentClass] = useState('Class 12');
+    const [targetExam, setTargetExam] = useState('Select Exam');
+    const [currentClass, setCurrentClass] = useState('Select Class');
     const [state, setState] = useState('');
     const [city, setCity] = useState('');
-    const [dob, setDob] = useState('');
+
+    const [dobDay, setDobDay] = useState('');
+    const [dobMonth, setDobMonth] = useState('');
+    const [dobYear, setDobYear] = useState('');
 
     const [isEditing, setIsEditing] = useState(false);
     const [successMsg, setSuccessMsg] = useState('');
 
     // Data States
     const [orders, setOrders] = useState<any[]>([]);
+
     const [myCourses, setMyCourses] = useState<any[]>([]);
+
+    // Real user stats (default to 0 for now)
+    const stats = [
+        { label: 'Courses Enrolled', value: '0', icon: BookOpen, color: '#00A99D' },
+        { label: 'Tests Attempted', value: '0', icon: ShieldCheck, color: '#FF5722' },
+        { label: 'Hours Studied', value: '0h', icon: Clock, color: '#2196F3' }
+    ];
+
+    const [phone, setPhone] = useState('');
 
     useEffect(() => {
         if (!isLoading && !user) {
@@ -36,6 +57,25 @@ export default function ProfilePage() {
             setName(user.name);
             setEmail(user.email);
 
+            // Load extended details
+            const savedDetails = JSON.parse(localStorage.getItem(`user_details_${user.email}`) || '{}');
+            setTargetExam(savedDetails.targetExam || 'Select Exam');
+            setCurrentClass(savedDetails.currentClass || 'Select Class');
+            setPhone(savedDetails.phone || '');
+            setPhone(savedDetails.phone || '');
+            if (savedDetails.dob) {
+                const [y, m, d] = savedDetails.dob.split('-');
+                setDobYear(y || '');
+                setDobMonth(m ? MONTHS[parseInt(m) - 1] : '');
+                setDobDay(d ? parseInt(d).toString() : '');
+            } else {
+                setDobYear('');
+                setDobMonth('');
+                setDobDay('');
+            }
+            setState(savedDetails.state || '');
+            setCity(savedDetails.city || '');
+
             // Fetch Orders
             const allOrders = JSON.parse(localStorage.getItem('orders') || '[]');
             setOrders(allOrders.filter((o: any) => o.user === user.name));
@@ -43,23 +83,49 @@ export default function ProfilePage() {
             // Determine Courses (User Scoped)
             const courses = [];
             const email = user.email;
-            if (localStorage.getItem(`access_full_bundle_${email}`)) courses.push({ name: 'NEET 2026 Full Course', progress: 15, subject: 'Bundle' });
-            if (localStorage.getItem(`access_physics_${email}`)) courses.push({ name: 'Physics Mastery', progress: 32, subject: 'Physics' });
-            if (localStorage.getItem(`access_chemistry_${email}`)) courses.push({ name: 'Chemistry Essentials', progress: 5, subject: 'Chemistry' });
-            if (localStorage.getItem(`access_biology_${email}`)) courses.push({ name: 'Biology Deep Dive', progress: 0, subject: 'Biology' });
-            if (localStorage.getItem(`access_test_series_${email}`)) courses.push({ name: 'All India Test Series', progress: 1, subject: 'Test Series' });
+            const hasBundle = localStorage.getItem(`access_full_bundle_${email}`);
+
+            if (hasBundle) {
+                courses.push({ name: 'NEET 2026 Full Course', progress: 0, subject: 'Bundle' });
+            } else {
+                if (localStorage.getItem(`access_physics_${email}`)) courses.push({ name: 'Physics Mastery', progress: 0, subject: 'Physics' });
+                if (localStorage.getItem(`access_chemistry_${email}`)) courses.push({ name: 'Chemistry Essentials', progress: 0, subject: 'Chemistry' });
+                if (localStorage.getItem(`access_biology_${email}`)) courses.push({ name: 'Biology Deep Dive', progress: 0, subject: 'Biology' });
+            }
+
+            // Test Series is separate (not included in default bundle targetIds, so check independently)
+            if (localStorage.getItem(`access_test_series_${email}`)) {
+                courses.push({ name: 'All India Test Series', progress: 0, subject: 'Test Series' });
+            }
 
             setMyCourses(courses);
         }
     }, [user, isLoading, router]);
 
+    const handleStateChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        const newState = e.target.value;
+        setState(newState);
+        setCity(''); // Reset city when state changes
+    };
+
     const handleSave = (e: React.FormEvent) => {
         e.preventDefault();
         updateUser(name, email);
+
+        // Persist extended details
+        const formattedMonth = (MONTHS.indexOf(dobMonth) + 1).toString().padStart(2, '0');
+        const formattedDay = dobDay.padStart(2, '0');
+        const dob = (dobYear && dobMonth && dobDay) ? `${dobYear}-${formattedMonth}-${formattedDay}` : '';
+
+        const details = { targetExam, currentClass, phone, dob, state, city };
+        localStorage.setItem(`user_details_${user?.email}`, JSON.stringify(details));
+
         setIsEditing(false);
         setSuccessMsg('Profile updated successfully!');
         setTimeout(() => setSuccessMsg(''), 3000);
     };
+
+
 
     if (isLoading || !user) {
         return <div style={{ padding: '80px', textAlign: 'center', color: '#64748b' }}>Loading your profile...</div>;
@@ -143,46 +209,26 @@ export default function ProfilePage() {
                         {/* OVERVIEW TAB */}
                         {activeTab === 'overview' && (
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '24px' }}>
-                                    <Card padding="lg">
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                                            <div style={{ padding: '12px', backgroundColor: '#e0f2f1', borderRadius: '12px', color: '#00A99D' }}>
-                                                <BookOpen size={24} />
+                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '16px' }}>
+                                    {stats.map((stat, i) => (
+                                        <Card key={i} padding="md">
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                                                <div style={{ padding: '12px', borderRadius: '12px', backgroundColor: `${stat.color}20` }}>
+                                                    <stat.icon size={24} color={stat.color} />
+                                                </div>
+                                                <div>
+                                                    <div style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--text-primary)' }}>{stat.value}</div>
+                                                    <div style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>{stat.label}</div>
+                                                </div>
                                             </div>
-                                            <div>
-                                                <p style={{ color: '#64748b', fontSize: '0.9rem' }}>Enrolled Courses</p>
-                                                <h3 style={{ fontSize: '1.5rem', fontWeight: 700 }}>{myCourses.length}</h3>
-                                            </div>
-                                        </div>
-                                    </Card>
-                                    <Card padding="lg">
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                                            <div style={{ padding: '12px', backgroundColor: '#d1fae5', borderRadius: '12px', color: '#059669' }}>
-                                                <ShieldCheck size={24} />
-                                            </div>
-                                            <div>
-                                                <p style={{ color: '#64748b', fontSize: '0.9rem' }}>Tests Attempted</p>
-                                                <h3 style={{ fontSize: '1.5rem', fontWeight: 700 }}>12</h3>
-                                            </div>
-                                        </div>
-                                    </Card>
-                                    <Card padding="lg">
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                                            <div style={{ padding: '12px', backgroundColor: '#dbeafe', borderRadius: '12px', color: '#2563eb' }}>
-                                                <Clock size={24} />
-                                            </div>
-                                            <div>
-                                                <p style={{ color: '#64748b', fontSize: '0.9rem' }}>Hours Studied</p>
-                                                <h3 style={{ fontSize: '1.5rem', fontWeight: 700 }}>48h</h3>
-                                            </div>
-                                        </div>
-                                    </Card>
+                                        </Card>
+                                    ))}
                                 </div>
 
                                 <h3 style={{ fontSize: '1.25rem', fontWeight: 700, marginTop: '8px' }}>Continue Learning</h3>
                                 {myCourses.length > 0 ? (
-                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
-                                        {myCourses.slice(0, 2).map((course, i) => (
+                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '24px' }}>
+                                        {myCourses.slice(0, 6).map((course, i) => (
                                             <Card key={i} padding="lg">
                                                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '16px' }}>
                                                     <span style={{ fontSize: '0.8rem', fontWeight: 600, color: '#00A99D', backgroundColor: '#e0f2f1', padding: '4px 8px', borderRadius: '4px' }}>
@@ -219,7 +265,7 @@ export default function ProfilePage() {
                             <div>
                                 <h2 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '24px' }}>My Enrolled Courses</h2>
                                 {myCourses.length > 0 ? (
-                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '24px' }}>
+                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '24px' }}>
                                         {myCourses.map((course, i) => (
                                             <Card key={i} padding="lg">
                                                 <h4 style={{ fontSize: '1.2rem', fontWeight: 700, marginBottom: '8px' }}>{course.name}</h4>
@@ -248,47 +294,49 @@ export default function ProfilePage() {
                             <div>
                                 <h2 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '24px' }}>Order History</h2>
                                 <Card padding="none">
-                                    <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                                        <thead style={{ backgroundColor: '#f8fafc', borderBottom: '1px solid #e2e8f0' }}>
-                                            <tr>
-                                                <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.85rem', color: '#64748b', fontWeight: 600 }}>Order ID</th>
-                                                <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.85rem', color: '#64748b', fontWeight: 600 }}>Date</th>
-                                                <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.85rem', color: '#64748b', fontWeight: 600 }}>Plan / Course</th>
-                                                <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.85rem', color: '#64748b', fontWeight: 600 }}>Amount</th>
-                                                <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.85rem', color: '#64748b', fontWeight: 600 }}>Status</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {orders.length === 0 ? (
+                                    <div style={{ overflowX: 'auto' }}>
+                                        <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '600px' }}>
+                                            <thead style={{ backgroundColor: '#f8fafc', borderBottom: '1px solid #e2e8f0' }}>
                                                 <tr>
-                                                    <td colSpan={5} style={{ padding: '40px', textAlign: 'center', color: '#94a3b8' }}>
-                                                        No orders found.
-                                                    </td>
+                                                    <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.85rem', color: '#64748b', fontWeight: 600 }}>Order ID</th>
+                                                    <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.85rem', color: '#64748b', fontWeight: 600 }}>Date</th>
+                                                    <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.85rem', color: '#64748b', fontWeight: 600 }}>Plan / Course</th>
+                                                    <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.85rem', color: '#64748b', fontWeight: 600 }}>Amount</th>
+                                                    <th style={{ padding: '16px', textAlign: 'left', fontSize: '0.85rem', color: '#64748b', fontWeight: 600 }}>Status</th>
                                                 </tr>
-                                            ) : (
-                                                orders.map((order, i) => (
-                                                    <tr key={i} style={{ borderBottom: '1px solid #f1f5f9' }}>
-                                                        <td style={{ padding: '16px', fontWeight: 500 }}>{order.id}</td>
-                                                        <td style={{ padding: '16px', color: '#64748b' }}>{order.date}</td>
-                                                        <td style={{ padding: '16px' }}>{order.plan}</td>
-                                                        <td style={{ padding: '16px', fontWeight: 600 }}>{order.amount}</td>
-                                                        <td style={{ padding: '16px' }}>
-                                                            <span style={{
-                                                                padding: '4px 10px',
-                                                                borderRadius: '20px',
-                                                                fontSize: '0.75rem',
-                                                                fontWeight: 600,
-                                                                backgroundColor: '#dcfce7',
-                                                                color: '#166534'
-                                                            }}>
-                                                                Success
-                                                            </span>
+                                            </thead>
+                                            <tbody>
+                                                {orders.length === 0 ? (
+                                                    <tr>
+                                                        <td colSpan={5} style={{ padding: '40px', textAlign: 'center', color: '#94a3b8' }}>
+                                                            No orders found.
                                                         </td>
                                                     </tr>
-                                                ))
-                                            )}
-                                        </tbody>
-                                    </table>
+                                                ) : (
+                                                    orders.map((order, i) => (
+                                                        <tr key={i} style={{ borderBottom: '1px solid #f1f5f9' }}>
+                                                            <td style={{ padding: '16px', fontWeight: 500 }}>{order.id}</td>
+                                                            <td style={{ padding: '16px', color: '#64748b' }}>{order.date}</td>
+                                                            <td style={{ padding: '16px' }}>{order.plan}</td>
+                                                            <td style={{ padding: '16px', fontWeight: 600 }}>{order.amount}</td>
+                                                            <td style={{ padding: '16px' }}>
+                                                                <span style={{
+                                                                    padding: '4px 10px',
+                                                                    borderRadius: '20px',
+                                                                    fontSize: '0.75rem',
+                                                                    fontWeight: 600,
+                                                                    backgroundColor: '#dcfce7',
+                                                                    color: '#166534'
+                                                                }}>
+                                                                    Success
+                                                                </span>
+                                                            </td>
+                                                        </tr>
+                                                    ))
+                                                )}
+                                            </tbody>
+                                        </table>
+                                    </div>
                                 </Card>
                             </div>
                         )}
@@ -396,30 +444,99 @@ export default function ProfilePage() {
                                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '24px' }}>
                                                 <div>
                                                     <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500, color: '#334155' }}>Date of Birth</label>
-                                                    <Input
-                                                        type="date"
-                                                        value={dob}
-                                                        onChange={(e) => setDob(e.target.value)}
-                                                        disabled={!isEditing}
-                                                    />
+                                                    <div style={{ display: 'flex', gap: '8px' }}>
+                                                        <select
+                                                            value={dobDay}
+                                                            onChange={(e) => setDobDay(e.target.value)}
+                                                            disabled={!isEditing}
+                                                            style={{
+                                                                flex: 1,
+                                                                padding: '10px',
+                                                                border: '1px solid #e2e8f0',
+                                                                borderRadius: '8px',
+                                                                backgroundColor: isEditing ? 'white' : '#f8fafc',
+                                                                fontSize: '0.9rem'
+                                                            }}
+                                                        >
+                                                            <option value="">Day</option>
+                                                            {DAYS.map(d => <option key={d} value={d}>{d}</option>)}
+                                                        </select>
+                                                        <select
+                                                            value={dobMonth}
+                                                            onChange={(e) => setDobMonth(e.target.value)}
+                                                            disabled={!isEditing}
+                                                            style={{
+                                                                flex: 2,
+                                                                padding: '10px',
+                                                                border: '1px solid #e2e8f0',
+                                                                borderRadius: '8px',
+                                                                backgroundColor: isEditing ? 'white' : '#f8fafc',
+                                                                fontSize: '0.9rem'
+                                                            }}
+                                                        >
+                                                            <option value="">Month</option>
+                                                            {MONTHS.map(m => <option key={m} value={m}>{m}</option>)}
+                                                        </select>
+                                                        <select
+                                                            value={dobYear}
+                                                            onChange={(e) => setDobYear(e.target.value)}
+                                                            disabled={!isEditing}
+                                                            style={{
+                                                                flex: 1.5,
+                                                                padding: '10px',
+                                                                border: '1px solid #e2e8f0',
+                                                                borderRadius: '8px',
+                                                                backgroundColor: isEditing ? 'white' : '#f8fafc',
+                                                                fontSize: '0.9rem'
+                                                            }}
+                                                        >
+                                                            <option value="">Year</option>
+                                                            {YEARS.map(y => <option key={y} value={y}>{y}</option>)}
+                                                        </select>
+                                                    </div>
                                                 </div>
                                                 <div>
                                                     <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500, color: '#334155' }}>State</label>
-                                                    <Input
+                                                    <select
                                                         value={state}
-                                                        onChange={(e) => setState(e.target.value)}
+                                                        onChange={handleStateChange}
                                                         disabled={!isEditing}
-                                                        placeholder="e.g. Delhi"
-                                                    />
+                                                        style={{
+                                                            width: '100%',
+                                                            padding: '10px 12px',
+                                                            border: '1px solid #e2e8f0',
+                                                            borderRadius: '8px',
+                                                            backgroundColor: isEditing ? 'white' : '#f8fafc',
+                                                            fontSize: '1rem'
+                                                        }}
+                                                    >
+                                                        <option value="">Select State</option>
+                                                        {INDIAN_STATES.map((s) => (
+                                                            <option key={s} value={s}>{s}</option>
+                                                        ))}
+                                                    </select>
                                                 </div>
                                                 <div>
                                                     <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500, color: '#334155' }}>City</label>
-                                                    <Input
+                                                    <select
                                                         value={city}
                                                         onChange={(e) => setCity(e.target.value)}
-                                                        disabled={!isEditing}
-                                                        placeholder="e.g. New Delhi"
-                                                    />
+                                                        disabled={!isEditing || !state}
+                                                        style={{
+                                                            width: '100%',
+                                                            padding: '10px 12px',
+                                                            border: '1px solid #e2e8f0',
+                                                            borderRadius: '8px',
+                                                            backgroundColor: isEditing && state ? 'white' : '#f8fafc',
+                                                            fontSize: '1rem'
+                                                        }}
+                                                    >
+                                                        <option value="">Select City</option>
+                                                        {state && CITIES_BY_STATE[state]?.map((c) => (
+                                                            <option key={c} value={c}>{c}</option>
+                                                        ))}
+                                                        {state && !CITIES_BY_STATE[state] && <option value="Other">Other</option>}
+                                                    </select>
                                                 </div>
                                             </div>
                                         </div>
@@ -428,11 +545,13 @@ export default function ProfilePage() {
                                             <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500, color: '#334155' }}>Phone Number</label>
                                             <Input
                                                 type="tel"
-                                                value="+91 98765 43210"
-                                                disabled={true}
-                                                style={{ backgroundColor: '#f1f5f9' }}
+                                                value={phone}
+                                                onChange={(e) => setPhone(e.target.value)}
+                                                disabled={!isEditing}
+                                                placeholder="Enter your phone number"
+                                                style={{ backgroundColor: isEditing ? 'white' : '#f8fafc' }}
                                             />
-                                            <p style={{ fontSize: '0.8rem', color: '#94a3b8', marginTop: '4px' }}>Please contact support to change your phone number.</p>
+                                            {isEditing && <p style={{ fontSize: '0.8rem', color: '#94a3b8', marginTop: '4px' }}>Used for important updates only.</p>}
                                         </div>
 
                                         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>

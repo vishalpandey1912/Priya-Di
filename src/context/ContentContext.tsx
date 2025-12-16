@@ -27,13 +27,17 @@ export const ContentProvider = ({ children }: { children: React.ReactNode }) => 
         if (savedContent) {
             try {
                 const parsed: Chapter[] = JSON.parse(savedContent);
-                // MIGRATION FIX: Detect old non-unique IDs (e.g. '1', '2') and force reload from updated initialContent
-                // New IDs are 'bio-1', 'phy-1' etc. Old were '1', '2'.
+                // MIGRATION FIX: Detect old non-unique IDs (e.g. '1', '2') 
+                // AND detect if 'bio-1' (The Living World) is missing its default content due to stale state.
                 const hasLegacyIds = parsed.some(c => c.id === '1' || c.id === '2');
+                const isBio1Stale = parsed.some(c => c.id === 'bio-1' && c.topics.find(t => t.id === 'bio-1-t1')?.materials.length === 0);
 
-                if (hasLegacyIds) {
-                    console.log("Legacy content IDs detected. Migrating to namespaced IDs.");
-                    setChapters(initialContent); // Reset to new hardcoded data
+                if (hasLegacyIds || isBio1Stale) {
+                    console.log("Legacy or stale content detected. Resetting to defaults.");
+                    // We merge defaults? Or just reset? 
+                    // To be safe for this user's issue: RESET. 
+                    // They want the default content to show up.
+                    setChapters(initialContent);
                     localStorage.setItem('siteContent', JSON.stringify(initialContent));
                 } else {
                     setChapters(parsed);

@@ -95,9 +95,16 @@ export default function PricingPage() {
                     </p>
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '32px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '32px' }}>
                     {displayPlans.map((plan) => {
-                        const isPurchased = purchasedPlans.includes(plan.id);
+                        // Check if Plan ID is in purchased list OR if user has access to ALL of its targets
+                        // If a plan sells 'physics', and I have 'access_physics_...', I own it.
+                        // However, be careful: A Bundle sells 'physics' + 'chem'. If I own 'physics', I don't own the bundle.
+                        // So for a generic plan: I own it if I have access to ALL its targets.
+                        // But for a single subject plan: I own it if I have access to that subject.
+
+                        const hasAccessToTargets = user && plan.targetIds.every((t: string) => localStorage.getItem(`access_${t}_${user.email}`));
+                        const isPurchased = purchasedPlans.includes(plan.id) || !!hasAccessToTargets;
 
                         return (
                             <Card
@@ -105,7 +112,7 @@ export default function PricingPage() {
                                 style={{
                                     position: 'relative',
                                     border: isPurchased ? '1px solid #d1fae5' : plan.isRecommended ? '2px solid #00A99D' : '1px solid #e5e7eb',
-                                    transform: plan.isRecommended ? 'scale(1.05)' : 'none',
+                                    transform: plan.isRecommended ? 'scale(1.02)' : 'none', // Reduced scale for mobile safety
                                     zIndex: plan.isRecommended ? 10 : 1,
                                     backgroundColor: isPurchased ? '#f0fdfa' : 'white'
                                 }}

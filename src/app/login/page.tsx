@@ -10,7 +10,18 @@ import { useAuth } from '@/context/AuthContext';
 
 export default function LoginPage() {
     const router = useRouter();
-    const { login } = useAuth();
+    const { login, googleLogin } = useAuth();
+    // ...
+    // ... (lines 88-90 replacement)
+    <Button
+        variant="outline"
+        className={styles.fullWidth}
+        style={{ width: '100%' }}
+        onClick={() => googleLogin()}
+        type="button"
+    >
+        Continue with Google
+    </Button>
     const [isLoading, setIsLoading] = useState(false);
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -85,7 +96,13 @@ export default function LoginPage() {
 
                 <div className={styles.divider}>OR</div>
 
-                <Button variant="outline" className={styles.fullWidth} style={{ width: '100%' }}>
+                <Button
+                    variant="outline"
+                    className={styles.fullWidth}
+                    style={{ width: '100%' }}
+                    onClick={() => googleLogin()}
+                    type="button"
+                >
                     Continue with Google
                 </Button>
 

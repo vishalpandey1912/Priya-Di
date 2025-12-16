@@ -30,11 +30,11 @@ export default function DashboardPage() {
             const hasTestSeries = localStorage.getItem(`access_test_series_${email}`);
 
             const activeCourses = [
-                { name: 'Full NEET Bundle', enrolled: !!hasFullAccess, progress: 12, color: '#00A99D' },
-                { name: 'Physics Mastery', enrolled: !!(hasPhysics || hasFullAccess), progress: 20, color: '#FF5722' },
-                { name: 'Chemistry Mastery', enrolled: !!(hasChemistry || hasFullAccess), progress: 32, color: '#2196F3' },
-                { name: 'Biology Mastery', enrolled: !!(hasBiology || hasFullAccess), progress: 45, color: '#8b5cf6' },
-                { name: 'All India Test Series', enrolled: !!hasTestSeries, progress: 5, color: '#FFC107' },
+                { name: 'Full NEET Bundle', enrolled: !!hasFullAccess, progress: 0, color: '#00A99D' },
+                { name: 'Physics Mastery', enrolled: !!(hasPhysics || hasFullAccess), progress: 0, color: '#FF5722' },
+                { name: 'Chemistry Mastery', enrolled: !!(hasChemistry || hasFullAccess), progress: 0, color: '#2196F3' },
+                { name: 'Biology Mastery', enrolled: !!(hasBiology || hasFullAccess), progress: 0, color: '#8b5cf6' },
+                { name: 'All India Test Series', enrolled: !!hasTestSeries, progress: 0, color: '#FFC107' },
             ].filter(c => c.enrolled);
 
             setCourses(activeCourses);
@@ -53,8 +53,8 @@ export default function DashboardPage() {
         <div className={styles.container}>
             {/* Header */}
             <div className={styles.header}>
-                <h1>High five, {user.name}! 👋</h1>
-                <p>You're on track to complete Biology by next week.</p>
+                <h1>Welcome, {user.name}! 👋</h1>
+                <p>Start your learning journey today.</p>
             </div>
 
             {/* Stats Grid */}
@@ -64,7 +64,7 @@ export default function DashboardPage() {
                         <Target size={24} color="var(--primary-color)" />
                     </div>
                     <div>
-                        <h3>68%</h3>
+                        <h3>0%</h3>
                         <p>Overall Accuracy</p>
                     </div>
                 </Card>
@@ -73,7 +73,7 @@ export default function DashboardPage() {
                         <BookOpen size={24} color="#2196F3" />
                     </div>
                     <div>
-                        <h3>12/98</h3>
+                        <h3>0/98</h3>
                         <p>Chapters Completed</p>
                     </div>
                 </Card>
@@ -82,7 +82,7 @@ export default function DashboardPage() {
                         <TrendingUp size={24} color="#FFC107" />
                     </div>
                     <div>
-                        <h3>Top 15%</h3>
+                        <h3>-</h3>
                         <p>Current Rank</p>
                     </div>
                 </Card>
@@ -120,33 +120,12 @@ export default function DashboardPage() {
                 <section className={styles.continueSection}>
                     <h2>Continue Learning</h2>
                     <Card className={styles.continueCard}>
-                        <div className={styles.continueHeader}>
-                            <div className={styles.iconCircle}>
-                                <Clock size={20} />
-                            </div>
-                            <div>
-                                <h4>Genetics: DNA Replication</h4>
-                                <p>Biology • Chapter 6</p>
-                            </div>
+                        <div style={{ textAlign: 'center', padding: '24px', color: '#64748b' }}>
+                            <p>No recent activity.</p>
+                            <Link href="/neet/physics">
+                                <Button variant="outline" size="sm" style={{ marginTop: '12px' }}>Start Learning</Button>
+                            </Link>
                         </div>
-                        <Link href="/neet/biology/genetics">
-                            <Button size="sm" className="w-full">Resume Video</Button>
-                        </Link>
-                    </Card>
-
-                    <Card className={styles.continueCard}>
-                        <div className={styles.continueHeader}>
-                            <div className={styles.iconCircle}>
-                                <Target size={20} />
-                            </div>
-                            <div>
-                                <h4>Rotational Motion - Test 2</h4>
-                                <p>Physics • Mock Test</p>
-                            </div>
-                        </div>
-                        <Link href="/neet/physics/rotational-motion">
-                            <Button variant="outline" size="sm" className="w-full">Start Test</Button>
-                        </Link>
                     </Card>
                 </section>
             </div>
