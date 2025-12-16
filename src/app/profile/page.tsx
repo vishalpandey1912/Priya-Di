@@ -49,6 +49,10 @@ export default function ProfilePage() {
     ];
 
     const [phone, setPhone] = useState('');
+    const [isChangingPhone, setIsChangingPhone] = useState(false);
+    const [newPhone, setNewPhone] = useState('');
+    const [otp, setOtp] = useState('');
+    const [isOtpSent, setIsOtpSent] = useState(false);
 
     useEffect(() => {
         if (!isLoading && !user) {
@@ -543,16 +547,99 @@ export default function ProfilePage() {
 
                                         <div style={{ marginBottom: '32px' }}>
                                             <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500, color: '#334155' }}>Phone Number</label>
-                                            <Input
-                                                type="tel"
-                                                value={phone}
-                                                onChange={(e) => setPhone(e.target.value)}
-                                                disabled={!isEditing}
-                                                placeholder="Enter your phone number"
-                                                style={{ backgroundColor: isEditing ? 'white' : '#f8fafc' }}
-                                            />
-                                            {isEditing && <p style={{ fontSize: '0.8rem', color: '#94a3b8', marginTop: '4px' }}>Used for important updates only.</p>}
+                                            <div style={{ display: 'flex', gap: '12px' }}>
+                                                <Input
+                                                    type="tel"
+                                                    value={phone}
+                                                    readOnly
+                                                    disabled
+                                                    placeholder="Enter your phone number"
+                                                    style={{ backgroundColor: '#f1f5f9', flex: 1, cursor: 'not-allowed' }}
+                                                />
+                                                {isEditing && (
+                                                    <Button
+                                                        type="button"
+                                                        variant="outline"
+                                                        onClick={() => setIsChangingPhone(true)}
+                                                    >
+                                                        Change
+                                                    </Button>
+                                                )}
+                                            </div>
+                                            {isEditing && <p style={{ fontSize: '0.8rem', color: '#94a3b8', marginTop: '4px' }}>Verified number. Click 'Change' to update.</p>}
                                         </div>
+
+                                        {/* Phone Change Modal/Section */}
+                                        {isChangingPhone && (
+                                            <div style={{
+                                                position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+                                                backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 100,
+                                                display: 'flex', alignItems: 'center', justifyContent: 'center'
+                                            }}>
+                                                <div style={{ backgroundColor: 'white', padding: '32px', borderRadius: '16px', width: '90%', maxWidth: '400px' }}>
+                                                    <h3 style={{ marginBottom: '16px', fontSize: '1.25rem' }}>Update Phone Number</h3>
+
+                                                    {!isOtpSent ? (
+                                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                                                            <Input
+                                                                placeholder="Enter New Mobile Number"
+                                                                value={newPhone}
+                                                                onChange={(e) => setNewPhone(e.target.value)}
+                                                            />
+                                                            <Button onClick={() => {
+                                                                if (newPhone.length < 10) {
+                                                                    alert('Please enter a valid 10-digit number');
+                                                                    return;
+                                                                }
+                                                                setIsOtpSent(true);
+                                                                alert(`OTP SENT to ${newPhone}: 1234`);
+                                                            }}>
+                                                                Send OTP
+                                                            </Button>
+                                                        </div>
+                                                    ) : (
+                                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                                                            <p style={{ fontSize: '0.9rem', color: '#64748b' }}>Enter the OTP sent to {newPhone}</p>
+                                                            <Input
+                                                                placeholder="Enter 4-digit OTP"
+                                                                value={otp}
+                                                                onChange={(e) => setOtp(e.target.value)}
+                                                            />
+                                                            <div style={{ display: 'flex', gap: '12px' }}>
+                                                                <Button onClick={() => {
+                                                                    if (otp === '1234') {
+                                                                        setPhone(newPhone);
+                                                                        setIsChangingPhone(false);
+                                                                        setIsOtpSent(false);
+                                                                        setNewPhone('');
+                                                                        setOtp('');
+                                                                        setSuccessMsg('Phone number updated!');
+                                                                    } else {
+                                                                        alert('Invalid OTP');
+                                                                    }
+                                                                }} style={{ flex: 1 }}>
+                                                                    Verify & Update
+                                                                </Button>
+                                                                <Button variant="outline" onClick={() => setIsOtpSent(false)}>Back</Button>
+                                                            </div>
+                                                        </div>
+                                                    )}
+
+                                                    <Button
+                                                        variant="ghost"
+                                                        style={{ width: '100%', marginTop: '16px' }}
+                                                        onClick={() => {
+                                                            setIsChangingPhone(false);
+                                                            setIsOtpSent(false);
+                                                            setNewPhone('');
+                                                            setOtp('');
+                                                        }}
+                                                    >
+                                                        Cancel
+                                                    </Button>
+                                                </div>
+                                            </div>
+                                        )}
 
                                         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
                                             {isEditing ? (
