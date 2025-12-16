@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import Link from 'next/link';
 import { FileText, PlayCircle, HelpCircle, PenTool } from 'lucide-react';
 import { Card, Button } from '@/components/ui';
 import styles from './ExamTabs.module.css';
@@ -36,14 +37,20 @@ export const ExamTabs = () => {
                 {activeTab === 'notes' && (
                     <div className={styles.grid}>
                         <h3>Recent Notes</h3>
-                        <div className={styles.placeholderItem}>Chapter 1: The Living World (PDF)</div>
-                        <div className={styles.placeholderItem}>Chapter 2: Biological Classification (PDF)</div>
+                        <Link href="/neet/biology/1" className={styles.placeholderItem}>
+                            Chapter 1: The Living World (PDF)
+                        </Link>
+                        <Link href="/neet/biology/2" className={styles.placeholderItem}>
+                            Chapter 2: Biological Classification (PDF)
+                        </Link>
                     </div>
                 )}
                 {activeTab === 'videos' && (
                     <div className={styles.grid}>
                         <h3>Concept Videos</h3>
-                        <div className={styles.videoPlaceholder}>Introduction to Botany</div>
+                        <Link href="/neet/biology/3" className={styles.videoPlaceholder}>
+                            Introduction to Botany
+                        </Link>
                     </div>
                 )}
                 {activeTab === 'tests' && <div>No active tests currently.</div>}

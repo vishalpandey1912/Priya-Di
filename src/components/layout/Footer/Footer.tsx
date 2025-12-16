@@ -1,9 +1,15 @@
+'use client';
+
 import React from 'react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { GraduationCap, Facebook, Twitter, Instagram, Linkedin } from 'lucide-react';
 import styles from './Footer.module.css';
 
 export const Footer = () => {
+    const pathname = usePathname();
+    if (pathname.startsWith('/admin')) return null;
+
     return (
         <footer className={styles.footer}>
             <div className={styles.container}>

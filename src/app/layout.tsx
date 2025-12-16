@@ -14,6 +14,7 @@ export const metadata: Metadata = {
 
 import { Navbar, Footer } from "@/components/layout";
 import { AuthProvider } from "@/context/AuthContext";
+import { ContentProvider } from "@/context/ContentContext";
 
 export default function RootLayout({
   children,
@@ -24,11 +25,13 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${inter.variable}`}>
         <AuthProvider>
-          <Navbar />
-          <main style={{ minHeight: 'calc(100vh - 64px - 300px)' }}>
-            {children}
-          </main>
-          <Footer />
+          <ContentProvider>
+            <Navbar />
+            <main style={{ minHeight: 'calc(100vh - 64px - 300px)' }}>
+              {children}
+            </main>
+            <Footer />
+          </ContentProvider>
         </AuthProvider>
       </body>
     </html>

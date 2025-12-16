@@ -1,14 +1,17 @@
-import React from 'react';
+'use client';
+
+import React, { use } from 'react';
 import { Accordion, AccordionItem } from '@/components/ui';
 import { PlayCircle, FileText, HelpCircle } from 'lucide-react';
-import { getChapterById } from '@/data/content';
+import { useContent } from '@/context/ContentContext';
 
-export default async function ChapterPage({
+export default function ChapterPage({
     params,
 }: {
     params: Promise<{ subject: string; chapter: string }>;
 }) {
-    const { subject, chapter: chapterId } = await params;
+    const { subject, chapter: chapterId } = use(params);
+    const { getChapterById } = useContent();
     const chapterData = getChapterById(subject, chapterId);
 
     if (!chapterData) {

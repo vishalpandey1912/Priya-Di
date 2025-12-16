@@ -24,7 +24,16 @@ export default function LoginPage() {
         try {
             const success = await login(email, password);
             if (success) {
-                router.push('/dashboard');
+                // Check if the user is an admin after successful login
+                // We need to fetch the user again or check the email/logic used in context. 
+                // Since login updates the context state, we might hit a race condition if we check 'user' immediately from useAuth hook data as it might not be updated in this render cycle.
+                // However, we know the credentials here.
+
+                if (email === 'admin@desi.com') {
+                    router.push('/admin/dashboard');
+                } else {
+                    router.push('/dashboard');
+                }
             } else {
                 setError('Invalid email or password');
             }

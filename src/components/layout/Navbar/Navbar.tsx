@@ -6,10 +6,12 @@ import { Menu, X, BookOpen, GraduationCap, LayoutDashboard, UserCircle } from 'l
 import { Button } from '@/components/ui';
 import styles from './Navbar.module.css';
 import { useAuth } from '@/context/AuthContext';
+import { usePathname } from 'next/navigation';
 
 export const Navbar = () => {
     const { user, logout } = useAuth();
     const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const pathname = usePathname();
 
     const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
 
@@ -45,6 +47,12 @@ export const Navbar = () => {
                                 <UserCircle size={24} />
                                 <span style={{ fontWeight: 500 }}>{user.name}</span>
                             </div>
+                            {/* Admin Link */}
+                            {user.role === 'admin' && (
+                                <Link href="/admin/dashboard">
+                                    <Button size="sm" variant="outline">Admin Panel</Button>
+                                </Link>
+                            )}
                             <Button variant="ghost" size="sm" onClick={logout}>Log Out</Button>
                         </div>
                     ) : (

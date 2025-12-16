@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 interface User {
     name: string;
     email: string;
+    role: 'student' | 'admin';
 }
 
 interface AuthContextType {
@@ -36,11 +37,19 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         // Simulate API delay
         await new Promise(resolve => setTimeout(resolve, 800));
 
+        // Hardcoded Admin Login
+        if (email === 'admin@desi.com' && password === 'admin') {
+            const adminUser: User = { name: 'Super Admin', email, role: 'admin' };
+            setUser(adminUser);
+            localStorage.setItem('currentUser', JSON.stringify(adminUser));
+            return true;
+        }
+
         const users = JSON.parse(localStorage.getItem('users') || '[]');
         const foundUser = users.find((u: any) => u.email === email && u.password === password);
 
         if (foundUser) {
-            const sessionUser = { name: foundUser.name, email: foundUser.email };
+            const sessionUser: User = { name: foundUser.name, email: foundUser.email, role: 'student' };
             setUser(sessionUser);
             localStorage.setItem('currentUser', JSON.stringify(sessionUser));
             return true;
@@ -58,12 +67,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             return false; // User already exists
         }
 
-        const newUser = { name, email, password };
+        const newUser = { name, email, password, role: 'student' };
         users.push(newUser);
         localStorage.setItem('users', JSON.stringify(users));
 
         // Auto login after signup
-        const sessionUser = { name, email };
+        const sessionUser: User = { name, email, role: 'student' };
         setUser(sessionUser);
         localStorage.setItem('currentUser', JSON.stringify(sessionUser));
         return true;

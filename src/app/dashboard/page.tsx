@@ -6,6 +6,7 @@ import { BookOpen, Target, TrendingUp, Clock } from 'lucide-react';
 import styles from './Dashboard.module.css';
 import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 
 export default function DashboardPage() {
     const { user, isLoading } = useAuth();
@@ -112,7 +113,9 @@ export default function DashboardPage() {
                                 <p>Biology • Chapter 6</p>
                             </div>
                         </div>
-                        <Button size="sm" className="w-full">Resume Video</Button>
+                        <Link href="/neet/biology/genetics">
+                            <Button size="sm" className="w-full">Resume Video</Button>
+                        </Link>
                     </Card>
 
                     <Card className={styles.continueCard}>
@@ -125,7 +128,9 @@ export default function DashboardPage() {
                                 <p>Physics • Mock Test</p>
                             </div>
                         </div>
-                        <Button variant="outline" size="sm" className="w-full">Start Test</Button>
+                        <Link href="/neet/physics/rotational-motion">
+                            <Button variant="outline" size="sm" className="w-full">Start Test</Button>
+                        </Link>
                     </Card>
                 </section>
             </div>

@@ -1,15 +1,18 @@
-import React from 'react';
+'use client';
+
+import React, { use } from 'react';
 import Link from 'next/link';
 import { Card } from '@/components/ui';
 import { ChevronRight } from 'lucide-react';
-import { getChaptersBySubject } from '@/data/content';
+import { useContent } from '@/context/ContentContext';
 
-export default async function SubjectPage({
+export default function SubjectPage({
     params,
 }: {
     params: Promise<{ subject: string }>;
 }) {
-    const { subject } = await params;
+    const { subject } = use(params);
+    const { getChaptersBySubject } = useContent();
     const subjectName = subject.charAt(0).toUpperCase() + subject.slice(1);
     const chapters = getChaptersBySubject(subject);
 
@@ -25,7 +28,7 @@ export default async function SubjectPage({
             ) : (
                 <div style={{ display: 'grid', gap: '16px' }}>
                     {chapters.map((chapter) => (
-                        <Link key={chapter.id} href={`/neet/${subject}/${chapter.id}`}>
+                        <Link key={`${chapter.subjectId}-${chapter.id}`} href={`/neet/${subject}/${chapter.id}`}>
                             <Card hoverable padding="md" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                 <div>
                                     <h3 style={{ fontSize: '1.1rem', marginBottom: '4px' }}>{chapter.title}</h3>
