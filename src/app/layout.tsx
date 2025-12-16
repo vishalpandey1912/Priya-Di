@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google"; // Use Inter as requested
 import "./globals.css";
 
@@ -6,6 +6,12 @@ const inter = Inter({
   variable: "--font-inter",
   subsets: ["latin"],
 });
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+};
 
 export const metadata: Metadata = {
   title: "Desi Educators | Crack NEET with Concept-First Learning",
@@ -15,6 +21,8 @@ export const metadata: Metadata = {
 import { Navbar, Footer } from "@/components/layout";
 import { AuthProvider } from "@/context/AuthContext";
 import { ContentProvider } from "@/context/ContentContext";
+import { CartProvider } from "@/context/CartContext";
+import { ProductProvider } from "@/context/ProductContext";
 
 export default function RootLayout({
   children,
@@ -26,11 +34,15 @@ export default function RootLayout({
       <body className={`${inter.variable}`}>
         <AuthProvider>
           <ContentProvider>
-            <Navbar />
-            <main style={{ minHeight: 'calc(100vh - 64px - 300px)' }}>
-              {children}
-            </main>
-            <Footer />
+            <ProductProvider>
+              <CartProvider>
+                <Navbar />
+                <main style={{ minHeight: 'calc(100vh - 64px - 300px)' }}>
+                  {children}
+                </main>
+                <Footer />
+              </CartProvider>
+            </ProductProvider>
           </ContentProvider>
         </AuthProvider>
       </body>

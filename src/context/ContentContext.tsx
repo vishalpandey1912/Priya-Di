@@ -26,13 +26,25 @@ export const ContentProvider = ({ children }: { children: React.ReactNode }) => 
         const savedContent = localStorage.getItem('siteContent');
         if (savedContent) {
             try {
-                const parsed = JSON.parse(savedContent);
-                // Merge strategy: simpler to just use saved if exists, 
-                // but for now let's prioritize saved content completely to allow "deletions" to persist
-                setChapters(parsed);
+                const parsed: Chapter[] = JSON.parse(savedContent);
+                // MIGRATION FIX: Detect old non-unique IDs (e.g. '1', '2') and force reload from updated initialContent
+                // New IDs are 'bio-1', 'phy-1' etc. Old were '1', '2'.
+                const hasLegacyIds = parsed.some(c => c.id === '1' || c.id === '2');
+
+                if (hasLegacyIds) {
+                    console.log("Legacy content IDs detected. Migrating to namespaced IDs.");
+                    setChapters(initialContent); // Reset to new hardcoded data
+                    localStorage.setItem('siteContent', JSON.stringify(initialContent));
+                } else {
+                    setChapters(parsed);
+                }
             } catch (e) {
                 console.error("Failed to parse saved content", e);
+                setChapters(initialContent); // Fallback
             }
+        } else {
+            // First load
+            setChapters(initialContent);
         }
         setIsLoaded(true);
     }, []);

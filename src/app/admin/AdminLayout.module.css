@@ -1,0 +1,22 @@
+.container {
+    display: flex;
+    min-height: 100vh;
+    background-color: #f8f9fa;
+    padding-top: 64px;
+}
+
+
+
+
+.main {
+    flex: 1;
+    width: 100%;
+    padding: var(--spacing-md);
+}
+
+@media (min-width: 768px) {
+    .main {
+        margin-left: 250px;
+        padding: var(--spacing-xl);
+    }
+}

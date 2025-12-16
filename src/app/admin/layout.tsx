@@ -4,6 +4,7 @@ import React from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { AdminSidebar } from '@/components/admin/AdminSidebar';
+import styles from './AdminLayout.module.css';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
     const pathname = usePathname();
@@ -29,9 +30,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     if (!user || user.role !== 'admin') return null;
 
     return (
-        <div style={{ display: 'flex', minHeight: '100vh', backgroundColor: '#f8f9fa', paddingTop: '64px' }}>
-            <AdminSidebar />
-            <main style={{ flex: 1, marginLeft: '250px', padding: '32px' }}>
+        <div className={styles.container}>
+            <div className={styles.sidebarWrapper}>
+                <AdminSidebar />
+            </div>
+            <main className={styles.main}>
                 {children}
             </main>
         </div>

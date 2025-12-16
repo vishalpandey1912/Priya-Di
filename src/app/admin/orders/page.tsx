@@ -3,8 +3,61 @@
 import React from 'react';
 import { Card, Button, Input } from '@/components/ui';
 import { Search, Download, Eye } from 'lucide-react';
+import { OrderDetailModal } from '@/components/admin/OrderDetailModal';
 
 export default function OrdersPage() {
+    const [orders, setOrders] = React.useState<any[]>([]);
+    const [searchTerm, setSearchTerm] = React.useState('');
+
+    React.useEffect(() => {
+        const storedOrders = JSON.parse(localStorage.getItem('orders') || '[]');
+        const mockOrders = [
+            { id: 'ORD-7829', user: 'Amit Kumar', plan: 'NEET Physics Crash', date: 'Dec 15, 2025', amount: '₹4,999', status: 'Success' },
+            { id: 'ORD-7830', user: 'Sneha Singh', plan: 'Biology Masterclass', date: 'Dec 14, 2025', amount: '₹2,499', status: 'Pending' },
+            { id: 'ORD-7831', user: 'Rahul Verma', plan: 'Full Bundle', date: 'Dec 12, 2025', amount: '₹14,999', status: 'Success' },
+            { id: 'ORD-7832', user: 'Priya Sharma', plan: 'Organic Chem', date: 'Dec 10, 2025', amount: '₹999', status: 'Failed' },
+        ];
+        // Combine stored orders with mock orders, avoiding potential duplicates if any (simple concat for now)
+        setOrders([...storedOrders, ...mockOrders]);
+    }, []);
+
+    const filteredOrders = orders.filter(order =>
+        order.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        order.user.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
+    const handleExportCSV = () => {
+        const headers = ["Order ID", "Student", "Plan", "Date", "Amount", "Status"];
+        const rows = filteredOrders.map(order => [
+            order.id,
+            order.user,
+            order.plan,
+            order.date,
+            order.amount.replace('₹', '').replace(',', ''), // Clean amount for CSV
+            order.status
+        ]);
+
+        const csvContent =
+            "data:text/csv;charset=utf-8," +
+            [headers.join(","), ...rows.map(e => e.join(","))].join("\n");
+
+        const encodedUri = encodeURI(csvContent);
+        const link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", "orders_export.csv");
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    };
+
+    const [selectedOrder, setSelectedOrder] = React.useState<any | null>(null);
+    const [isModalOpen, setIsModalOpen] = React.useState(false);
+
+    const handleViewOrder = (order: any) => {
+        setSelectedOrder(order);
+        setIsModalOpen(true);
+    };
+
     return (
         <div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
@@ -12,12 +65,25 @@ export default function OrdersPage() {
                     <h1 style={{ fontSize: '1.8rem', fontWeight: 800 }}>Orders</h1>
                     <p style={{ color: 'var(--text-secondary)' }}>Track payments and subscriptions.</p>
                 </div>
-                <Button variant="outline" leftIcon={<Download size={18} />}>Export CSV</Button>
+                <Button variant="outline" onClick={handleExportCSV} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <Download size={18} /> Export CSV
+                </Button>
             </div>
+
+            <OrderDetailModal
+                isOpen={isModalOpen}
+                onClose={() => setIsModalOpen(false)}
+                order={selectedOrder}
+            />
 
             <Card padding="md">
                 <div style={{ marginBottom: '24px', maxWidth: '400px' }}>
-                    <Input placeholder="Search by Order ID..." icon={<Search size={18} />} />
+                    <Input
+                        placeholder="Search by Order ID or Student..."
+                        icon={<Search size={18} />}
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                    />
                 </div>
 
                 <table style={{ width: '100%', borderCollapse: 'collapse' }}>
@@ -33,14 +99,9 @@ export default function OrdersPage() {
                         </tr>
                     </thead>
                     <tbody>
-                        {[
-                            { id: 'ORD-7829', user: 'Amit Kumar', plan: 'NEET Physics Crash', date: 'Dec 15, 2025', amount: '₹4,999', status: 'Success' },
-                            { id: 'ORD-7830', user: 'Sneha Singh', plan: 'Biology Masterclass', date: 'Dec 14, 2025', amount: '₹2,499', status: 'Pending' },
-                            { id: 'ORD-7831', user: 'Rahul Verma', plan: 'Full Bundle', date: 'Dec 12, 2025', amount: '₹14,999', status: 'Success' },
-                            { id: 'ORD-7832', user: 'Priya Sharma', plan: 'Organic Chem', date: 'Dec 10, 2025', amount: '₹999', status: 'Failed' },
-                        ].map((order, i) => (
+                        {filteredOrders.map((order, i) => (
                             <tr key={i} style={{ borderBottom: '1px solid #f1f5f9' }}>
-                                <td style={{ padding: '16px 12px', fontWeight: 600 }}>#{order.id}</td>
+                                <td style={{ padding: '16px 12px', fontWeight: 600 }}>#{order.id.replace('#', '')}</td>
                                 <td style={{ padding: '16px 12px' }}>{order.user}</td>
                                 <td style={{ padding: '16px 12px' }}>{order.plan}</td>
                                 <td style={{ padding: '16px 12px', color: '#64748b' }}>{order.date}</td>
@@ -58,7 +119,10 @@ export default function OrdersPage() {
                                     </span>
                                 </td>
                                 <td style={{ padding: '16px 12px', textAlign: 'right' }}>
-                                    <button style={{ border: 'none', background: 'none', cursor: 'pointer', color: '#64748b' }}>
+                                    <button
+                                        onClick={() => handleViewOrder(order)}
+                                        style={{ border: 'none', background: 'none', cursor: 'pointer', color: '#64748b' }}
+                                    >
                                         <Eye size={18} />
                                     </button>
                                 </td>

@@ -8,7 +8,7 @@ import { useAuth } from '@/context/AuthContext';
 
 export default function AdminLoginPage() {
     const router = useRouter();
-    const { login } = useAuth();
+    const { login, logout } = useAuth();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
@@ -20,11 +20,18 @@ export default function AdminLoginPage() {
         setError('');
 
         try {
+            // Attempt login
             const success = await login(email, password);
-            // Wait a bit to ensure context updates
+
             if (success) {
-                // Double check authentication happens in context, but for admin we redirect to admin dashboard
-                router.push('/admin/dashboard');
+                // Strict check for Admin email
+                if (email === 'admin@desi.com') {
+                    router.push('/admin/dashboard');
+                } else {
+                    // Login successful but not Admin -> Deny Access
+                    logout(); // Clear the student session immediately
+                    setError('Access Denied: You do not have admin privileges.');
+                }
             } else {
                 setError('Invalid Admin Credentials');
             }

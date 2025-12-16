@@ -9,7 +9,8 @@ import {
     Settings,
     LogOut,
     GraduationCap,
-    MessageSquare
+    MessageSquare,
+    DollarSign
 } from 'lucide-react';
 import styles from './AdminSidebar.module.css';
 import { useAuth } from '@/context/AuthContext';
@@ -21,6 +22,7 @@ export const AdminSidebar = () => {
     const links = [
         { name: 'Dashboard', href: '/admin/dashboard', icon: <LayoutDashboard size={20} /> },
         { name: 'Courses', href: '/admin/content', icon: <BookOpen size={20} /> },
+        { name: 'Monetization', href: '/admin/monetization', icon: <DollarSign size={20} /> },
         { name: 'Users', href: '/admin/users', icon: <Users size={20} /> },
         { name: 'Orders', href: '/admin/orders', icon: <ShoppingCart size={20} /> },
         { name: 'Settings', href: '/admin/settings', icon: <Settings size={20} /> },

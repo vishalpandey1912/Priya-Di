@@ -12,11 +12,34 @@ export default function DashboardPage() {
     const { user, isLoading } = useAuth();
     const router = useRouter();
 
+    const [courses, setCourses] = React.useState<any[]>([]);
+
     useEffect(() => {
         if (!isLoading && !user) {
             router.push('/login');
         }
     }, [user, isLoading, router]);
+
+    useEffect(() => {
+        if (user) {
+            const email = user.email;
+            const hasFullAccess = localStorage.getItem(`access_full_bundle_${email}`);
+            const hasPhysics = localStorage.getItem(`access_physics_${email}`);
+            const hasChemistry = localStorage.getItem(`access_chemistry_${email}`);
+            const hasBiology = localStorage.getItem(`access_biology_${email}`);
+            const hasTestSeries = localStorage.getItem(`access_test_series_${email}`);
+
+            const activeCourses = [
+                { name: 'Full NEET Bundle', enrolled: !!hasFullAccess, progress: 12, color: '#00A99D' },
+                { name: 'Physics Mastery', enrolled: !!(hasPhysics || hasFullAccess), progress: 20, color: '#FF5722' },
+                { name: 'Chemistry Mastery', enrolled: !!(hasChemistry || hasFullAccess), progress: 32, color: '#2196F3' },
+                { name: 'Biology Mastery', enrolled: !!(hasBiology || hasFullAccess), progress: 45, color: '#8b5cf6' },
+                { name: 'All India Test Series', enrolled: !!hasTestSeries, progress: 5, color: '#FFC107' },
+            ].filter(c => c.enrolled);
+
+            setCourses(activeCourses);
+        }
+    }, [user]);
 
     if (isLoading || !user) {
         return (
@@ -66,37 +89,30 @@ export default function DashboardPage() {
             </div>
 
             <div className={styles.mainGrid}>
-                {/* Recent Activity / Progress */}
+                {/* Enrolled Courses / Progress */}
                 <section className={styles.progressSection}>
-                    <h2>Subject Progress</h2>
+                    <h2>Your Enrolled Courses</h2>
                     <Card className={styles.progressCard}>
-                        <div className={styles.subjectRow}>
-                            <div className={styles.subjectInfo}>
-                                <span className={styles.subjectName}>Biology</span>
-                                <span className={styles.subjectPercent}>45%</span>
+                        {courses.length === 0 ? (
+                            <div style={{ textAlign: 'center', padding: '32px 0', color: '#64748b' }}>
+                                <p>You haven't enrolled in any courses yet.</p>
+                                <Link href="/pricing">
+                                    <Button size="sm" style={{ marginTop: '12px' }}>Browse Courses</Button>
+                                </Link>
                             </div>
-                            <div className={styles.progressBar}>
-                                <div className={styles.progressFill} style={{ width: '45%', backgroundColor: '#00A99D' }}></div>
-                            </div>
-                        </div>
-                        <div className={styles.subjectRow}>
-                            <div className={styles.subjectInfo}>
-                                <span className={styles.subjectName}>Physics</span>
-                                <span className={styles.subjectPercent}>20%</span>
-                            </div>
-                            <div className={styles.progressBar}>
-                                <div className={styles.progressFill} style={{ width: '20%', backgroundColor: '#FF5722' }}></div>
-                            </div>
-                        </div>
-                        <div className={styles.subjectRow}>
-                            <div className={styles.subjectInfo}>
-                                <span className={styles.subjectName}>Chemistry</span>
-                                <span className={styles.subjectPercent}>32%</span>
-                            </div>
-                            <div className={styles.progressBar}>
-                                <div className={styles.progressFill} style={{ width: '32%', backgroundColor: '#2196F3' }}></div>
-                            </div>
-                        </div>
+                        ) : (
+                            courses.map((course, i) => (
+                                <div key={i} className={styles.subjectRow}>
+                                    <div className={styles.subjectInfo}>
+                                        <span className={styles.subjectName}>{course.name}</span>
+                                        <span className={styles.subjectPercent}>{course.progress}%</span>
+                                    </div>
+                                    <div className={styles.progressBar}>
+                                        <div className={styles.progressFill} style={{ width: `${course.progress}%`, backgroundColor: course.color }}></div>
+                                    </div>
+                                </div>
+                            ))
+                        )}
                     </Card>
                 </section>
 
