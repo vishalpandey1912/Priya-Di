@@ -34,28 +34,57 @@ export default function SubjectPage({
         const storedLocks = JSON.parse(localStorage.getItem('contentLocks') || '{}');
         setLocks(storedLocks);
 
-        if (user) {
-            // Check specific access (works for bundles too now as they write all targets)
-            const subjectAccess = localStorage.getItem(`access_${subject}_${user.email}`);
-            const fullAccess = localStorage.getItem(`access_full_bundle_${user.email}`); // Fallback for legacy
-            if (subjectAccess || fullAccess) {
+        const checkAccess = async () => {
+            if (!user) return;
+
+            // Check generic DB enrollments
+            // We can optimize this by creating a useEnrollments hook later
+            const { supabase } = await import('@/lib/supabase');
+            const { data } = await supabase.from('enrollments').select('target_id').eq('user_id', user.id);
+
+            const dbTargets = data?.map(e => e.target_id) || [];
+
+            // Check if we own this subject via Bundle or Direct
+            if (dbTargets.includes(subject) || dbTargets.includes('full_bundle')) {
                 setIsOwned(true);
-            } else {
-                setIsOwned(false);
             }
-        } else {
-            setIsOwned(false);
+
+            // Update local storage for cache (optional but good for consistency)
+            dbTargets.forEach(t => localStorage.setItem(`access_${t}_${user.email}`, 'true'));
+        };
+
+        checkAccess();
+
+        // Keep legacy local storage check for immediate UI feedback before DB load
+        if (user) {
+            const subjectAccess = localStorage.getItem(`access_${subject}_${user.email}`);
+            const fullAccess = localStorage.getItem(`access_full_bundle_${user.email}`);
+            if (subjectAccess || fullAccess) setIsOwned(true);
         }
     }, [subject, user]);
 
-    const handleSuccess = () => {
+    const handleSuccess = async () => {
         if (!user || !selectedProduct) return;
 
-        // Grant Access Generic Logic
+        // 1. Grant Access in Database (Enrollments)
+        const { supabase } = await import('@/lib/supabase');
+
+        // Loop through all targets (e.g. ['physics'] or ['chapter_101'])
+        const inserts = selectedProduct.targetIds.map((targetId: string) => ({
+            user_id: user.id,
+            target_id: targetId,
+            target_type: selectedProduct.type === 'chapter' ? 'chapter' : 'subject',
+            created_at: new Date().toISOString()
+        }));
+
+        await supabase.from('enrollments').insert(inserts);
+
+        // 2. Grant Access Locally (Cache)
         selectedProduct.targetIds.forEach((target: string) => {
             localStorage.setItem(`access_${target}_${user.email}`, 'true');
         });
 
+        // 3. Update Order History (Local Storage Backup - PaymentModal handles DB Order)
         const newOrder = {
             id: `ORD-${Math.floor(1000 + Math.random() * 9000)}`,
             user: user.name,
@@ -67,18 +96,10 @@ export default function SubjectPage({
         const existingOrders = JSON.parse(localStorage.getItem('orders') || '[]');
         localStorage.setItem('orders', JSON.stringify([newOrder, ...existingOrders]));
 
-        // If we bought the whole subject, mark as owned. 
-        // If we bought a chapter, we ideally need to refresh locks or re-render.
-        // check if `selectedProduct` targets the subject
+        // Refresh State
         if (selectedProduct.targetIds.includes(subject)) {
             setIsOwned(true);
         } else {
-            // Force reload or re-check?
-            // Simple way: Access writes to localStorage, loop reads from localStorage? 
-            // In the loop below, `isChapterLocked` checks `locks`. 
-            // `locks` is generic content locks. 
-            // But we also need to check user access for that specific chapter!
-            // I need to update the check in the loop to also check `access_{chapterId}`.
             window.location.reload();
         }
 

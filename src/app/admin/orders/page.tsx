@@ -10,30 +10,36 @@ export default function OrdersPage() {
     const [searchTerm, setSearchTerm] = React.useState('');
 
     React.useEffect(() => {
-        const storedOrders = JSON.parse(localStorage.getItem('orders') || '[]');
-        const mockOrders = [
-            { id: 'ORD-7829', user: 'Amit Kumar', plan: 'NEET Physics Crash', date: 'Dec 15, 2025', amount: '₹4,999', status: 'Success' },
-            { id: 'ORD-7830', user: 'Sneha Singh', plan: 'Biology Masterclass', date: 'Dec 14, 2025', amount: '₹2,499', status: 'Pending' },
-            { id: 'ORD-7831', user: 'Rahul Verma', plan: 'Full Bundle', date: 'Dec 12, 2025', amount: '₹14,999', status: 'Success' },
-            { id: 'ORD-7832', user: 'Priya Sharma', plan: 'Organic Chem', date: 'Dec 10, 2025', amount: '₹999', status: 'Failed' },
-        ];
-        // Combine stored orders with mock orders, avoiding potential duplicates if any (simple concat for now)
-        setOrders([...storedOrders, ...mockOrders]);
+        const fetchOrders = async () => {
+            const { supabase } = await import('@/lib/supabase');
+            const { data, error } = await supabase
+                .from('orders')
+                .select('*')
+                .order('created_at', { ascending: false });
+
+            if (error) {
+                console.error('Error fetching orders:', error);
+            } else {
+                setOrders(data || []);
+            }
+        };
+
+        fetchOrders();
     }, []);
 
     const filteredOrders = orders.filter(order =>
-        order.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        order.user.toLowerCase().includes(searchTerm.toLowerCase())
+        (order.id || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (order.user_id || '').toLowerCase().includes(searchTerm.toLowerCase())
     );
 
     const handleExportCSV = () => {
-        const headers = ["Order ID", "Student", "Plan", "Date", "Amount", "Status"];
+        const headers = ["Order ID", "Student ID", "Plan", "Date", "Amount", "Status"];
         const rows = filteredOrders.map(order => [
             order.id,
-            order.user,
-            order.plan,
-            order.date,
-            order.amount.replace('₹', '').replace(',', ''), // Clean amount for CSV
+            order.user_id,
+            order.plan_name,
+            new Date(order.created_at).toLocaleDateString(),
+            order.amount.toString().replace(/[^\d.]/g, ''),
             order.status
         ]);
 
@@ -79,7 +85,7 @@ export default function OrdersPage() {
             <Card padding="md">
                 <div style={{ marginBottom: '24px', maxWidth: '400px' }}>
                     <Input
-                        placeholder="Search by Order ID or Student..."
+                        placeholder="Search by Order ID..."
                         icon={<Search size={18} />}
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
@@ -90,7 +96,7 @@ export default function OrdersPage() {
                     <thead>
                         <tr style={{ borderBottom: '1px solid #e2e8f0', textAlign: 'left' }}>
                             <th style={{ padding: '12px', color: '#64748b' }}>Order ID</th>
-                            <th style={{ padding: '12px', color: '#64748b' }}>Student</th>
+                            <th style={{ padding: '12px', color: '#64748b' }}>Student ID</th>
                             <th style={{ padding: '12px', color: '#64748b' }}>Plan/Course</th>
                             <th style={{ padding: '12px', color: '#64748b' }}>Date</th>
                             <th style={{ padding: '12px', color: '#64748b' }}>Amount</th>
@@ -99,35 +105,39 @@ export default function OrdersPage() {
                         </tr>
                     </thead>
                     <tbody>
-                        {filteredOrders.map((order, i) => (
-                            <tr key={i} style={{ borderBottom: '1px solid #f1f5f9' }}>
-                                <td style={{ padding: '16px 12px', fontWeight: 600 }}>#{order.id.replace('#', '')}</td>
-                                <td style={{ padding: '16px 12px' }}>{order.user}</td>
-                                <td style={{ padding: '16px 12px' }}>{order.plan}</td>
-                                <td style={{ padding: '16px 12px', color: '#64748b' }}>{order.date}</td>
-                                <td style={{ padding: '16px 12px', fontWeight: 600 }}>{order.amount}</td>
-                                <td style={{ padding: '16px 12px' }}>
-                                    <span style={{
-                                        padding: '4px 8px',
-                                        borderRadius: '12px',
-                                        fontSize: '0.75rem',
-                                        fontWeight: 600,
-                                        backgroundColor: order.status === 'Success' ? '#dcfce7' : order.status === 'Pending' ? '#fef3c7' : '#fee2e2',
-                                        color: order.status === 'Success' ? '#166534' : order.status === 'Pending' ? '#92400e' : '#991b1b'
-                                    }}>
-                                        {order.status}
-                                    </span>
-                                </td>
-                                <td style={{ padding: '16px 12px', textAlign: 'right' }}>
-                                    <button
-                                        onClick={() => handleViewOrder(order)}
-                                        style={{ border: 'none', background: 'none', cursor: 'pointer', color: '#64748b' }}
-                                    >
-                                        <Eye size={18} />
-                                    </button>
-                                </td>
-                            </tr>
-                        ))}
+                        {filteredOrders.length === 0 ? (
+                            <tr><td colSpan={7} style={{ padding: '24px', textAlign: 'center', color: '#94a3b8' }}>No orders found.</td></tr>
+                        ) : (
+                            filteredOrders.map((order, i) => (
+                                <tr key={i} style={{ borderBottom: '1px solid #f1f5f9' }}>
+                                    <td style={{ padding: '16px 12px', fontWeight: 600 }}>#{order.id.replace('ORD-', '')}</td>
+                                    <td style={{ padding: '16px 12px', fontSize: '0.85rem', color: '#64748b' }}>{order.user_id}</td>
+                                    <td style={{ padding: '16px 12px' }}>{order.plan_name}</td>
+                                    <td style={{ padding: '16px 12px', color: '#64748b' }}>{new Date(order.created_at).toLocaleDateString()}</td>
+                                    <td style={{ padding: '16px 12px', fontWeight: 600 }}>₹{order.amount.toString().replace(/[^\d.]/g, '')}</td>
+                                    <td style={{ padding: '16px 12px' }}>
+                                        <span style={{
+                                            padding: '4px 8px',
+                                            borderRadius: '12px',
+                                            fontSize: '0.75rem',
+                                            fontWeight: 600,
+                                            backgroundColor: order.status === 'Success' ? '#dcfce7' : order.status === 'Pending' ? '#fef3c7' : '#fee2e2',
+                                            color: order.status === 'Success' ? '#166534' : order.status === 'Pending' ? '#92400e' : '#991b1b'
+                                        }}>
+                                            {order.status}
+                                        </span>
+                                    </td>
+                                    <td style={{ padding: '16px 12px', textAlign: 'right' }}>
+                                        <button
+                                            onClick={() => handleViewOrder(order)}
+                                            style={{ border: 'none', background: 'none', cursor: 'pointer', color: '#64748b' }}
+                                        >
+                                            <Eye size={18} />
+                                        </button>
+                                    </td>
+                                </tr>
+                            ))
+                        )}
                     </tbody>
                 </table>
             </Card>

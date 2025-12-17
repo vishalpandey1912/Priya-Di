@@ -32,20 +32,24 @@ const DEFAULT_LOCKS: LockSettings = {
     biology: true
 };
 
-const SubjectLockManager = ({ subject, locks, toggleLock, itemPrices, setItemPrice }: {
+const SubjectLockManager = ({ subject, locks, toggleLock }: {
     subject: string,
     locks: LockSettings,
-    toggleLock: (key: string) => void,
-    itemPrices: ItemPrices,
-    setItemPrice: (id: string, price: string) => void
+    toggleLock: (key: string) => void
 }) => {
-    const { getChaptersBySubject } = useContent();
+    const { getChaptersBySubject, updateMaterial } = useContent();
     const [expanded, setExpanded] = useState(false);
     const [expandedChapters, setExpandedChapters] = useState<Record<string, boolean>>({});
     const chapters = getChaptersBySubject(subject);
 
     const toggleChapterExpand = (chapterId: string) => {
         setExpandedChapters(prev => ({ ...prev, [chapterId]: !prev[chapterId] }));
+    };
+
+    const handlePriceChange = async (subjectId: string, chapterId: string, topicId: string, materialId: string, val: string) => {
+        // Update DB
+        const price = parseFloat(val) || 0;
+        await updateMaterial(subjectId, chapterId, topicId, materialId, { price });
     };
 
     return (
@@ -145,14 +149,14 @@ const SubjectLockManager = ({ subject, locks, toggleLock, itemPrices, setItemPri
                                                                         <span style={{ color: '#94a3b8', fontSize: '0.75rem' }}>({material.type})</span>
                                                                     </div>
                                                                     <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                                                        {!itemPrices[material.id] && <span style={{ fontSize: '0.75rem', color: '#16a34a' }}>Free</span>}
+                                                                        {(!material.price || material.price === 0) && <span style={{ fontSize: '0.75rem', color: '#16a34a' }}>Free</span>}
                                                                         <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
                                                                             <IndianRupee size={12} style={{ position: 'absolute', left: '8px', color: '#64748b' }} />
                                                                             <input
                                                                                 type="number"
                                                                                 placeholder="Price"
-                                                                                value={itemPrices[material.id] || ''}
-                                                                                onChange={(e) => setItemPrice(material.id, e.target.value)}
+                                                                                defaultValue={(material.price || 0) > 0 ? material.price : ''}
+                                                                                onBlur={(e) => handlePriceChange(subject, chapter.id, topic.id, material.id, e.target.value)}
                                                                                 style={{
                                                                                     width: '70px',
                                                                                     padding: '4px 4px 4px 20px',
@@ -183,7 +187,7 @@ const SubjectLockManager = ({ subject, locks, toggleLock, itemPrices, setItemPri
 
 const ProductManager = () => {
     const { products, addProduct, updateProduct, deleteProduct } = useProduct();
-    const { getChaptersBySubject } = useContent();
+    const { subjects, getChaptersBySubject } = useContent();
     const [isEditing, setIsEditing] = useState(false);
     const [currentProduct, setCurrentProduct] = useState<any>(null);
     const [showContentSelector, setShowContentSelector] = useState(false);
@@ -299,7 +303,7 @@ const ProductManager = () => {
                                 <div style={{ marginBottom: '16px' }}>
                                     <div style={{ fontWeight: 600, fontSize: '0.9rem', marginBottom: '8px' }}>Subjects & Global</div>
                                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-                                        {['physics', 'chemistry', 'biology', 'full_bundle', 'test_series'].map(id => {
+                                        {['full_bundle', 'test_series', ...subjects.map(s => s.id)].map(id => {
                                             const isSelected = formData.targetIds.split(',').map(s => s.trim()).includes(id);
                                             return (
                                                 <div
@@ -328,12 +332,12 @@ const ProductManager = () => {
                                 {/* Dynamic Chapters */}
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                                     <div style={{ fontWeight: 600, fontSize: '0.9rem' }}>Specific Chapters</div>
-                                    {['physics', 'chemistry', 'biology'].map(subject => {
-                                        const chapters = getChaptersBySubject(subject);
+                                    {subjects.map(subject => {
+                                        const chapters = getChaptersBySubject(subject.id);
                                         if (chapters.length === 0) return null;
                                         return (
-                                            <div key={subject}>
-                                                <div style={{ fontSize: '0.85rem', fontWeight: 500, color: '#475569', marginBottom: '4px', textTransform: 'capitalize' }}>{subject}</div>
+                                            <div key={subject.id}>
+                                                <div style={{ fontSize: '0.85rem', fontWeight: 500, color: '#475569', marginBottom: '4px', textTransform: 'capitalize' }}>{subject.title}</div>
                                                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: '8px' }}>
                                                     {chapters.map(chapter => {
                                                         const isSelected = formData.targetIds.split(',').map(s => s.trim()).includes(chapter.id);
@@ -440,6 +444,7 @@ const ProductManager = () => {
 };
 
 export default function MonetizationPage() {
+    const { subjects } = useContent();
     const [activeTab, setActiveTab] = useState<'locks' | 'products' | 'coupons'>('locks');
 
     // ... (Keep existing state hooks for Locks/Coupons if needed, or refactor to separate components entirely)
@@ -447,35 +452,29 @@ export default function MonetizationPage() {
     // To save context space, I will re-implement the structure surrounding the tabs.
 
     // Existing State
+    // Existing State
     const [coupons, setCoupons] = useState<Coupon[]>([]);
-    const [locks, setLocks] = useState<LockSettings>(DEFAULT_LOCKS);
-    const [itemPrices, setItemPrices] = useState<ItemPrices>({});
+    const [locks, setLocks] = useState<LockSettings>(DEFAULT_LOCKS); // Keep locks local for now as visual toggle
+
+    // Derived or unused state removed (itemPrices handled via context now)
+
     const [newCoupon, setNewCoupon] = useState({ code: '', discount: '', type: 'percent' as const });
 
     useEffect(() => {
-        // Load coupons
-        const storedCoupons = localStorage.getItem('siteCoupons');
-        if (storedCoupons) setCoupons(JSON.parse(storedCoupons));
-        else { setCoupons(DEFAULT_COUPONS); localStorage.setItem('siteCoupons', JSON.stringify(DEFAULT_COUPONS)); }
+        // Load coupons from Supabase
+        const fetchCoupons = async () => {
+            const { supabase } = await import('@/lib/supabase');
+            const { data, error } = await supabase.from('coupons').select('*');
+            if (data) setCoupons(data);
+        };
+        fetchCoupons();
 
-        // Load locks
+        // Load locks (Local Preference for UI)
         const storedLocks = localStorage.getItem('contentLocks');
         if (storedLocks) setLocks(JSON.parse(storedLocks));
-        else localStorage.setItem('contentLocks', JSON.stringify(DEFAULT_LOCKS));
-
-        // Load item prices
-        const storedPrices = localStorage.getItem('itemPrices');
-        if (storedPrices) setItemPrices(JSON.parse(storedPrices));
     }, []);
 
-    const setItemPrice = (id: string, price: string) => {
-        const updated = { ...itemPrices, [id]: price };
-        if (!price) delete updated[id];
-        setItemPrices(updated);
-        localStorage.setItem('itemPrices', JSON.stringify(updated));
-    };
-
-    const handleAddCoupon = (e: React.FormEvent) => {
+    const handleAddCoupon = async (e: React.FormEvent) => {
         e.preventDefault();
         const coupon: Coupon = {
             code: newCoupon.code.toUpperCase(),
@@ -483,16 +482,26 @@ export default function MonetizationPage() {
             type: newCoupon.type,
             active: true
         };
-        const updated = [...coupons, coupon];
-        setCoupons(updated);
-        localStorage.setItem('siteCoupons', JSON.stringify(updated));
-        setNewCoupon({ code: '', discount: '', type: 'percent' });
+
+        const { supabase } = await import('@/lib/supabase');
+        const { error } = await supabase.from('coupons').insert(coupon);
+
+        if (error) {
+            console.error('Error adding coupon', error);
+            alert('Failed to add coupon');
+        } else {
+            setCoupons([...coupons, coupon]);
+            setNewCoupon({ code: '', discount: '', type: 'percent' });
+        }
     };
 
-    const handleDeleteCoupon = (code: string) => {
-        const updated = coupons.filter(c => c.code !== code);
-        setCoupons(updated);
-        localStorage.setItem('siteCoupons', JSON.stringify(updated));
+    const handleDeleteCoupon = async (code: string) => {
+        const { supabase } = await import('@/lib/supabase');
+        const { error } = await supabase.from('coupons').delete().eq('code', code);
+
+        if (!error) {
+            setCoupons(coupons.filter(c => c.code !== code));
+        }
     };
 
     const toggleLock = (subject: string) => {
@@ -537,14 +546,12 @@ export default function MonetizationPage() {
                             Manage default access permissions. (Use Product Builder to create sellable bundles).
                         </p>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                            {['physics', 'chemistry', 'biology'].map(subject => (
+                            {subjects.map(subject => (
                                 <SubjectLockManager
-                                    key={subject}
-                                    subject={subject}
+                                    key={subject.id}
+                                    subject={subject.id}
                                     locks={locks}
                                     toggleLock={toggleLock}
-                                    itemPrices={itemPrices}
-                                    setItemPrice={setItemPrice}
                                 />
                             ))}
                         </div>

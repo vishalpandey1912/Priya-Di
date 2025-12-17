@@ -31,11 +31,12 @@ export default function AdminChapterPage({
 
     const [isQuizModalOpen, setIsQuizModalOpen] = useState(false);
     const [editingQuizId, setEditingQuizId] = useState<string | null>(null);
-    const [quizInitialData, setQuizInitialData] = useState<{ title: string, questions: any[] } | undefined>(undefined);
+    const [quizInitialData, setQuizInitialData] = useState<{ title: string, questions: any[], price?: number } | undefined>(undefined);
 
     const [materialType, setMaterialType] = useState<'pdf' | 'video' | 'image' | 'document' | 'test'>('pdf');
     const [materialTitle, setMaterialTitle] = useState('');
     const [materialUrl, setMaterialUrl] = useState(''); // Keep for manual URL
+    const [materialPrice, setMaterialPrice] = useState(''); // New State for Price
     const [uploadedFile, setUploadedFile] = useState<File | null>(null);
     const [isUploading, setIsUploading] = useState(false);
 
@@ -56,11 +57,11 @@ export default function AdminChapterPage({
         }
     };
 
-    const handleSaveQuiz = async (title: string, questions: any[]) => {
+    const handleSaveQuiz = async (title: string, questions: any[], price: number) => {
         if (editingQuizId) {
-            await updateQuiz(editingQuizId, title, questions);
+            await updateQuiz(editingQuizId, title, questions, price);
         } else if (selectedTopicId) {
-            await addQuiz(selectedTopicId, title, questions);
+            await addQuiz(selectedTopicId, title, questions, price);
         }
         setIsQuizModalOpen(false);
         setEditingQuizId(null);
@@ -92,7 +93,8 @@ export default function AdminChapterPage({
 
         setQuizInitialData({
             title: quiz.title,
-            questions: mappedQuestions
+            questions: mappedQuestions,
+            price: quiz.price
         });
 
         setIsQuizModalOpen(true);
@@ -105,7 +107,21 @@ export default function AdminChapterPage({
     };
 
     const handleSaveMaterial = async () => {
-        if (!selectedTopicId || !materialTitle) return;
+        if (!selectedTopicId) return;
+
+        // Redirect to Quiz Builder if Test selected
+        if (materialType === 'test') {
+            setMaterialModalOpen(false);
+            openAddQuizModal(selectedTopicId);
+            // Pre-fill title if provided
+            if (materialTitle) {
+                // We'd need to modify openAddQuizModal to accept initial title, or just let user re-type
+                // For simplicity, just open the modal.
+            }
+            return;
+        }
+
+        if (!materialTitle) return;
 
         let finalUrl = materialUrl;
 
@@ -125,17 +141,21 @@ export default function AdminChapterPage({
             return;
         }
 
+        const price = materialPrice ? parseInt(materialPrice) : 0;
+
         if (editingMaterialId) {
             await updateMaterial(subject, chapterId, selectedTopicId, editingMaterialId, {
                 title: materialTitle,
                 url: finalUrl,
-                type: materialType
+                type: materialType,
+                price: price
             });
         } else {
             await addMaterial(subject, chapterId, selectedTopicId, {
                 title: materialTitle,
                 url: finalUrl,
-                type: materialType
+                type: materialType,
+                price: price
             });
         }
 
@@ -154,6 +174,7 @@ export default function AdminChapterPage({
         setMaterialTitle(material.title);
         setMaterialType(material.type);
         setMaterialUrl(material.url || '');
+        setMaterialPrice(material.price ? material.price.toString() : '');
         setMaterialModalOpen(true);
     };
 
@@ -161,6 +182,7 @@ export default function AdminChapterPage({
         setMaterialTitle('');
         setMaterialUrl('');
         setMaterialType('pdf');
+        setMaterialPrice('');
         setUploadedFile(null);
         setEditingMaterialId(null);
         setIsUploading(false);
@@ -190,40 +212,24 @@ export default function AdminChapterPage({
                 )}
 
                 {chapter.topics.map((topic) => {
-                    const quiz = quizzes?.find(q => q.topic_id === topic.id);
+                    const topicQuizzes = quizzes?.filter(q => q.topic_id === topic.id) || [];
+
+                    // Combine and Sort
+                    const items = [
+                        ...topic.materials.map(m => ({ ...m, itemType: 'material', created_at: m.created_at || ' ' })),
+                        ...topicQuizzes.map(q => ({ ...q, id: q.id, title: q.title, itemType: 'quiz', created_at: q.created_at || ' ' }))
+                    ].sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
 
                     return (
                         <Card key={topic.id} padding="md">
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', borderBottom: '1px solid #f1f5f9', paddingBottom: '12px' }}>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                                     <h3 style={{ fontSize: '1.1rem', fontWeight: 600 }}>{topic.title}</h3>
-                                    {quiz && (
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                            <span style={{
-                                                fontSize: '0.75rem',
-                                                backgroundColor: '#dcfce7',
-                                                color: '#166534',
-                                                padding: '2px 8px',
-                                                borderRadius: '99px',
-                                                fontWeight: 600
-                                            }}>
-                                                Quiz Helper
-                                            </span>
-                                            <button onClick={() => openEditQuizModal(quiz)} style={{ cursor: 'pointer', border: 'none', background: 'none', color: '#64748b' }} title="Edit Quiz">
-                                                <Edit size={14} />
-                                            </button>
-                                            <button onClick={() => handleDeleteQuiz(quiz.id)} style={{ cursor: 'pointer', border: 'none', background: 'none', color: '#ef4444' }} title="Delete Quiz">
-                                                <Trash2 size={14} />
-                                            </button>
-                                        </div>
-                                    )}
                                 </div>
                                 <div style={{ display: 'flex', gap: '8px' }}>
-                                    {!quiz && (
-                                        <Button size="sm" variant="outline" leftIcon={<HelpCircle size={14} />} onClick={() => openAddQuizModal(topic.id)}>
-                                            Create Quiz
-                                        </Button>
-                                    )}
+                                    <Button size="sm" variant="outline" leftIcon={<HelpCircle size={14} />} onClick={() => openAddQuizModal(topic.id)}>
+                                        Add Quiz
+                                    </Button>
                                     <Button size="sm" variant="outline" leftIcon={<Plus size={14} />} onClick={() => openAddMaterialModal(topic.id)}>Add Material</Button>
                                     <button
                                         onClick={() => {
@@ -248,50 +254,87 @@ export default function AdminChapterPage({
                                 </div>
                             </div>
 
-                            {topic.materials.length === 0 ? (
-                                <p style={{ fontSize: '0.9rem', color: '#94a3b8', fontStyle: 'italic' }}>No notes or videos added.</p>
+                            {items.length === 0 ? (
+                                <p style={{ fontSize: '0.9rem', color: '#94a3b8', fontStyle: 'italic' }}>No notes, videos, or quizzes added.</p>
                             ) : (
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                                    {topic.materials.map((material) => (
-                                        <div key={material.id} style={{
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            justifyContent: 'space-between',
-                                            padding: '8px 12px',
-                                            backgroundColor: '#f8fafc',
-                                            borderRadius: '6px'
-                                        }}>
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                                {material.type === 'pdf' ? <FileText size={16} color="#00A99D" /> : <Video size={16} color="#3b82f6" />}
-                                                {material.url ? (
-                                                    <a href={material.url} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none', color: 'inherit', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                                        <span style={{ fontSize: '0.9rem', fontWeight: 500, textDecoration: 'underline' }}>{material.title}</span>
-                                                    </a>
-                                                ) : (
-                                                    <span style={{ fontSize: '0.9rem', fontWeight: 500 }}>{material.title}</span>
-                                                )}
-                                                {material.url && <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>({material.type === 'pdf' ? 'PDF' : 'Video'})</span>}
-                                            </div>
-                                            <div style={{ display: 'flex', gap: '8px' }}>
-                                                <button
-                                                    onClick={() => openEditMaterialModal(topic.id, material)}
-                                                    style={{ border: 'none', background: 'none', cursor: 'pointer', color: '#64748b' }}
-                                                >
-                                                    <Edit size={14} />
-                                                </button>
-                                                <button
-                                                    onClick={() => {
-                                                        if (confirm('Are you sure you want to delete this material?')) {
-                                                            deleteMaterial(subject, chapterId, topic.id, material.id);
-                                                        }
-                                                    }}
-                                                    style={{ border: 'none', background: 'none', cursor: 'pointer', color: '#ef4444' }}
-                                                >
-                                                    <Trash2 size={14} />
-                                                </button>
-                                            </div>
-                                        </div>
-                                    ))}
+                                    {items.map((item) => {
+                                        if (item.itemType === 'quiz') {
+                                            // Quiz Item Render
+                                            return (
+                                                <div key={item.id} style={{
+                                                    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                                                    padding: '8px 12px', backgroundColor: '#f0fdf4', borderRadius: '6px', border: '1px solid #dcfce7'
+                                                }}>
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                                        <HelpCircle size={16} color="#166534" />
+                                                        <span style={{ fontSize: '0.9rem', fontWeight: 600, color: '#166534' }}>{item.title}</span>
+                                                        <span style={{ fontSize: '0.75rem', backgroundColor: '#166534', color: 'white', padding: '1px 6px', borderRadius: '4px' }}>Quiz</span>
+                                                        {item.price && item.price > 0 && (
+                                                            <span style={{ fontSize: '0.75rem', backgroundColor: '#fff7ed', color: '#c2410c', padding: '2px 6px', borderRadius: '4px', fontWeight: 600 }}>
+                                                                ₹{item.price}
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                    <div style={{ display: 'flex', gap: '8px' }}>
+                                                        <button onClick={() => openEditQuizModal(item)} style={{ border: 'none', background: 'none', cursor: 'pointer', color: '#64748b' }}>
+                                                            <Edit size={14} />
+                                                        </button>
+                                                        <button onClick={() => handleDeleteQuiz(item.id)} style={{ border: 'none', background: 'none', cursor: 'pointer', color: '#ef4444' }}>
+                                                            <Trash2 size={14} />
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            );
+                                        } else {
+                                            // Material Item Render
+                                            return (
+                                                <div key={item.id} style={{
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    justifyContent: 'space-between',
+                                                    padding: '8px 12px',
+                                                    backgroundColor: '#f8fafc',
+                                                    borderRadius: '6px'
+                                                }}>
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                                        {item.type === 'pdf' ? <FileText size={16} color="#00A99D" /> : <Video size={16} color="#3b82f6" />}
+                                                        {item.url ? (
+                                                            <a href={item.url} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none', color: 'inherit', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                                                <span style={{ fontSize: '0.9rem', fontWeight: 500, textDecoration: 'underline' }}>{item.title}</span>
+                                                            </a>
+                                                        ) : (
+                                                            <span style={{ fontSize: '0.9rem', fontWeight: 500 }}>{item.title}</span>
+                                                        )}
+                                                        {item.url && <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>({item.type === 'pdf' ? 'PDF' : 'Video'})</span>}
+                                                        {item.price && item.price > 0 ? (
+                                                            <span style={{ fontSize: '0.75rem', backgroundColor: '#fff7ed', color: '#c2410c', padding: '2px 6px', borderRadius: '4px', fontWeight: 600 }}>
+                                                                ₹{item.price}
+                                                            </span>
+                                                        ) : <span style={{ fontSize: '0.75rem', backgroundColor: '#f0fdf4', color: '#15803d', padding: '2px 6px', borderRadius: '4px', fontWeight: 600 }}>Free</span>}
+                                                    </div>
+                                                    <div style={{ display: 'flex', gap: '8px' }}>
+                                                        <button
+                                                            onClick={() => openEditMaterialModal(topic.id, item as Material)}
+                                                            style={{ border: 'none', background: 'none', cursor: 'pointer', color: '#64748b' }}
+                                                        >
+                                                            <Edit size={14} />
+                                                        </button>
+                                                        <button
+                                                            onClick={() => {
+                                                                if (confirm('Are you sure you want to delete this material?')) {
+                                                                    deleteMaterial(subject, chapterId, topic.id, item.id);
+                                                                }
+                                                            }}
+                                                            style={{ border: 'none', background: 'none', cursor: 'pointer', color: '#ef4444' }}
+                                                        >
+                                                            <Trash2 size={14} />
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            );
+                                        }
+                                    })}
                                 </div>
                             )}
                         </Card>
@@ -339,6 +382,7 @@ export default function AdminChapterPage({
                                     <option value="video">Video</option>
                                     <option value="image">Image (JPG/PNG)</option>
                                     <option value="document">Word/Doc</option>
+                                    <option value="test">Test / Quiz</option>
                                 </select>
                             </div>
 
@@ -383,6 +427,19 @@ export default function AdminChapterPage({
                                 onChange={(e) => setMaterialUrl(e.target.value)}
                                 disabled={!!uploadedFile}
                             />
+
+                            <div style={{ marginTop: '16px' }}>
+                                <Input
+                                    label="Price (₹)"
+                                    placeholder="0 for Free"
+                                    type="number"
+                                    value={materialPrice}
+                                    onChange={(e) => setMaterialPrice(e.target.value)}
+                                />
+                                <p style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '4px' }}>
+                                    If price &gt; 0, it will be locked for users who haven't purchased it.
+                                </p>
+                            </div>
                         </div>
 
                         <Button style={{ marginTop: '16px', width: '100%' }} onClick={handleSaveMaterial}>

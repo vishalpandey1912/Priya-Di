@@ -17,46 +17,67 @@ export default function AdminDashboardPage() {
     const [topCourses, setTopCourses] = useState<{ name: string, count: number, percent: number }[]>([]);
 
     useEffect(() => {
-        // Load Orders
-        const orders = JSON.parse(localStorage.getItem('orders') || '[]');
+        const fetchOrders = async () => {
+            const { supabase } = await import('@/lib/supabase');
 
-        // Calculate Revenue
-        const totalRevenue = orders.reduce((acc: number, order: any) => {
-            if (order.status === 'Success') {
-                const amount = parseInt(order.amount.replace(/[^\d]/g, ''));
-                return acc + amount;
+            // Fetch Orders from Supabase
+            const { data: dbOrders, error } = await supabase
+                .from('orders')
+                .select('*')
+                .order('created_at', { ascending: false });
+
+            if (error) {
+                console.error('Error fetching orders:', error);
+                return;
             }
-            return acc;
-        }, 0);
 
-        // Calculate Active Students (Unique Users)
-        const uniqueStudents = new Set(orders.map((o: any) => o.user)).size;
+            const orders = dbOrders || [];
 
-        // Top Courses
-        const courseCounts: { [key: string]: number } = {};
-        orders.forEach((o: any) => {
-            courseCounts[o.plan] = (courseCounts[o.plan] || 0) + 1;
-        });
+            // Calculate Revenue
+            const totalRevenue = orders.reduce((acc: number, order: any) => {
+                if (order.status === 'Success') {
+                    // Handle potential string formats like "₹500" or just "500"
+                    const amountStr = order.amount.toString().replace(/[^\d.]/g, '');
+                    const amount = parseFloat(amountStr) || 0;
+                    return acc + amount;
+                }
+                return acc;
+            }, 0);
 
-        const sortedCourses = Object.entries(courseCounts)
-            .sort(([, a], [, b]) => b - a)
-            .slice(0, 3)
-            .map(([name, count]) => ({
-                name,
-                count,
-                percent: Math.round((count / orders.length) * 100)
-            }));
+            // Calculate Active Students (Unique Users)
+            // Note: In a real app we might count 'enrollments', but orders work for sales unique users
+            // Using user_id if available, or fallback to user name if old data
+            const uniqueStudents = new Set(orders.map((o: any) => o.user_id || o.user)).size;
 
-        setStats({
-            revenue: totalRevenue,
-            activeStudents: uniqueStudents,
-            totalOrders: orders.length,
-            pendingOrders: Math.floor(orders.length * 0.1) // Mock 10% pending for demo
-        });
+            // Top Courses
+            const courseCounts: { [key: string]: number } = {};
+            orders.forEach((o: any) => {
+                // Determine course name. Logic might need adjustment if DB field varies
+                const planName = o.plan_name || o.plan || 'Unknown';
+                courseCounts[planName] = (courseCounts[planName] || 0) + 1;
+            });
 
-        setRecentOrders(orders.slice(0, 5));
-        setTopCourses(sortedCourses);
+            const sortedCourses = Object.entries(courseCounts)
+                .sort(([, a], [, b]) => b - a)
+                .slice(0, 3)
+                .map(([name, count]) => ({
+                    name,
+                    count,
+                    percent: orders.length > 0 ? Math.round((count / orders.length) * 100) : 0
+                }));
 
+            setStats({
+                revenue: totalRevenue,
+                activeStudents: uniqueStudents,
+                totalOrders: orders.length,
+                pendingOrders: orders.filter((o: any) => o.status === 'Pending').length
+            });
+
+            setRecentOrders(orders.slice(0, 5));
+            setTopCourses(sortedCourses);
+        };
+
+        fetchOrders();
     }, []);
 
     return (
@@ -124,9 +145,9 @@ export default function AdminDashboardPage() {
                                 recentOrders.map((order, i) => (
                                     <tr key={i} style={{ borderBottom: '1px solid #f1f5f9' }}>
                                         <td style={{ padding: '12px', fontWeight: 500 }}>#{order.id.replace('ORD-', '')}</td>
-                                        <td style={{ padding: '12px', color: '#64748b' }}>{order.user}</td>
-                                        <td style={{ padding: '12px', fontSize: '0.9rem' }}>{order.plan}</td>
-                                        <td style={{ padding: '12px', fontWeight: 600 }}>{order.amount}</td>
+                                        <td style={{ padding: '12px', color: '#64748b' }}>{order.user_id ? 'Student' : order.user}</td>
+                                        <td style={{ padding: '12px', fontSize: '0.9rem' }}>{order.plan_name || order.plan}</td>
+                                        <td style={{ padding: '12px', fontWeight: 600 }}>₹{order.amount.toString().replace(/[^\d.]/g, '')}</td>
                                         <td style={{ padding: '12px' }}>
                                             <span style={{
                                                 padding: '4px 8px',

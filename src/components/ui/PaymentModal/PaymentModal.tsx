@@ -62,9 +62,9 @@ export const PaymentModal = ({ isOpen, onClose, amount, planName, onSuccess }: P
                 // 1. Create Order
                 const orderId = `ORD-${Math.floor(100000 + Math.random() * 900000)}`;
                 const { error: orderError } = await supabase.from('orders').insert({
-                    order_id: orderId,
+                    id: orderId, // Changed from order_id to match SQL
                     user_id: user.id,
-                    amount: finalAmount,
+                    amount: finalAmount.toString(), // Schema expects text
                     plan_name: planName,
                     status: 'Success',
                     created_at: new Date().toISOString()
@@ -94,10 +94,11 @@ export const PaymentModal = ({ isOpen, onClose, amount, planName, onSuccess }: P
                 setStep('details');
             }, 1500);
 
-        } catch (err) {
-            console.error('Payment Error:', err);
+        } catch (err: any) {
+            console.error('Payment Error Full:', JSON.stringify(err, null, 2));
+            console.error('Payment Error Message:', err?.message || err?.error_description || 'Unknown error');
             setLoading(false);
-            alert('Payment failed. Please try again.');
+            alert(`Payment failed: ${err?.message || 'Please try again.'}`);
         }
     };
 

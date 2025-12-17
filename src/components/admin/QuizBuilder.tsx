@@ -14,12 +14,13 @@ interface Question {
 interface QuizBuilderProps {
     isOpen: boolean;
     onClose: () => void;
-    onSave: (title: string, questions: Question[]) => void;
-    initialData?: { title: string, questions: Question[] };
+    onSave: (title: string, questions: Question[], price: number) => void;
+    initialData?: { title: string, questions: Question[], price?: number };
 }
 
 export function QuizBuilder({ isOpen, onClose, onSave, initialData }: QuizBuilderProps) {
     const [title, setTitle] = useState(initialData?.title || '');
+    const [price, setPrice] = useState(initialData?.price?.toString() || '');
     const [questions, setQuestions] = useState<Question[]>(initialData?.questions || [
         { id: '1', questionText: '', options: ['', '', '', ''], correctOption: 0 }
     ]);
@@ -28,6 +29,7 @@ export function QuizBuilder({ isOpen, onClose, onSave, initialData }: QuizBuilde
     React.useEffect(() => {
         if (isOpen) {
             setTitle(initialData?.title || '');
+            setPrice(initialData?.price?.toString() || '');
             setQuestions(initialData?.questions || [
                 { id: '1', questionText: '', options: ['', '', '', ''], correctOption: 0 }
             ]);
@@ -79,9 +81,10 @@ export function QuizBuilder({ isOpen, onClose, onSave, initialData }: QuizBuilde
             return;
         }
 
-        onSave(title, questions);
+        onSave(title, questions, parseFloat(price) || 0);
         // Reset state
         setTitle('');
+        setPrice('');
         setQuestions([{ id: '1', questionText: '', options: ['', '', '', ''], correctOption: 0 }]);
     };
 
@@ -104,13 +107,24 @@ export function QuizBuilder({ isOpen, onClose, onSave, initialData }: QuizBuilde
                     </button>
                 </div>
 
-                <div style={{ marginBottom: '24px' }}>
-                    <Input
-                        label="Quiz Title"
-                        placeholder="e.g. Thermodynamics Practice Test"
-                        value={title}
-                        onChange={(e) => setTitle(e.target.value)}
-                    />
+                <div style={{ marginBottom: '24px', display: 'flex', gap: '16px' }}>
+                    <div style={{ flex: 1 }}>
+                        <Input
+                            label="Quiz Title"
+                            placeholder="e.g. Thermodynamics Practice Test"
+                            value={title}
+                            onChange={(e) => setTitle(e.target.value)}
+                        />
+                    </div>
+                    <div style={{ width: '150px' }}>
+                        <Input
+                            label="Price (₹)"
+                            placeholder="0"
+                            type="number"
+                            value={price}
+                            onChange={(e) => setPrice(e.target.value)}
+                        />
+                    </div>
                 </div>
 
                 <div style={{ flex: 1, overflowY: 'auto', paddingRight: '12px' }}>

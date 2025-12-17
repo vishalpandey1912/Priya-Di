@@ -4,6 +4,8 @@ export interface Material {
     title: string;
     url?: string; // In real app this would be link to storage
     duration?: string; // For videos
+    price?: number; // Price in INR. 0 or undefined means free/inherited.
+    created_at?: string; // ISO date string
 }
 
 export interface Topic {
@@ -16,6 +18,7 @@ export interface Chapter {
     id: string;
     subjectId: string;
     title: string;
+    price?: number; // Price to unlock whole chapter
     topics: Topic[];
 }
 

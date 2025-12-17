@@ -26,21 +26,36 @@ export default function PricingPage() {
     }, [products]);
 
     useEffect(() => {
-        // Check local storage for purchased access (User-Specific)
-        if (typeof window !== 'undefined' && user) {
-            const purchased: string[] = [];
-            // Check if user has access to the *primary* target of a product
-            // This is a heuristic. Ideally we track "Order History" for exact product match.
-            // But relying on access flags is robust.
+        const loadPurchased = async () => {
+            if (user) {
+                const purchased: string[] = [];
 
-            displayPlans.forEach(plan => {
-                // If any of the targetIds are present? No, usually all.
-                // Let's check if the *first* targetId is present as a proxy.
-                const key = `access_${plan.targetIds[0]}_${user.email}`;
-                if (localStorage.getItem(key)) purchased.push(plan.id);
-            });
-            setPurchasedPlans(purchased);
-        }
+                // 1. Check Local Storage (Fast)
+                displayPlans.forEach(plan => {
+                    const key = `access_${plan.targetIds[0]}_${user.email}`;
+                    if (localStorage.getItem(key)) purchased.push(plan.id);
+                });
+
+                // 2. Check Database (Source of Truth)
+                const { supabase } = await import('@/lib/supabase');
+                const { data } = await supabase.from('enrollments').select('target_id').eq('user_id', user.id);
+                const dbTargets = data?.map(e => e.target_id) || [];
+
+                displayPlans.forEach(plan => {
+                    // Check if *all* targets of this plan are present in DB enrollments
+                    // e.g. Bundle has [physics, chem]. If DB has both, we own the bundle.
+                    const ownsAll = plan.targetIds.every(tid => dbTargets.includes(tid));
+                    if (ownsAll && !purchased.includes(plan.id)) {
+                        purchased.push(plan.id);
+                        // Backfill local storage
+                        plan.targetIds.forEach(tid => localStorage.setItem(`access_${tid}_${user.email}`, 'true'));
+                    }
+                });
+
+                setPurchasedPlans(purchased);
+            }
+        };
+        loadPurchased();
     }, [isModalOpen, user, displayPlans]);
 
     const handleAddToCart = (plan: any) => {
@@ -53,8 +68,27 @@ export default function PricingPage() {
         });
     };
 
-    const handlePaymentSuccess = () => {
+    const handlePaymentSuccess = async () => {
         if (!selectedPlan || !user) return;
+
+        // 1. DB: Grant Access (Enrollments)
+        const { supabase } = await import('@/lib/supabase');
+        if (selectedPlan.targetIds && Array.isArray(selectedPlan.targetIds)) {
+            const inserts = selectedPlan.targetIds.map((tid: string) => ({
+                user_id: user.id,
+                target_id: tid,
+                target_type: 'plan_component',
+                created_at: new Date().toISOString()
+            }));
+            await supabase.from('enrollments').insert(inserts);
+        }
+
+        // 2. Local: Grant Access
+        if (selectedPlan.targetIds && Array.isArray(selectedPlan.targetIds)) {
+            selectedPlan.targetIds.forEach((target: string) => {
+                localStorage.setItem(`access_${target}_${user.email}`, 'true');
+            });
+        }
 
         const newOrder = {
             id: `ORD-${Math.floor(1000 + Math.random() * 9000)}`,
@@ -65,21 +99,13 @@ export default function PricingPage() {
             status: 'Success'
         };
 
-        const newPurchased = [...purchasedPlans];
-        if (!newPurchased.includes(selectedPlan.id)) newPurchased.push(selectedPlan.id);
-
-        // Grant Access Logic (Generic & User-Scoped)
-        // This is THE magic fix that enables dynamic bundles!
-        if (selectedPlan.targetIds && Array.isArray(selectedPlan.targetIds)) {
-            selectedPlan.targetIds.forEach((target: string) => {
-                localStorage.setItem(`access_${target}_${user.email}`, 'true');
-            });
-        }
-
         const existingOrders = JSON.parse(localStorage.getItem('orders') || '[]');
         localStorage.setItem('orders', JSON.stringify([newOrder, ...existingOrders]));
 
+        const newPurchased = [...purchasedPlans];
+        if (!newPurchased.includes(selectedPlan.id)) newPurchased.push(selectedPlan.id);
         setPurchasedPlans(newPurchased);
+
         setIsModalOpen(false);
     };
 

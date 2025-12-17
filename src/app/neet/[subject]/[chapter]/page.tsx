@@ -17,7 +17,7 @@ export default function ChapterPage({
     const { user } = useAuth();
     const chapterData = getChapterById(subject, chapterId);
 
-    const [prices, setPrices] = React.useState<Record<string, string>>({});
+
     const [isOwnedGlobal, setIsOwnedGlobal] = React.useState(false);
     const [ownedItems, setOwnedItems] = React.useState<string[]>([]);
     const [selectedItem, setSelectedItem] = React.useState<{ id: string, name: string, price: number } | null>(null);
@@ -26,11 +26,8 @@ export default function ChapterPage({
 
     const [enrollments, setEnrollments] = React.useState<string[]>([]);
 
-    React.useEffect(() => {
-        // Load Item Prices
-        const storedPrices = JSON.parse(localStorage.getItem('itemPrices') || '{}');
-        setPrices(storedPrices);
 
+    React.useEffect(() => {
         const checkAccess = async () => {
             if (!user) return;
 
@@ -52,13 +49,12 @@ export default function ChapterPage({
     const hasItemAccess = (itemId: string) => {
         if (!user) return false;
         // Check local state (fetched from DB)
-        // Also check if admin? Admins have access to everything? Maybe later.
         if (enrollments.includes('full_bundle')) return true;
         if (enrollments.includes(subject)) return true; // Subject level access
         return enrollments.includes(itemId);
     };
 
-    const handleBuyItem = (e: React.MouseEvent, item: { id: string, title: string, price: string }) => {
+    const handleBuyItem = (e: React.MouseEvent, item: { id: string, title: string, price: number }) => {
         e.preventDefault();
 
         if (!user) {
@@ -70,7 +66,7 @@ export default function ChapterPage({
         setSelectedItem({
             id: item.id,
             name: item.title,
-            price: parseInt(item.price)
+            price: item.price
         });
     };
 
@@ -90,7 +86,6 @@ export default function ChapterPage({
         setEnrollments(prev => [...prev, selectedItem.id]);
 
         setSelectedItem(null);
-        // No reload needed
     };
 
     if (!chapterData) {
@@ -148,8 +143,8 @@ export default function ChapterPage({
                             ) : (
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                                     {topic.materials.map(material => {
-                                        const price = prices[material.id];
-                                        const isLocked = price && !hasItemAccess(material.id);
+                                        const price = material.price || 0;
+                                        const isLocked = price > 0 && !hasItemAccess(material.id);
                                         const isCompleted = userProgress[material.id] || false;
 
                                         return (

@@ -5,6 +5,9 @@ import { supabase } from '@/lib/supabase';
 import { Button, Card } from '@/components/ui';
 import { ArrowLeft, CheckCircle, XCircle, Timer, AlertCircle } from 'lucide-react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useAuth } from '@/context/AuthContext';
+import { PaymentModal } from '@/components/ui/PaymentModal/PaymentModal';
 
 interface Question {
     id: string;
@@ -19,10 +22,8 @@ interface Quiz {
     title: string;
     duration_minutes: number;
     topic_id?: string;
+    price?: number;
 }
-
-import { useRouter } from 'next/navigation';
-import { useAuth } from '@/context/AuthContext';
 
 export default function QuizPage({ params }: { params: Promise<{ quizId: string }> }) {
     const { quizId } = use(params);
@@ -32,6 +33,8 @@ export default function QuizPage({ params }: { params: Promise<{ quizId: string 
     const [quiz, setQuiz] = useState<Quiz | null>(null);
     const [questions, setQuestions] = useState<Question[]>([]);
     const [loading, setLoading] = useState(true);
+    const [hasAccess, setHasAccess] = useState(false);
+    const [showPaymentModal, setShowPaymentModal] = useState(false);
 
     // Quiz State (Restored)
     const [activeQuestionIndex, setActiveQuestionIndex] = useState(0);
@@ -39,6 +42,25 @@ export default function QuizPage({ params }: { params: Promise<{ quizId: string 
     const [isSubmitted, setIsSubmitted] = useState(false);
     const [score, setScore] = useState(0);
     const [timeLeft, setTimeLeft] = useState(0);
+
+    const checkAccess = async (quizPrice: number, quizId: string) => {
+        if (!user || quizPrice === 0) {
+            setHasAccess(true);
+            return;
+        }
+
+        const { data: enrollments } = await supabase
+            .from('enrollments')
+            .select('*')
+            .eq('user_id', user.id)
+            .eq('course_id', quizId);
+
+        if (enrollments && enrollments.length > 0) {
+            setHasAccess(true);
+        } else {
+            setHasAccess(false);
+        }
+    };
 
     useEffect(() => {
         if (!authLoading && !user) {
@@ -64,6 +86,9 @@ export default function QuizPage({ params }: { params: Promise<{ quizId: string 
             if (quizError) throw quizError;
             setQuiz(quizData);
             setTimeLeft(quizData.duration_minutes * 60);
+
+            // Check Access
+            await checkAccess(quizData.price || 0, quizData.id);
 
             // Get Questions
             const { data: questionsData, error: questionsError } = await supabase
@@ -130,6 +155,43 @@ export default function QuizPage({ params }: { params: Promise<{ quizId: string 
     if (!quiz) return <div style={{ padding: '40px', textAlign: 'center' }}>Quiz not found</div>;
 
     const activeQuestion = questions[activeQuestionIndex];
+
+    if (!hasAccess && quiz) {
+        return (
+            <div style={{ maxWidth: '600px', margin: '40px auto', padding: '20px', textAlign: 'center' }}>
+                <Card padding="lg">
+                    <h1 style={{ fontSize: '1.8rem', fontWeight: 800, marginBottom: '16px' }}>{quiz.title}</h1>
+                    <div style={{ padding: '24px', backgroundColor: '#f8fafc', borderRadius: '12px', marginBottom: '24px' }}>
+                        <p style={{ fontSize: '1.1rem', color: '#64748b', marginBottom: '8px' }}>This quiz is locked.</p>
+                        <div style={{ fontSize: '2.5rem', fontWeight: 800, color: 'var(--primary-color)' }}>
+                            ₹{quiz.price}
+                        </div>
+                    </div>
+                    <Button size="lg" onClick={() => setShowPaymentModal(true)} style={{ width: '100%' }}>
+                        Unlock Now
+                    </Button>
+                </Card>
+
+                <PaymentModal
+                    isOpen={showPaymentModal}
+                    onClose={() => setShowPaymentModal(false)}
+                    planName={`Quiz: ${quiz.title}`}
+                    amount={quiz.price || 0}
+                    onSuccess={async () => {
+                        // Insert enrollment so user has access
+                        const { error } = await supabase.from('enrollments').insert({
+                            user_id: user.id,
+                            course_id: quiz.id
+                        });
+                        if (!error) {
+                            setHasAccess(true);
+                            setShowPaymentModal(false);
+                        }
+                    }}
+                />
+            </div>
+        );
+    }
 
     return (
         <div style={{ maxWidth: '800px', margin: '0 auto', padding: '20px' }}>

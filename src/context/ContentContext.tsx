@@ -15,8 +15,8 @@ interface ContentContextType {
     chapters: Chapter[];
     subjects: Subject[];
     quizzes: any[];
-    addQuiz: (topicId: string, title: string, questions: any[]) => Promise<void>;
-    updateQuiz: (quizId: string, title: string, questions: any[]) => Promise<void>;
+    addQuiz: (topicId: string, title: string, questions: any[], price: number) => Promise<void>;
+    updateQuiz: (quizId: string, title: string, questions: any[], price: number) => Promise<void>;
     deleteQuiz: (quizId: string) => Promise<void>;
     addSubject: (title: string) => Promise<void>;
     deleteSubject: (id: string) => Promise<void>;
@@ -130,7 +130,7 @@ export const ContentProvider = ({ children }: { children: React.ReactNode }) => 
             // Fetch Quizzes
             const { data: quizzesData, error: quizzesError } = await supabase
                 .from('quizzes')
-                .select('id, topic_id, title, duration_minutes');
+                .select('id, topic_id, title, duration_minutes, price, created_at');
 
             if (quizzesError) console.error('Error fetching quizzes:', quizzesError); // Non-critical
             if (quizzesData) setQuizzes(quizzesData);
@@ -154,7 +154,8 @@ export const ContentProvider = ({ children }: { children: React.ReactNode }) => 
                                     id: m.id,
                                     title: m.title,
                                     type: m.type as 'pdf' | 'video',
-                                    url: m.url
+                                    url: m.url,
+                                    price: m.price || 0
                                 }))
                             };
                         })
@@ -169,7 +170,7 @@ export const ContentProvider = ({ children }: { children: React.ReactNode }) => 
         }
     };
 
-    const addQuiz = async (topicId: string, title: string, questions: any[]) => {
+    const addQuiz = async (topicId: string, title: string, questions: any[], price: number) => {
         const quizId = crypto.randomUUID();
 
         // 1. Create Quiz
@@ -177,7 +178,8 @@ export const ContentProvider = ({ children }: { children: React.ReactNode }) => 
             id: quizId,
             topic_id: topicId,
             title: title,
-            duration_minutes: 30 // Default
+            duration_minutes: 30, // Default
+            price: price
         }]);
 
         if (quizError) {
@@ -206,13 +208,13 @@ export const ContentProvider = ({ children }: { children: React.ReactNode }) => 
         }
 
         await fetchData(); // Refresh content
-        await fetchData(); // Refresh content
     };
 
-    const updateQuiz = async (quizId: string, title: string, questions: any[]) => {
-        // 1. Update Title
+    const updateQuiz = async (quizId: string, title: string, questions: any[], price: number) => {
+        // 1. Update Title and Price
         const { error: quizError } = await supabase.from('quizzes').update({
-            title: title
+            title: title,
+            price: price
         }).eq('id', quizId);
 
         if (quizError) {
@@ -277,10 +279,9 @@ export const ContentProvider = ({ children }: { children: React.ReactNode }) => 
         const { error } = await supabase.from('subjects').insert([{ id, title }]);
         if (error) {
             console.error('Error adding subject', error);
-            // Fallback for duplicates or RLS
             return;
         }
-        await fetchData(); // Refresh
+        await fetchData();
     };
 
     const deleteSubject = async (id: string) => {
@@ -304,7 +305,6 @@ export const ContentProvider = ({ children }: { children: React.ReactNode }) => 
 
     const addTopic = async (subjectId: string, chapterId: string, title: string) => {
         const id = crypto.randomUUID();
-        // Ignoring subjectId in DB as relation is via chapter
         const { error } = await supabase.from('topics').insert([{ id, chapter_id: chapterId, title }]);
         if (error) console.error(error);
         await fetchData();
@@ -316,6 +316,8 @@ export const ContentProvider = ({ children }: { children: React.ReactNode }) => 
         await fetchData();
     };
 
+    // ... (other methods unchanged)
+
     const addMaterial = async (subjectId: string, chapterId: string, topicId: string, material: Omit<Material, 'id'>) => {
         const id = crypto.randomUUID();
         const { error } = await supabase.from('materials').insert([{
@@ -323,7 +325,8 @@ export const ContentProvider = ({ children }: { children: React.ReactNode }) => 
             topic_id: topicId,
             title: material.title,
             type: material.type,
-            url: material.url
+            url: material.url,
+            price: material.price || 0
         }]);
         if (error) console.error(error);
         await fetchData();
