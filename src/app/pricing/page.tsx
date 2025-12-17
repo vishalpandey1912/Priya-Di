@@ -207,6 +207,10 @@ export default function PricingPage() {
                                     </Button>
                                     <Button
                                         onClick={() => {
+                                            if (!user) {
+                                                window.location.href = `/login?next=${window.location.pathname}`;
+                                                return;
+                                            }
                                             setSelectedPlan(plan);
                                             setIsModalOpen(true);
                                         }}

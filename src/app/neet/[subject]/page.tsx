@@ -108,7 +108,13 @@ export default function SubjectPage({
                         >
                             Add to Cart
                         </Button>
-                        <Button onClick={() => setSelectedProduct(product)} style={{ backgroundColor: '#FFC107', color: 'black' }}>
+                        <Button onClick={() => {
+                            if (!user) {
+                                window.location.href = `/login?next=${window.location.pathname}`;
+                                return;
+                            }
+                            setSelectedProduct(product);
+                        }} style={{ backgroundColor: '#FFC107', color: 'black' }}>
                             Buy Now
                         </Button>
                     </div>
@@ -158,7 +164,13 @@ export default function SubjectPage({
                                         </div>
                                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                                             {chapterProduct ? (
-                                                <Button size="sm" onClick={() => setSelectedProduct(chapterProduct)}>
+                                                <Button size="sm" onClick={() => {
+                                                    if (!user) {
+                                                        window.location.href = `/login?next=${window.location.pathname}`;
+                                                        return;
+                                                    }
+                                                    setSelectedProduct(chapterProduct);
+                                                }}>
                                                     Unlock ₹{chapterProduct.price}
                                                 </Button>
                                             ) : (
