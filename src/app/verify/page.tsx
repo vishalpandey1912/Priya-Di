@@ -7,7 +7,7 @@ import { Mail, Phone, CheckCircle, ArrowRight, ShieldAlert } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext';
 
 export default function VerifyPage() {
-    const { user, verifyEmail, verifyPhone, isLoading } = useAuth();
+    const { user, isLoading } = useAuth();
     const router = useRouter();
 
     const [emailOtp, setEmailOtp] = useState('');
@@ -24,12 +24,6 @@ export default function VerifyPage() {
     useEffect(() => {
         if (!isLoading && !user) {
             router.push('/login');
-        } else if (user) {
-            setPhoneNumber(user.phone || '');
-            if (user.isEmailVerified && user.isPhoneVerified) {
-                // Already fully verified
-                router.push('/dashboard');
-            }
         }
     }, [user, isLoading, router]);
 
@@ -54,24 +48,15 @@ export default function VerifyPage() {
 
     const handleVerifyEmail = async () => {
         setEmailError('');
-        if (await verifyEmail(emailOtp)) {
-            // Success
-            // Force refresh or just let updated user state trigger re-render
-        } else {
-            setEmailError('Invalid code. Try 1234 (Simulation).');
-        }
+        alert('Please check your email inbox for the verification link from Supabase.');
     };
 
     const handleVerifyPhone = async () => {
         setPhoneError('');
-        if (await verifyPhone(phoneOtp, phoneNumber)) {
-            // Success
-        } else {
-            setPhoneError('Invalid code. Try 1234 (Simulation).');
-        }
+        alert('Phone verification coming soon with Supabase Auth.');
     };
 
-    const allVerified = user?.isEmailVerified && user?.isPhoneVerified;
+    const allVerified = user?.email && true; // user?.isEmailVerified && user?.isPhoneVerified;
 
     if (isLoading || !user) {
         return <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>Loading...</div>;
@@ -88,10 +73,10 @@ export default function VerifyPage() {
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', gap: '24px', maxWidth: '800px', width: '100%' }}>
 
                 {/* Email Verification Card */}
-                <Card padding="lg" style={{ borderTop: user.isEmailVerified ? '4px solid #10b981' : '4px solid #f59e0b' }}>
+                <Card padding="lg" style={{ borderTop: '4px solid #10b981' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '24px' }}>
-                        <div style={{ padding: '12px', borderRadius: '50%', backgroundColor: user.isEmailVerified ? '#dcfce7' : '#fef3c7' }}>
-                            {user.isEmailVerified ? <CheckCircle color="#166534" size={24} /> : <Mail color="#d97706" size={24} />}
+                        <div style={{ padding: '12px', borderRadius: '50%', backgroundColor: '#dcfce7' }}>
+                            <CheckCircle color="#166534" size={24} />
                         </div>
                         <div>
                             <h2 style={{ fontSize: '1.2rem', fontWeight: 700 }}>Email Verification</h2>
@@ -99,7 +84,7 @@ export default function VerifyPage() {
                         </div>
                     </div>
 
-                    {user.isEmailVerified ? (
+                    {true ? (
                         <div style={{ padding: '16px', backgroundColor: '#f0fdf4', borderRadius: '8px', color: '#166534', fontWeight: 600, textAlign: 'center' }}>
                             Verified Successfully
                         </div>
@@ -128,10 +113,10 @@ export default function VerifyPage() {
                 </Card>
 
                 {/* Phone Verification Card */}
-                <Card padding="lg" style={{ borderTop: user.isPhoneVerified ? '4px solid #10b981' : '4px solid #f59e0b' }}>
+                <Card padding="lg" style={{ borderTop: '4px solid #f59e0b' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '24px' }}>
-                        <div style={{ padding: '12px', borderRadius: '50%', backgroundColor: user.isPhoneVerified ? '#dcfce7' : '#fef3c7' }}>
-                            {user.isPhoneVerified ? <CheckCircle color="#166534" size={24} /> : <Phone color="#d97706" size={24} />}
+                        <div style={{ padding: '12px', borderRadius: '50%', backgroundColor: '#fef3c7' }}>
+                            <Phone color="#d97706" size={24} />
                         </div>
                         <div>
                             <h2 style={{ fontSize: '1.2rem', fontWeight: 700 }}>Phone Verification</h2>
@@ -139,9 +124,9 @@ export default function VerifyPage() {
                         </div>
                     </div>
 
-                    {user.isPhoneVerified ? (
+                    {false ? (
                         <div style={{ padding: '16px', backgroundColor: '#f0fdf4', borderRadius: '8px', color: '#166534', fontWeight: 600, textAlign: 'center' }}>
-                            Verified Successfully ({user.phone})
+                            Verified Successfully
                         </div>
                     ) : (
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>

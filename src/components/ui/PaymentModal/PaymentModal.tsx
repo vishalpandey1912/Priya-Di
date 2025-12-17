@@ -49,15 +49,56 @@ export const PaymentModal = ({ isOpen, onClose, amount, planName, onSuccess }: P
     const handlePay = async () => {
         setStep('processing');
         setLoading(true);
-        // Simulate payment gateway delay
-        await new Promise(resolve => setTimeout(resolve, 2000));
-        setLoading(false);
-        setStep('success');
-        // Close after showing success for a moment
-        setTimeout(() => {
-            onSuccess();
-            setStep('details'); // Reset
-        }, 1500);
+
+        try {
+            // Simulate Payment Gateway
+            await new Promise(resolve => setTimeout(resolve, 2000));
+
+            const { data: { user } } = await import('@/lib/supabase').then(m => m.supabase.auth.getUser());
+
+            if (user) {
+                const { supabase } = await import('@/lib/supabase');
+
+                // 1. Create Order
+                const orderId = `ORD-${Math.floor(100000 + Math.random() * 900000)}`;
+                const { error: orderError } = await supabase.from('orders').insert({
+                    order_id: orderId,
+                    user_id: user.id,
+                    amount: finalAmount,
+                    plan_name: planName,
+                    status: 'Success',
+                    created_at: new Date().toISOString()
+                });
+
+                if (orderError) throw orderError;
+
+                // 2. Create Enrollment
+                // planName usually "Unlock: Material Title"
+                const cleanPlanName = planName.replace('Unlock: ', '').trim();
+                // We need the ID, but PaymentModal only gets planName. 
+                // Let's rely on callback or parent to handle enrollment?
+                // Parent `ChapterPage` knows the ID. 
+                // Let's keep `handlePaymentSuccess` in parent doing the heavy lifting?
+                // OR better: PaymentModal just handles payment record, Parent handles enrollment?
+                // Re-reading: ChapterPage handles 'hasItemAccess'.
+                // Ideally, PaymentModal should be pure.
+                // But we want to centralize logic.
+                // Let's stick to Parent Component handling success logic for content access.
+                // BUT PaymentModal MUST record the transaction in DB.
+            }
+
+            setLoading(false);
+            setStep('success');
+            setTimeout(() => {
+                onSuccess();
+                setStep('details');
+            }, 1500);
+
+        } catch (err) {
+            console.error('Payment Error:', err);
+            setLoading(false);
+            alert('Payment failed. Please try again.');
+        }
     };
 
     const modalContent = (

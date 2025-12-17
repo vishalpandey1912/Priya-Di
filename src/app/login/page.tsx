@@ -10,18 +10,8 @@ import { useAuth } from '@/context/AuthContext';
 
 export default function LoginPage() {
     const router = useRouter();
-    const { login, googleLogin } = useAuth();
-    // ...
-    // ... (lines 88-90 replacement)
-    <Button
-        variant="outline"
-        className={styles.fullWidth}
-        style={{ width: '100%' }}
-        onClick={() => googleLogin()}
-        type="button"
-    >
-        Continue with Google
-    </Button>
+    const { login } = useAuth();
+
     const [isLoading, setIsLoading] = useState(false);
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -33,23 +23,19 @@ export default function LoginPage() {
         setError('');
 
         try {
-            const success = await login(email, password);
-            if (success) {
-                // Check if the user is an admin after successful login
-                // We need to fetch the user again or check the email/logic used in context. 
-                // Since login updates the context state, we might hit a race condition if we check 'user' immediately from useAuth hook data as it might not be updated in this render cycle.
-                // However, we know the credentials here.
+            await login(email, password);
 
-                if (email === 'admin@desi.com') {
-                    router.push('/admin/dashboard');
-                } else {
-                    router.push('/dashboard');
-                }
+            // Check if the user is an admin after successful login
+            // Note: In real app, we should check claim or profile.
+            // For now, based on email assumption or just redirect to dashboard
+
+            if (email === 'vishal.pandey1912@gmail.com') {
+                router.push('/admin/dashboard');
             } else {
-                setError('Invalid email or password');
+                router.push('/dashboard');
             }
-        } catch (err) {
-            setError('Something went wrong');
+        } catch (err: any) {
+            setError(err.message || 'Invalid email or password');
         } finally {
             setIsLoading(false);
         }
@@ -100,7 +86,7 @@ export default function LoginPage() {
                     variant="outline"
                     className={styles.fullWidth}
                     style={{ width: '100%' }}
-                    onClick={() => googleLogin()}
+                    onClick={() => alert('Google Login coming soon!')}
                     type="button"
                 >
                     Continue with Google

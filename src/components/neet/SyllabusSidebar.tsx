@@ -8,19 +8,12 @@ import styles from './SyllabusSidebar.module.css';
 import { useContent } from '@/context/ContentContext';
 
 export const SyllabusSidebar = () => {
-    const { chapters } = useContent();
+    const { chapters, subjects } = useContent();
     const [expandedSubject, setExpandedSubject] = useState<string | null>('biology');
 
     const toggleSubject = (subjectId: string) => {
         setExpandedSubject(expandedSubject === subjectId ? null : subjectId);
     };
-
-    // Group chapters by subject
-    const subjects = [
-        { id: 'biology', name: 'Biology' },
-        { id: 'physics', name: 'Physics' },
-        { id: 'chemistry', name: 'Chemistry' }
-    ];
 
     return (
         <aside className={styles.sidebar}>
@@ -38,7 +31,7 @@ export const SyllabusSidebar = () => {
                                 className={styles.subjectHeader}
                                 onClick={() => toggleSubject(subject.id)}
                             >
-                                <span>{subject.name}</span>
+                                <span style={{ textTransform: 'capitalize' }}>{subject.title}</span>
                                 {expandedSubject === subject.id ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
                             </button>
 

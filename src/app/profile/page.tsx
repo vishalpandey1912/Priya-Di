@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { Card, Button, Input } from '@/components/ui';
 import { User, Mail, Save, UserCircle, BookOpen, ShoppingBag, LayoutDashboard, Clock, ShieldCheck, ChevronRight } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
+import { supabase } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { INDIAN_STATES, CITIES_BY_STATE } from '@/data/locations';
@@ -16,7 +17,7 @@ const MONTHS = [
 const YEARS = Array.from({ length: 60 }, (_, i) => (2025 - i).toString()); // 2025 down to 1966
 
 export default function ProfilePage() {
-    const { user, updateUser, isLoading } = useAuth();
+    const { user, isLoading } = useAuth();
     const router = useRouter();
 
     const [activeTab, setActiveTab] = useState('overview');
@@ -58,51 +59,81 @@ export default function ProfilePage() {
         if (!isLoading && !user) {
             router.push('/login');
         } else if (user) {
-            setName(user.name);
-            setEmail(user.email);
+            // Fetch Profile Data from Supabase
+            const fetchProfile = async () => {
+                try {
+                    // Fetch profile
+                    const { data: profile, error } = await supabase
+                        .from('profiles')
+                        .select('*')
+                        .eq('id', user.id)
+                        .single();
 
-            // Load extended details
-            const savedDetails = JSON.parse(localStorage.getItem(`user_details_${user.email}`) || '{}');
-            setTargetExam(savedDetails.targetExam || 'Select Exam');
-            setCurrentClass(savedDetails.currentClass || 'Select Class');
-            setPhone(savedDetails.phone || '');
-            setPhone(savedDetails.phone || '');
-            if (savedDetails.dob) {
-                const [y, m, d] = savedDetails.dob.split('-');
-                setDobYear(y || '');
-                setDobMonth(m ? MONTHS[parseInt(m) - 1] : '');
-                setDobDay(d ? parseInt(d).toString() : '');
-            } else {
-                setDobYear('');
-                setDobMonth('');
-                setDobDay('');
-            }
-            setState(savedDetails.state || '');
-            setCity(savedDetails.city || '');
+                    if (profile) {
+                        setName(profile.name || user.name);
+                        setEmail(profile.email || user.email);
+                        setPhone(profile.phone || '');
+                        setTargetExam(profile.target_exam || 'Select Exam');
+                        setCurrentClass(profile.current_class || 'Select Class');
+                        setState(profile.state || '');
+                        setCity(profile.city || '');
 
-            // Fetch Orders
-            const allOrders = JSON.parse(localStorage.getItem('orders') || '[]');
-            setOrders(allOrders.filter((o: any) => o.user === user.name));
+                        if (profile.dob) {
+                            const [y, m, d] = profile.dob.split('-');
+                            setDobYear(y || '');
+                            setDobMonth(m ? MONTHS[parseInt(m) - 1] : '');
+                            setDobDay(d ? parseInt(d).toString() : '');
+                        }
+                    } else {
+                        // Fallback if no profile yet (should exist due to trigger, but just in case)
+                        setName(user.name);
+                        setEmail(user.email);
+                    }
 
-            // Determine Courses (User Scoped)
-            const courses = [];
-            const email = user.email;
-            const hasBundle = localStorage.getItem(`access_full_bundle_${email}`);
+                    // Fetch Orders
+                    const { data: userOrders } = await supabase
+                        .from('orders')
+                        .select('*')
+                        .eq('user_id', user.id)
+                        .order('created_at', { ascending: false });
 
-            if (hasBundle) {
-                courses.push({ name: 'NEET 2026 Full Course', progress: 0, subject: 'Bundle' });
-            } else {
-                if (localStorage.getItem(`access_physics_${email}`)) courses.push({ name: 'Physics Mastery', progress: 0, subject: 'Physics' });
-                if (localStorage.getItem(`access_chemistry_${email}`)) courses.push({ name: 'Chemistry Essentials', progress: 0, subject: 'Chemistry' });
-                if (localStorage.getItem(`access_biology_${email}`)) courses.push({ name: 'Biology Deep Dive', progress: 0, subject: 'Biology' });
-            }
+                    if (userOrders) {
+                        setOrders(userOrders.map(o => ({
+                            id: o.order_id,
+                            date: new Date(o.created_at).toLocaleDateString(),
+                            plan: o.plan_name,
+                            amount: `₹${o.amount}`,
+                            status: o.status
+                        })));
+                    }
 
-            // Test Series is separate (not included in default bundle targetIds, so check independently)
-            if (localStorage.getItem(`access_test_series_${email}`)) {
-                courses.push({ name: 'All India Test Series', progress: 0, subject: 'Test Series' });
-            }
+                    // Fetch Enrollments (Courses)
+                    const { data: enrollments } = await supabase
+                        .from('enrollments')
+                        .select('target_id')
+                        .eq('user_id', user.id);
 
-            setMyCourses(courses);
+                    const courses = [];
+                    const targets = enrollments ? enrollments.map(e => e.target_id) : [];
+
+                    if (targets.includes('full_bundle')) {
+                        courses.push({ name: 'NEET 2026 Full Course', progress: 0, subject: 'Bundle' });
+                    } else {
+                        if (targets.includes('physics')) courses.push({ name: 'Physics Mastery', progress: 0, subject: 'Physics' });
+                        if (targets.includes('chemistry')) courses.push({ name: 'Chemistry Essentials', progress: 0, subject: 'Chemistry' });
+                        if (targets.includes('biology')) courses.push({ name: 'Biology Deep Dive', progress: 0, subject: 'Biology' });
+                    }
+                    if (targets.includes('test_series')) {
+                        courses.push({ name: 'All India Test Series', progress: 0, subject: 'Test Series' });
+                    }
+                    setMyCourses(courses);
+
+                } catch (err) {
+                    console.error('Error loading profile:', err);
+                }
+            };
+
+            fetchProfile();
         }
     }, [user, isLoading, router]);
 
@@ -112,21 +143,37 @@ export default function ProfilePage() {
         setCity(''); // Reset city when state changes
     };
 
-    const handleSave = (e: React.FormEvent) => {
+    const handleSave = async (e: React.FormEvent) => {
         e.preventDefault();
-        updateUser(name, email);
 
-        // Persist extended details
+        // Prepare DOB
         const formattedMonth = (MONTHS.indexOf(dobMonth) + 1).toString().padStart(2, '0');
         const formattedDay = dobDay.padStart(2, '0');
-        const dob = (dobYear && dobMonth && dobDay) ? `${dobYear}-${formattedMonth}-${formattedDay}` : '';
+        const dob = (dobYear && dobMonth && dobDay) ? `${dobYear}-${formattedMonth}-${formattedDay}` : null;
 
-        const details = { targetExam, currentClass, phone, dob, state, city };
-        localStorage.setItem(`user_details_${user?.email}`, JSON.stringify(details));
+        try {
+            const { error } = await supabase
+                .from('profiles')
+                .update({
+                    name,
+                    target_exam: targetExam,
+                    current_class: currentClass,
+                    state,
+                    city,
+                    dob,
+                    updated_at: new Date().toISOString()
+                })
+                .eq('id', user?.id);
 
-        setIsEditing(false);
-        setSuccessMsg('Profile updated successfully!');
-        setTimeout(() => setSuccessMsg(''), 3000);
+            if (error) throw error;
+
+            setIsEditing(false);
+            setSuccessMsg('Profile updated successfully!');
+            setTimeout(() => setSuccessMsg(''), 3000);
+        } catch (err) {
+            console.error('Error updating profile:', err);
+            alert('Failed to update profile. Please try again.');
+        }
     };
 
 

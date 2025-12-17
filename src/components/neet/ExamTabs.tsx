@@ -17,7 +17,7 @@ const tabs = [
 export const ExamTabs = () => {
     const [activeTab, setActiveTab] = useState('notes');
 
-    const { chapters } = useContent();
+    const { chapters, quizzes } = useContent();
 
     // Get recent 3 chapters with materials
     const recentNotes = chapters
@@ -64,7 +64,29 @@ export const ExamTabs = () => {
                         </Link>
                     </div>
                 )}
-                {activeTab === 'tests' && <div>No active tests currently.</div>}
+                {activeTab === 'tests' && (
+                    <div className={styles.grid}>
+                        <h3>Available Mock Tests</h3>
+                        {quizzes && quizzes.length > 0 ? (
+                            quizzes.map(quiz => (
+                                <Link
+                                    key={quiz.id}
+                                    href={`/quiz/${quiz.id}`}
+                                    className={styles.placeholderItem}
+                                    style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}
+                                >
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                        <HelpCircle size={18} color="var(--primary-color)" />
+                                        <span>{quiz.title || 'Untitled Quiz'}</span>
+                                    </div>
+                                    <span style={{ fontSize: '0.8rem', color: '#64748b' }}>Start Test &rarr;</span>
+                                </Link>
+                            ))
+                        ) : (
+                            <p>No active tests currently.</p>
+                        )}
+                    </div>
+                )}
                 {activeTab === 'doubts' && <div>Join the discussion forum.</div>}
             </Card>
         </div>

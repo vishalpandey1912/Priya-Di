@@ -2,34 +2,91 @@
 
 import React from 'react';
 import { usePathname, useRouter } from 'next/navigation';
-import { useAuth } from '@/context/AuthContext';
+import { supabase } from '@/lib/supabase';
 import { AdminSidebar } from '@/components/admin/AdminSidebar';
 import styles from './AdminLayout.module.css';
 import { Menu } from 'lucide-react';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
     const pathname = usePathname();
-    const { user, isLoading } = useAuth();
     const router = useRouter();
     const [isSidebarOpen, setIsSidebarOpen] = React.useState(false);
+    const [isLoading, setIsLoading] = React.useState(true);
+    const [isAuthenticated, setIsAuthenticated] = React.useState(false);
+
+
+    // Protect Admin Routes with Supabase
+    React.useEffect(() => {
+        const checkAuth = async () => {
+            try {
+                // Add a timeout to prevent infinite loading
+                const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject('Timeout'), 5000));
+                const authPromise = supabase.auth.getSession();
+
+                const { data: { session }, error } = await Promise.race([authPromise, timeoutPromise]) as any;
+
+                if (error) throw error;
+
+                console.log('AdminLayout: Checking session', { session });
+
+                if (!session) {
+                    if (pathname !== '/admin/login') {
+                        console.log('AdminLayout: No session, redirecting to login');
+                        router.push('/admin/login');
+                    } else {
+                        setIsLoading(false); // Validly on login page
+                    }
+                } else {
+                    console.log('AdminLayout: Session found, authenticating');
+                    setIsAuthenticated(true);
+                    if (pathname === '/admin/login') {
+                        console.log('AdminLayout: Already logged in, redirecting to dashboard');
+                        router.push('/admin/content');
+                    }
+                }
+            } catch (error) {
+                console.error('Auth check failed or timed out', error);
+                if (pathname !== '/admin/login') {
+                    router.push('/admin/login');
+                } else {
+                    setIsLoading(false);
+                }
+            } finally {
+                if (pathname !== '/admin/login') {
+                    setIsLoading(false);
+                }
+            }
+        };
+
+        checkAuth();
+
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+            console.log('AdminLayout: Auth state change', event, session);
+            if (event === 'SIGNED_OUT') {
+                setIsAuthenticated(false);
+                router.push('/admin/login');
+            } else if (session) {
+                setIsAuthenticated(true);
+                if (pathname === '/admin/login') {
+                    router.push('/admin/content');
+                }
+            }
+        });
+
+        return () => {
+            subscription.unsubscribe();
+        };
+    }, [pathname, router]);
 
     // If on login page, render full screen without sidebar
     if (pathname === '/admin/login') {
+        // If we are authenticated, we are likely redirecting, but render children briefly
         return <>{children}</>;
     }
 
-    // Protect Admin Routes
-    React.useEffect(() => {
-        if (!isLoading) {
-            if (!user || user.role !== 'admin') {
-                router.push('/admin/login');
-            }
-        }
-    }, [user, isLoading, router]);
+    if (isLoading) return <div style={{ display: 'flex', height: '100vh', alignItems: 'center', justifyContent: 'center' }}>Loading Admin...</div>;
 
-    if (isLoading) return <div>Loading Admin...</div>;
-
-    if (!user || user.role !== 'admin') return null;
+    if (!isAuthenticated) return null;
 
     return (
         <div className={styles.container}>
@@ -45,7 +102,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                         border: 'none',
                         background: 'none',
                         cursor: 'pointer',
-                        display: 'flex',
+                        // display: 'flex' handled by CSS class .mobileToggle
                         alignItems: 'center',
                         gap: '8px',
                         fontWeight: 600,

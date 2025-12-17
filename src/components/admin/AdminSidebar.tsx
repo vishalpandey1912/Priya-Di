@@ -13,7 +13,8 @@ import {
     DollarSign
 } from 'lucide-react';
 import styles from './AdminSidebar.module.css';
-import { useAuth } from '@/context/AuthContext';
+import { useRouter } from 'next/navigation';
+import { supabase } from '@/lib/supabase';
 
 interface AdminSidebarProps {
     isOpen?: boolean;
@@ -22,7 +23,12 @@ interface AdminSidebarProps {
 
 export const AdminSidebar = ({ isOpen = false, onClose }: AdminSidebarProps) => {
     const pathname = usePathname();
-    const { logout } = useAuth();
+    const router = useRouter();
+
+    const handleLogout = async () => {
+        await supabase.auth.signOut();
+        router.push('/admin/login');
+    };
 
     const links = [
         { name: 'Dashboard', href: '/admin/dashboard', icon: <LayoutDashboard size={20} /> },
@@ -61,7 +67,7 @@ export const AdminSidebar = ({ isOpen = false, onClose }: AdminSidebarProps) => 
                 </nav>
 
                 <div className={styles.footer}>
-                    <button onClick={logout} className={styles.logoutBtn}>
+                    <button onClick={handleLogout} className={styles.logoutBtn}>
                         <LogOut size={20} />
                         <span>Logout</span>
                     </button>

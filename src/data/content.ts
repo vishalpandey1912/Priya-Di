@@ -1,6 +1,6 @@
 export interface Material {
     id: string;
-    type: 'pdf' | 'video' | 'test';
+    type: 'pdf' | 'video' | 'test' | 'image' | 'document';
     title: string;
     url?: string; // In real app this would be link to storage
     duration?: string; // For videos

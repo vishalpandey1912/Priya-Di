@@ -1,172 +1,378 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { contentData as initialContent, Chapter, Topic, Material } from '@/data/content';
+import { supabase } from '@/lib/supabase';
+// Retaining types for existing UI compatibility
+import { Chapter, Topic, Material } from '@/data/content';
+export type { Chapter, Topic, Material };
+
+export interface Subject {
+    id: string;
+    title: string;
+}
 
 interface ContentContextType {
     chapters: Chapter[];
-    addChapter: (subjectId: string, title: string) => void;
-    deleteChapter: (chapterId: string) => void;
-    addTopic: (subjectId: string, chapterId: string, title: string) => void;
-    addMaterial: (subjectId: string, chapterId: string, topicId: string, material: Omit<Material, 'id'>) => void;
-    updateMaterial: (subjectId: string, chapterId: string, topicId: string, materialId: string, updates: Partial<Material>) => void;
-    deleteMaterial: (subjectId: string, chapterId: string, topicId: string, materialId: string) => void;
+    subjects: Subject[];
+    quizzes: any[];
+    addQuiz: (topicId: string, title: string, questions: any[]) => Promise<void>;
+    updateQuiz: (quizId: string, title: string, questions: any[]) => Promise<void>;
+    deleteQuiz: (quizId: string) => Promise<void>;
+    addSubject: (title: string) => Promise<void>;
+    deleteSubject: (id: string) => Promise<void>;
+    addChapter: (subjectId: string, title: string) => Promise<void>;
+    deleteChapter: (chapterId: string) => Promise<void>;
+    addTopic: (subjectId: string, chapterId: string, title: string) => Promise<void>;
+    deleteTopic: (subjectId: string, chapterId: string, topicId: string) => Promise<void>;
+    addMaterial: (subjectId: string, chapterId: string, topicId: string, material: Omit<Material, 'id'>) => Promise<void>;
+    updateMaterial: (subjectId: string, chapterId: string, topicId: string, materialId: string, updates: Partial<Material>) => Promise<void>;
+    deleteMaterial: (subjectId: string, chapterId: string, topicId: string, materialId: string) => Promise<void>;
+    uploadFile: (file: File) => Promise<string | null>;
     getChaptersBySubject: (subjectId: string) => Chapter[];
     getChapterById: (subjectId: string, chapterId: string) => Chapter | undefined;
+    userProgress: Record<string, boolean>;
+    toggleProgress: (materialId: string, isCompleted: boolean) => Promise<void>;
+    isLoading: boolean;
 }
 
 const ContentContext = createContext<ContentContextType | undefined>(undefined);
 
 export const ContentProvider = ({ children }: { children: React.ReactNode }) => {
-    const [chapters, setChapters] = useState<Chapter[]>(initialContent);
-    const [isLoaded, setIsLoaded] = useState(false);
+    const [chapters, setChapters] = useState<Chapter[]>([]);
+    const [subjects, setSubjects] = useState<Subject[]>([]);
+    const [quizzes, setQuizzes] = useState<any[]>([]); // Metadata only
+    const [isLoading, setIsLoading] = useState(true);
 
-    // Load from local storage on mount
+    const [userProgress, setUserProgress] = useState<Record<string, boolean>>({});
+
+    // Fetch Initial Data
     useEffect(() => {
-        const savedContent = localStorage.getItem('siteContent');
-        if (savedContent) {
-            try {
-                const parsed: Chapter[] = JSON.parse(savedContent);
-                // MIGRATION FIX: Detect old non-unique IDs (e.g. '1', '2') 
-                // AND detect if 'bio-1' (The Living World) is missing its default content due to stale state.
-                const hasLegacyIds = parsed.some(c => c.id === '1' || c.id === '2');
-                const isBio1Stale = parsed.some(c => c.id === 'bio-1' && c.topics.find(t => t.id === 'bio-1-t1')?.materials.length === 0);
-
-                if (hasLegacyIds || isBio1Stale) {
-                    console.log("Legacy or stale content detected. Resetting to defaults.");
-                    // We merge defaults? Or just reset? 
-                    // To be safe for this user's issue: RESET. 
-                    // They want the default content to show up.
-                    setChapters(initialContent);
-                    localStorage.setItem('siteContent', JSON.stringify(initialContent));
-                } else {
-                    setChapters(parsed);
-                }
-            } catch (e) {
-                console.error("Failed to parse saved content", e);
-                setChapters(initialContent); // Fallback
-            }
-        } else {
-            // First load
-            setChapters(initialContent);
-        }
-        setIsLoaded(true);
+        fetchData();
+        fetchUserProgress();
     }, []);
 
-    // Save to local storage whenever chapters change
-    useEffect(() => {
-        if (isLoaded) {
-            localStorage.setItem('siteContent', JSON.stringify(chapters));
+    // Fetch User Progress
+    const fetchUserProgress = async () => {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+            const { data, error } = await supabase
+                .from('user_progress')
+                .select('material_id, is_completed')
+                .eq('user_id', user.id);
+
+            if (data) {
+                const progressMap: Record<string, boolean> = {};
+                data.forEach((p: any) => {
+                    progressMap[p.material_id] = p.is_completed;
+                });
+                setUserProgress(progressMap);
+            }
         }
-    }, [chapters, isLoaded]);
-
-    const addChapter = (subjectId: string, title: string) => {
-        const newChapter: Chapter = {
-            id: Date.now().toString(), // Simple ID generation
-            subjectId: subjectId.toLowerCase(),
-            title,
-            topics: []
-        };
-        setChapters(prev => [...prev, newChapter]);
     };
 
-    const addTopic = (subjectId: string, chapterId: string, title: string) => {
-        setChapters(prev => prev.map(c => {
-            if (c.id === chapterId && c.subjectId === subjectId) {
-                return {
-                    ...c,
-                    topics: [...c.topics, { id: Date.now().toString(), title, materials: [] }]
-                };
-            }
-            return c;
-        }));
+    const toggleProgress = async (materialId: string, isCompleted: boolean) => {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return;
+
+        // Optimistic Update
+        setUserProgress(prev => ({ ...prev, [materialId]: isCompleted }));
+
+        const { error } = await supabase
+            .from('user_progress')
+            .upsert({
+                user_id: user.id,
+                material_id: materialId,
+                is_completed: isCompleted,
+                updated_at: new Date().toISOString()
+            }, { onConflict: 'user_id, material_id' });
+
+        if (error) {
+            console.error('Error updating progress:', error);
+            // Revert on error?
+        }
     };
 
-    const addMaterial = (subjectId: string, chapterId: string, topicId: string, material: Omit<Material, 'id'>) => {
-        setChapters(prev => prev.map(c => {
-            if (c.id === chapterId && c.subjectId === subjectId) {
-                return {
-                    ...c,
-                    topics: c.topics.map(t => {
-                        if (t.id === topicId) {
+    const fetchData = async () => {
+        setIsLoading(true);
+        try {
+            // Fetch Subjects
+            const { data: subjectsData, error: subjectsError } = await supabase
+                .from('subjects')
+                .select('*')
+                .order('created_at', { ascending: true });
+
+            if (subjectsError) throw subjectsError;
+
+            // Fetch Chapters
+            const { data: chaptersData, error: chaptersError } = await supabase
+                .from('chapters')
+                .select('*')
+                .order('created_at', { ascending: true });
+
+            if (chaptersError) throw chaptersError;
+
+            // Fetch Topics
+            const { data: topicsData, error: topicsError } = await supabase
+                .from('topics')
+                .select('*')
+                .order('created_at', { ascending: true });
+
+            if (topicsError) throw topicsError;
+
+            // Fetch Materials
+            const { data: materialsData, error: materialsError } = await supabase
+                .from('materials')
+                .select('*')
+                .order('created_at', { ascending: true });
+
+            if (materialsError) throw materialsError;
+
+            // Fetch Quizzes
+            const { data: quizzesData, error: quizzesError } = await supabase
+                .from('quizzes')
+                .select('id, topic_id, title, duration_minutes');
+
+            if (quizzesError) console.error('Error fetching quizzes:', quizzesError); // Non-critical
+            if (quizzesData) setQuizzes(quizzesData);
+
+            // Reconstruct nested structure
+            if (subjectsData) setSubjects(subjectsData);
+
+            if (chaptersData) {
+                const nestedChapters = chaptersData.map(c => {
+                    const cTopics = topicsData?.filter(t => t.chapter_id === c.id) || [];
+                    return {
+                        id: c.id,
+                        subjectId: c.subject_id,
+                        title: c.title,
+                        topics: cTopics.map(t => {
+                            const tMaterials = materialsData?.filter(m => m.topic_id === t.id) || [];
                             return {
-                                ...t,
-                                materials: [...t.materials, { ...material, id: Date.now().toString() }]
+                                id: t.id,
+                                title: t.title,
+                                materials: tMaterials.map(m => ({
+                                    id: m.id,
+                                    title: m.title,
+                                    type: m.type as 'pdf' | 'video',
+                                    url: m.url
+                                }))
                             };
-                        }
-                        return t;
-                    })
-                };
+                        })
+                    };
+                });
+                setChapters(nestedChapters);
             }
-            return c;
-        }));
+        } catch (error) {
+            console.error('Error fetching content:', error);
+        } finally {
+            setIsLoading(false);
+        }
     };
 
-    const updateMaterial = (subjectId: string, chapterId: string, topicId: string, materialId: string, updates: Partial<Material>) => {
-        setChapters(prev => prev.map(c => {
-            if (c.id === chapterId && c.subjectId === subjectId) {
-                return {
-                    ...c,
-                    topics: c.topics.map(t => {
-                        if (t.id === topicId) {
-                            return {
-                                ...t,
-                                materials: t.materials.map(m =>
-                                    m.id === materialId ? { ...m, ...updates } : m
-                                )
-                            };
-                        }
-                        return t;
-                    })
-                };
+    const addQuiz = async (topicId: string, title: string, questions: any[]) => {
+        const quizId = crypto.randomUUID();
+
+        // 1. Create Quiz
+        const { error: quizError } = await supabase.from('quizzes').insert([{
+            id: quizId,
+            topic_id: topicId,
+            title: title,
+            duration_minutes: 30 // Default
+        }]);
+
+        if (quizError) {
+            console.error('Error creating quiz:', quizError);
+            return;
+        }
+
+        // 2. Add Questions
+        if (questions && questions.length > 0) {
+            const formattedQuestions = questions.map(q => ({
+                id: crypto.randomUUID(),
+                quiz_id: quizId,
+                question_text: q.questionText,
+                options: q.options,
+                correct_option: q.correctOption,
+                marks: 4
+            }));
+
+            const { error: questionsError } = await supabase
+                .from('quiz_questions')
+                .insert(formattedQuestions);
+
+            if (questionsError) {
+                console.error('Error adding questions:', questionsError);
             }
-            return c;
-        }));
+        }
+
+        await fetchData(); // Refresh content
+        await fetchData(); // Refresh content
     };
 
-    const deleteMaterial = (subjectId: string, chapterId: string, topicId: string, materialId: string) => {
-        setChapters(prev => prev.map(c => {
-            if (c.id === chapterId && c.subjectId === subjectId) {
-                return {
-                    ...c,
-                    topics: c.topics.map(t => {
-                        if (t.id === topicId) {
-                            return {
-                                ...t,
-                                materials: t.materials.filter(m => m.id !== materialId)
-                            };
-                        }
-                        return t;
-                    })
-                };
-            }
-            return c;
-        }));
+    const updateQuiz = async (quizId: string, title: string, questions: any[]) => {
+        // 1. Update Title
+        const { error: quizError } = await supabase.from('quizzes').update({
+            title: title
+        }).eq('id', quizId);
+
+        if (quizError) {
+            console.error('Error updating quiz:', quizError);
+            return;
+        }
+
+        // 2. Replace Questions (Delete All + Insert New)
+        // Note: This loses question history if tracking per-question analytics, but fine for now.
+        await supabase.from('quiz_questions').delete().eq('quiz_id', quizId);
+
+        if (questions && questions.length > 0) {
+            const formattedQuestions = questions.map(q => ({
+                id: crypto.randomUUID(),
+                quiz_id: quizId,
+                question_text: q.questionText,
+                options: q.options,
+                correct_option: q.correctOption,
+                marks: 4
+            }));
+
+            await supabase.from('quiz_questions').insert(formattedQuestions);
+        }
+
+        await fetchData();
     };
 
-    const deleteChapter = (chapterId: string) => {
-        setChapters(prev => prev.filter(c => c.id !== chapterId));
+    const deleteQuiz = async (quizId: string) => {
+        const { error } = await supabase.from('quizzes').delete().eq('id', quizId);
+        if (error) console.error('Error deleting quiz:', error);
+        await fetchData();
     };
+
+    const uploadFile = async (file: File): Promise<string | null> => {
+        try {
+            const fileExt = file.name.split('.').pop();
+            const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+            const filePath = `uploads/${fileName}`;
+
+            const { error: uploadError } = await supabase.storage
+                .from('course-materials')
+                .upload(filePath, file);
+
+            if (uploadError) {
+                console.error('Error uploading file:', uploadError);
+                return null;
+            }
+
+            const { data: { publicUrl } } = supabase.storage
+                .from('course-materials')
+                .getPublicUrl(filePath);
+
+            return publicUrl;
+        } catch (error) {
+            console.error('Error in uploadFile:', error);
+            return null;
+        }
+    };
+
+    const addSubject = async (title: string) => {
+        const id = title.toLowerCase().replace(/\s+/g, '-');
+        const { error } = await supabase.from('subjects').insert([{ id, title }]);
+        if (error) {
+            console.error('Error adding subject', error);
+            // Fallback for duplicates or RLS
+            return;
+        }
+        await fetchData(); // Refresh
+    };
+
+    const deleteSubject = async (id: string) => {
+        const { error } = await supabase.from('subjects').delete().eq('id', id);
+        if (error) console.error(error);
+        await fetchData();
+    };
+
+    const addChapter = async (subjectId: string, title: string) => {
+        const id = crypto.randomUUID();
+        const { error } = await supabase.from('chapters').insert([{ id, subject_id: subjectId, title }]);
+        if (error) console.error(error);
+        await fetchData();
+    };
+
+    const deleteChapter = async (chapterId: string) => {
+        const { error } = await supabase.from('chapters').delete().eq('id', chapterId);
+        if (error) console.error(error);
+        await fetchData();
+    };
+
+    const addTopic = async (subjectId: string, chapterId: string, title: string) => {
+        const id = crypto.randomUUID();
+        // Ignoring subjectId in DB as relation is via chapter
+        const { error } = await supabase.from('topics').insert([{ id, chapter_id: chapterId, title }]);
+        if (error) console.error(error);
+        await fetchData();
+    };
+
+    const deleteTopic = async (subjectId: string, chapterId: string, topicId: string) => {
+        const { error } = await supabase.from('topics').delete().eq('id', topicId);
+        if (error) console.error(error);
+        await fetchData();
+    };
+
+    const addMaterial = async (subjectId: string, chapterId: string, topicId: string, material: Omit<Material, 'id'>) => {
+        const id = crypto.randomUUID();
+        const { error } = await supabase.from('materials').insert([{
+            id,
+            topic_id: topicId,
+            title: material.title,
+            type: material.type,
+            url: material.url
+        }]);
+        if (error) console.error(error);
+        await fetchData();
+    };
+
+    const updateMaterial = async (subjectId: string, chapterId: string, topicId: string, materialId: string, updates: Partial<Material>) => {
+        const { error } = await supabase.from('materials').update(updates).eq('id', materialId);
+        if (error) console.error(error);
+        await fetchData();
+    };
+
+    const deleteMaterial = async (subjectId: string, chapterId: string, topicId: string, materialId: string) => {
+        const { error } = await supabase.from('materials').delete().eq('id', materialId);
+        if (error) console.error(error);
+        await fetchData();
+    };
+
 
     const getChaptersBySubject = (subjectId: string) => {
-        return chapters.filter(c => c.subjectId === subjectId.toLowerCase());
+        return chapters.filter(c => c.subjectId === subjectId);
     };
 
     const getChapterById = (subjectId: string, chapterId: string) => {
-        return chapters.find(c => c.subjectId === subjectId.toLowerCase() && c.id === chapterId);
+        return chapters.find(c => c.subjectId === subjectId && c.id === chapterId);
     };
 
     return (
         <ContentContext.Provider value={{
             chapters,
+            subjects,
+            quizzes,
+            userProgress,
+            toggleProgress,
+            addQuiz,
+            updateQuiz,
+            deleteQuiz,
+            addSubject,
+            deleteSubject,
             addChapter,
             deleteChapter,
             addTopic,
+            deleteTopic,
             addMaterial,
             updateMaterial,
             deleteMaterial,
+            uploadFile,
             getChaptersBySubject,
-            getChapterById
+            getChapterById,
+            isLoading
         }}>
             {children}
         </ContentContext.Provider>

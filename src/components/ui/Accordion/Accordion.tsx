@@ -5,7 +5,7 @@ import { ChevronDown, ChevronUp } from 'lucide-react';
 import styles from './Accordion.module.css';
 
 interface AccordionItemProps {
-    title: string;
+    title: React.ReactNode;
     children: React.ReactNode;
     defaultOpen?: boolean;
 }

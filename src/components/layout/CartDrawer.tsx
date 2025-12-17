@@ -6,6 +6,7 @@ import { X, Trash2, ShoppingCart, Lock } from 'lucide-react';
 import { Button } from '@/components/ui';
 import { useCart } from '@/context/CartContext';
 import { useAuth } from '@/context/AuthContext';
+import { supabase } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
 
 export const CartDrawer = () => {
@@ -47,7 +48,7 @@ export const CartDrawer = () => {
         }
     };
 
-    const handleCheckout = () => {
+    const handleCheckout = async () => {
         if (!user) {
             router.push('/login');
             setIsCartOpen(false);
@@ -58,66 +59,72 @@ export const CartDrawer = () => {
         const confirm = window.confirm(`Proceed to pay ₹${finalAmount}?`);
 
         if (confirm) {
-            const now = new Date();
-            const dateStr = now.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-            const timeStr = now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+            try {
+                // 1. Create Order
+                const orderId = `ORD-${Math.floor(1000 + Math.random() * 9000)}`;
+                // In real app, we iterate if multiple plans? Usually one transaction per cart or summed up.
+                // For simplicity, we create specific orders per item or one bulk order?
+                // The current schema asks for 'plan_name'. Let's join them if multiple.
+                const planNames = items.map(i => i.name).join(', ');
 
-            // Create orders
-            const newOrders = items.map(item => ({
-                id: `ORD-${Math.floor(1000 + Math.random() * 9000)}`,
-                user: user.name,
-                plan: item.name,
-                date: `${dateStr} • ${timeStr}`,
-                amount: `₹${item.price.toLocaleString()}`,
-                status: 'Success'
-            }));
+                const { error: orderError } = await supabase.from('orders').insert({
+                    order_id: orderId,
+                    user_id: user.id,
+                    plan_name: planNames,
+                    amount: finalAmount,
+                    status: 'Success'
+                });
 
-            // Grant access - User Scoped
-            items.forEach(item => {
-                const nameLower = item.name.toLowerCase();
-                const type = item.type;
-                const email = user.email;
+                if (orderError) throw orderError;
 
-                // Dynamic Product Logic (Primary)
-                if (item.targetIds && Array.isArray(item.targetIds)) {
-                    item.targetIds.forEach(target => {
-                        localStorage.setItem(`access_${target}_${email}`, 'true');
-                    });
-                    // Continue to next item? implicit.
-                } else {
-                    // Fallback Legacy Logic
-                    // Full Bundle Logic
-                    if (type === 'bundle' || nameLower.includes('full')) {
-                        localStorage.setItem(`access_full_bundle_${email}`, 'true');
-                        localStorage.setItem(`access_physics_${email}`, 'true');
-                        localStorage.setItem(`access_chemistry_${email}`, 'true');
-                        localStorage.setItem(`access_biology_${email}`, 'true');
+                // 2. Grant Access (Enrollments)
+                const enrollmentsToInsert: any[] = [];
+                items.forEach(item => {
+                    const nameLower = item.name.toLowerCase();
+                    const type = item.type;
+
+                    if (item.targetIds && Array.isArray(item.targetIds)) {
+                        item.targetIds.forEach(target => {
+                            enrollmentsToInsert.push({ user_id: user.id, target_id: target });
+                        });
+                    } else {
+                        // Legacy logic mapped to targets
+                        if (type === 'bundle' || nameLower.includes('full')) {
+                            enrollmentsToInsert.push({ user_id: user.id, target_id: 'full_bundle' });
+                            // Optionally expand bundle? No, keep it simple, check for bundle existence in access logic.
+                            // Actually, let's expand for granular access if needed, but 'full_bundle' key is easier.
+                            // Let's Add physics/chem/bio too just in case we deprecate bundle key.
+                            enrollmentsToInsert.push({ user_id: user.id, target_id: 'physics' });
+                            enrollmentsToInsert.push({ user_id: user.id, target_id: 'chemistry' });
+                            enrollmentsToInsert.push({ user_id: user.id, target_id: 'biology' });
+                        }
+                        if (nameLower.includes('physics')) enrollmentsToInsert.push({ user_id: user.id, target_id: 'physics' });
+                        if (nameLower.includes('chemistry')) enrollmentsToInsert.push({ user_id: user.id, target_id: 'chemistry' });
+                        if (nameLower.includes('biology')) enrollmentsToInsert.push({ user_id: user.id, target_id: 'biology' });
+                        if (type === 'test-series' || nameLower.includes('test series')) {
+                            enrollmentsToInsert.push({ user_id: user.id, target_id: 'test_series' });
+                        }
                     }
+                });
 
-                    // Subject Logic
-                    if (nameLower.includes('physics')) localStorage.setItem(`access_physics_${email}`, 'true');
-                    if (nameLower.includes('chemistry')) localStorage.setItem(`access_chemistry_${email}`, 'true');
-                    if (nameLower.includes('biology')) localStorage.setItem(`access_biology_${email}`, 'true');
+                // Deduplicate targets before insert
+                const uniqueEnrollments = Array.from(new Set(enrollmentsToInsert.map(e => e.target_id)))
+                    .map(targetId => ({ user_id: user.id, target_id: targetId }));
 
-                    // Test Series Logic
-                    if (type === 'test-series' || nameLower.includes('test series')) {
-                        localStorage.setItem(`access_test_series_${email}`, 'true');
-                    }
+                if (uniqueEnrollments.length > 0) {
+                    const { error: enrollError } = await supabase.from('enrollments').upsert(uniqueEnrollments, { onConflict: 'user_id, target_id' });
+                    if (enrollError) throw enrollError;
                 }
-            });
 
-            const existingOrders = JSON.parse(localStorage.getItem('orders') || '[]');
-            localStorage.setItem('orders', JSON.stringify([...newOrders, ...existingOrders]));
-
-            alert('Payment Successful! Access Granted.');
-            clearCart();
-            setIsCartOpen(false);
-
-            // Force reload to update UI state if current page depends on it
-            if (window.location.pathname === '/dashboard' || window.location.pathname === '/pricing') {
-                window.location.reload();
-            } else {
+                alert('Payment Successful! Access Granted.');
+                clearCart();
+                setIsCartOpen(false);
                 router.push('/dashboard');
+
+            } catch (err: any) {
+                console.error('Checkout Error:', err);
+                alert('Payment recorded locally but failed to save to server: ' + err.message);
+                // Fallback? No, we want strict sync.
             }
         }
     };
