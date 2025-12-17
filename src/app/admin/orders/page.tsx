@@ -121,8 +121,8 @@ export default function OrdersPage() {
                                             borderRadius: '12px',
                                             fontSize: '0.75rem',
                                             fontWeight: 600,
-                                            backgroundColor: order.status === 'Success' ? '#dcfce7' : order.status === 'Pending' ? '#fef3c7' : '#fee2e2',
-                                            color: order.status === 'Success' ? '#166534' : order.status === 'Pending' ? '#92400e' : '#991b1b'
+                                            backgroundColor: order.status === 'Success' ? '#FEE2E2' : order.status === 'Pending' ? '#fef3c7' : '#fee2e2',
+                                            color: order.status === 'Success' ? '#B91C1C' : order.status === 'Pending' ? '#92400e' : '#991b1b'
                                         }}>
                                             {order.status}
                                         </span>

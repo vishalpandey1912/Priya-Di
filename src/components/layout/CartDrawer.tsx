@@ -202,7 +202,7 @@ export const CartDrawer = () => {
                                         <h4 style={{ fontSize: '0.95rem', fontWeight: 600, marginBottom: '4px' }}>{item.name}</h4>
                                         <p style={{ fontSize: '0.875rem', color: '#64748b', marginBottom: '8px' }}>{item.type}</p>
                                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                            <span style={{ fontWeight: 700, color: '#00A99D' }}>₹{item.price.toLocaleString()}</span>
+                                            <span style={{ fontWeight: 700, color: '#DC2626' }}>₹{item.price.toLocaleString()}</span>
                                             <button
                                                 onClick={() => removeFromCart(item.id)}
                                                 style={{ border: 'none', background: 'none', cursor: 'pointer', color: '#ef4444', display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.75rem' }}
@@ -240,7 +240,7 @@ export const CartDrawer = () => {
                                 </Button>
                             </div>
                             {discount > 0 && (
-                                <p style={{ fontSize: '0.8rem', color: '#166534', marginTop: '4px' }}>
+                                <p style={{ fontSize: '0.8rem', color: '#B91C1C', marginTop: '4px' }}>
                                     Discount applied: -₹{discount}
                                 </p>
                             )}
@@ -251,7 +251,7 @@ export const CartDrawer = () => {
                             <span>₹{cartTotal.toLocaleString()}</span>
                         </div>
                         {discount > 0 && (
-                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', fontSize: '0.9rem', color: '#166534' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', fontSize: '0.9rem', color: '#B91C1C' }}>
                                 <span>Discount</span>
                                 <span>-₹{discount.toLocaleString()}</span>
                             </div>

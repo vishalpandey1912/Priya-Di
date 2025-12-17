@@ -237,10 +237,10 @@ export default function QuizPage({ params }: { params: Promise<{ quizId: string 
                                         <div key={i} style={{
                                             padding: '8px 12px', borderRadius: '6px',
                                             backgroundColor:
-                                                i === q.correct_option ? '#dcfce7' : // Always show correct green
+                                                i === q.correct_option ? '#FEE2E2' : // Always show correct green
                                                     (i === userAnswer && !isCorrect) ? '#fee2e2' : '#f8fafc', // Show wrong red
                                             color:
-                                                i === q.correct_option ? '#166534' :
+                                                i === q.correct_option ? '#B91C1C' :
                                                     (i === userAnswer && !isCorrect) ? '#991b1b' : 'inherit',
                                             display: 'flex', justifyContent: 'space-between', alignItems: 'center'
                                         }}>

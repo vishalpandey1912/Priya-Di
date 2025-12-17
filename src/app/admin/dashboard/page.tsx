@@ -97,7 +97,7 @@ export default function AdminDashboardPage() {
                     trend="Now"
                     trendUp={true}
                     icon={<DollarSign size={24} />}
-                    color="#00A99D"
+                    color="#DC2626"
                 />
                 <StatCard
                     label="Active Students"
@@ -154,8 +154,8 @@ export default function AdminDashboardPage() {
                                                 borderRadius: '12px',
                                                 fontSize: '0.75rem',
                                                 fontWeight: 600,
-                                                backgroundColor: order.status === 'Success' ? '#dcfce7' : order.status === 'Pending' ? '#fef3c7' : '#fee2e2',
-                                                color: order.status === 'Success' ? '#166534' : order.status === 'Pending' ? '#92400e' : '#991b1b'
+                                                backgroundColor: order.status === 'Success' ? '#FEE2E2' : order.status === 'Pending' ? '#fef3c7' : '#fee2e2',
+                                                color: order.status === 'Success' ? '#B91C1C' : order.status === 'Pending' ? '#92400e' : '#991b1b'
                                             }}>
                                                 {order.status}
                                             </span>
@@ -184,7 +184,7 @@ export default function AdminDashboardPage() {
                                         <div style={{ width: '100%', background: '#f1f5f9', height: '6px', borderRadius: '4px' }}>
                                             <div style={{
                                                 width: `${course.percent}%`,
-                                                background: i === 0 ? '#00A99D' : i === 1 ? '#3b82f6' : '#f59e0b',
+                                                background: i === 0 ? '#DC2626' : i === 1 ? '#3b82f6' : '#f59e0b',
                                                 height: '100%',
                                                 borderRadius: '4px'
                                             }}></div>
@@ -200,7 +200,7 @@ export default function AdminDashboardPage() {
                             <Link href="/admin/content">
                                 <button style={{
                                     padding: '12px',
-                                    backgroundColor: '#00A99D',
+                                    backgroundColor: '#DC2626',
                                     color: 'white',
                                     border: 'none',
                                     borderRadius: '8px',

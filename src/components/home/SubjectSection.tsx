@@ -10,7 +10,7 @@ export const SubjectSection = () => {
             id: 'biology',
             title: 'Biology',
             desc: 'Botany & Zoology with NCERT line-by-line coverage.',
-            icon: <Dna size={32} color="#00A99D" />, // Primary Teal
+            icon: <Dna size={32} color="#DC2626" />, // Primary Teal
             color: 'rgba(0, 169, 157, 0.1)',
             href: '/neet/biology'
         },

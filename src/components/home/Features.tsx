@@ -7,22 +7,22 @@ export const Features = () => {
         {
             title: 'NCERT-Aligned Notes',
             desc: 'Concise, high-yield notes strictly based on NCERT for Biology, Physics, & Chemistry.',
-            icon: <BookOpen size={24} color="#00A99D" />
+            icon: <BookOpen size={24} color="#DC2626" />
         },
         {
             title: 'Concept Videos',
             desc: 'Short, crisp video explanations for difficult concepts and derivations.',
-            icon: <PlayCircle size={24} color="#00A99D" />
+            icon: <PlayCircle size={24} color="#DC2626" />
         },
         {
             title: 'Topic-wise MCQs',
             desc: 'Thousands of questions sorted by topic/difficulty with detailed solutions.',
-            icon: <CheckCircle size={24} color="#00A99D" />
+            icon: <CheckCircle size={24} color="#DC2626" />
         },
         {
             title: 'Performance Analytics',
             desc: 'Track your accuracy, speed, and weak areas with our advanced dashboard.',
-            icon: <PieChart size={24} color="#00A99D" />
+            icon: <PieChart size={24} color="#DC2626" />
         }
     ];
 

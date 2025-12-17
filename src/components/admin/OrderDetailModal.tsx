@@ -72,8 +72,8 @@ export const OrderDetailModal = ({ isOpen, onClose, order }: OrderDetailModalPro
                         marginBottom: '24px',
                         padding: '16px',
                         borderRadius: '8px',
-                        backgroundColor: order.status === 'Success' ? '#dcfce7' : order.status === 'Pending' ? '#fef3c7' : '#fee2e2',
-                        color: order.status === 'Success' ? '#166534' : order.status === 'Pending' ? '#92400e' : '#991b1b',
+                        backgroundColor: order.status === 'Success' ? '#FEE2E2' : order.status === 'Pending' ? '#fef3c7' : '#fee2e2',
+                        color: order.status === 'Success' ? '#B91C1C' : order.status === 'Pending' ? '#92400e' : '#991b1b',
                         display: 'flex',
                         alignItems: 'center',
                         gap: '12px',
@@ -111,7 +111,7 @@ export const OrderDetailModal = ({ isOpen, onClose, order }: OrderDetailModalPro
                             </div>
                             <div style={{ padding: '12px 16px', backgroundColor: '#f8fafc', display: 'flex', justifyContent: 'space-between', fontWeight: 700 }}>
                                 <span>Total</span>
-                                <span style={{ color: '#00A99D' }}>{order.amount}</span>
+                                <span style={{ color: '#DC2626' }}>{order.amount}</span>
                             </div>
                         </div>
                     </div>

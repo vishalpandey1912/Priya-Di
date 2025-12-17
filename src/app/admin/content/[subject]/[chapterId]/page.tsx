@@ -264,12 +264,12 @@ export default function AdminChapterPage({
                                             return (
                                                 <div key={item.id} style={{
                                                     display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                                                    padding: '8px 12px', backgroundColor: '#f0fdf4', borderRadius: '6px', border: '1px solid #dcfce7'
+                                                    padding: '8px 12px', backgroundColor: '#f0fdf4', borderRadius: '6px', border: '1px solid #FEE2E2'
                                                 }}>
                                                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                                        <HelpCircle size={16} color="#166534" />
-                                                        <span style={{ fontSize: '0.9rem', fontWeight: 600, color: '#166534' }}>{item.title}</span>
-                                                        <span style={{ fontSize: '0.75rem', backgroundColor: '#166534', color: 'white', padding: '1px 6px', borderRadius: '4px' }}>Quiz</span>
+                                                        <HelpCircle size={16} color="#B91C1C" />
+                                                        <span style={{ fontSize: '0.9rem', fontWeight: 600, color: '#B91C1C' }}>{item.title}</span>
+                                                        <span style={{ fontSize: '0.75rem', backgroundColor: '#B91C1C', color: 'white', padding: '1px 6px', borderRadius: '4px' }}>Quiz</span>
                                                         {item.price && item.price > 0 && (
                                                             <span style={{ fontSize: '0.75rem', backgroundColor: '#fff7ed', color: '#c2410c', padding: '2px 6px', borderRadius: '4px', fontWeight: 600 }}>
                                                                 ₹{item.price}
@@ -298,7 +298,7 @@ export default function AdminChapterPage({
                                                     borderRadius: '6px'
                                                 }}>
                                                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                                        {item.type === 'pdf' ? <FileText size={16} color="#00A99D" /> : <Video size={16} color="#3b82f6" />}
+                                                        {item.type === 'pdf' ? <FileText size={16} color="#DC2626" /> : <Video size={16} color="#3b82f6" />}
                                                         {item.url ? (
                                                             <a href={item.url} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none', color: 'inherit', display: 'flex', alignItems: 'center', gap: '6px' }}>
                                                                 <span style={{ fontSize: '0.9rem', fontWeight: 500, textDecoration: 'underline' }}>{item.title}</span>
@@ -407,7 +407,7 @@ export default function AdminChapterPage({
                                     }}
                                 />
                                 {uploadedFile && (
-                                    <p style={{ marginTop: '4px', fontSize: '0.8rem', color: '#166534' }}>
+                                    <p style={{ marginTop: '4px', fontSize: '0.8rem', color: '#B91C1C' }}>
                                         Selected: {uploadedFile.name}
                                     </p>
                                 )}

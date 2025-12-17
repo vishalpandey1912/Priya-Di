@@ -156,7 +156,7 @@ export const PaymentModal = ({ isOpen, onClose, amount, planName, onSuccess }: P
                             alignItems: 'center'
                         }}>
                             <span style={{ color: '#475569', fontWeight: 500 }}>Total Amount</span>
-                            <span style={{ fontSize: '1.25rem', fontWeight: 700, color: '#00A99D' }}>₹{amount}</span>
+                            <span style={{ fontSize: '1.25rem', fontWeight: 700, color: '#DC2626' }}>₹{amount}</span>
                         </div>
 
                         <div style={{ marginBottom: '24px' }}>
@@ -226,7 +226,7 @@ export const PaymentModal = ({ isOpen, onClose, amount, planName, onSuccess }: P
                                 </Button>
                             </div>
                             {discountApplied > 0 && (
-                                <p style={{ fontSize: '0.8rem', color: '#166534', marginTop: '4px' }}>
+                                <p style={{ fontSize: '0.8rem', color: '#B91C1C', marginTop: '4px' }}>
                                     Coupon applied! You saved ₹{discountApplied}.
                                 </p>
                             )}
@@ -248,7 +248,7 @@ export const PaymentModal = ({ isOpen, onClose, amount, planName, onSuccess }: P
                             width: '40px',
                             height: '40px',
                             border: '4px solid #f3f3f3',
-                            borderTop: '4px solid #00A99D',
+                            borderTop: '4px solid #DC2626',
                             borderRadius: '50%',
                             margin: '0 auto 24px',
                             animation: 'spin 1s linear infinite'

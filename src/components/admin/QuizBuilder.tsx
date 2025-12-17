@@ -165,7 +165,7 @@ export function QuizBuilder({ isOpen, onClose, onSave, initialData }: QuizBuilde
                                                 color: q.correctOption === oIndex ? '#22c55e' : '#cbd5e1'
                                             }}
                                         >
-                                            <CheckCircle size={20} fill={q.correctOption === oIndex ? '#dcfce7' : 'none'} />
+                                            <CheckCircle size={20} fill={q.correctOption === oIndex ? '#FEE2E2' : 'none'} />
                                         </div>
                                         <Input
                                             placeholder={`Option ${String.fromCharCode(65 + oIndex)}`}

@@ -190,7 +190,7 @@ export default function UsersManagementPage() {
                                 </td>
                                 <td style={{ padding: '16px 12px' }}>
                                     {user.status === 'active' ? (
-                                        <span style={{ display: 'flex', alignItems: 'center', gap: '4px', color: '#166534', fontSize: '0.9rem' }}>
+                                        <span style={{ display: 'flex', alignItems: 'center', gap: '4px', color: '#B91C1C', fontSize: '0.9rem' }}>
                                             <CheckCircle size={14} /> Active
                                         </span>
                                     ) : (

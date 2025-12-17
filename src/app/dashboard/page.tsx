@@ -30,7 +30,7 @@ export default function DashboardPage() {
             const hasTestSeries = localStorage.getItem(`access_test_series_${email}`);
 
             const activeCourses = [
-                { name: 'Full NEET Bundle', enrolled: !!hasFullAccess, progress: 0, color: '#00A99D' },
+                { name: 'Full NEET Bundle', enrolled: !!hasFullAccess, progress: 0, color: '#DC2626' },
                 { name: 'Physics Mastery', enrolled: !!(hasPhysics || hasFullAccess), progress: 0, color: '#FF5722' },
                 { name: 'Chemistry Mastery', enrolled: !!(hasChemistry || hasFullAccess), progress: 0, color: '#2196F3' },
                 { name: 'Biology Mastery', enrolled: !!(hasBiology || hasFullAccess), progress: 0, color: '#8b5cf6' },

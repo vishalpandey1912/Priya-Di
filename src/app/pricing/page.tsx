@@ -137,10 +137,10 @@ export default function PricingPage() {
                                 key={plan.id}
                                 style={{
                                     position: 'relative',
-                                    border: isPurchased ? '1px solid #d1fae5' : plan.isRecommended ? '2px solid #00A99D' : '1px solid #e5e7eb',
+                                    border: isPurchased ? '1px solid #1f2937' : plan.isRecommended ? '2px solid #DC2626' : '1px solid #e5e7eb',
                                     transform: plan.isRecommended ? 'scale(1.02)' : 'none', // Reduced scale for mobile safety
                                     zIndex: plan.isRecommended ? 10 : 1,
-                                    backgroundColor: isPurchased ? '#f0fdfa' : 'white'
+                                    backgroundColor: isPurchased ? '#f9fafb' : 'white'
                                 }}
                                 padding="lg"
                             >
@@ -150,7 +150,7 @@ export default function PricingPage() {
                                         top: '-12px',
                                         left: '50%',
                                         transform: 'translateX(-50%)',
-                                        backgroundColor: '#00A99D',
+                                        backgroundColor: '#DC2626',
                                         color: 'white',
                                         padding: '4px 16px',
                                         borderRadius: '12px',
@@ -166,7 +166,7 @@ export default function PricingPage() {
                                         position: 'absolute',
                                         top: '16px',
                                         right: '16px',
-                                        backgroundColor: '#059669',
+                                        backgroundColor: '#000000',
                                         color: 'white',
                                         padding: '4px 12px',
                                         borderRadius: '20px',
@@ -185,14 +185,14 @@ export default function PricingPage() {
                                         width: '48px',
                                         height: '48px',
                                         borderRadius: '12px',
-                                        backgroundColor: `${plan.color || '#00A99D'}15`,
+                                        backgroundColor: `${plan.color || '#DC2626'}15`,
                                         display: 'flex',
                                         alignItems: 'center',
                                         justifyContent: 'center',
                                         marginBottom: '16px'
                                     }}>
                                         {/* Dynamic Icon based on type - simplified */}
-                                        {plan.type === 'bundle' || plan.name.includes('Full') ? <Zap size={24} color={plan.color || '#00A99D'} /> :
+                                        {plan.type === 'bundle' || plan.name.includes('Full') ? <Zap size={24} color={plan.color || '#DC2626'} /> :
                                             plan.type === 'test_series' ? <Star size={24} color={plan.color || '#FFC107'} /> :
                                                 <BookOpen size={24} color={plan.color || '#FF5722'} />}
                                     </div>
@@ -210,12 +210,12 @@ export default function PricingPage() {
                                                 minWidth: '20px',
                                                 height: '20px',
                                                 borderRadius: '50%',
-                                                backgroundColor: '#dcfce7',
+                                                backgroundColor: '#FEE2E2',
                                                 display: 'flex',
                                                 alignItems: 'center',
                                                 justifyContent: 'center'
                                             }}>
-                                                <Check size={12} color="#166534" />
+                                                <Check size={12} color="#DC2626" />
                                             </div>
                                             <span>{feature}</span>
                                         </div>
@@ -243,7 +243,7 @@ export default function PricingPage() {
                                         disabled={isPurchased}
                                         style={{
                                             width: '100%',
-                                            backgroundColor: isPurchased ? '#10b981' : plan.isRecommended ? '#00A99D' : '#1f2937',
+                                            backgroundColor: isPurchased ? '#1f2937' : plan.isRecommended ? '#DC2626' : '#1f2937',
                                             height: '48px',
                                             fontSize: '1rem',
                                             opacity: isPurchased ? 0.8 : 1,

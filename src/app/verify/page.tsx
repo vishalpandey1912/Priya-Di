@@ -75,8 +75,8 @@ export default function VerifyPage() {
                 {/* Email Verification Card */}
                 <Card padding="lg" style={{ borderTop: '4px solid #10b981' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '24px' }}>
-                        <div style={{ padding: '12px', borderRadius: '50%', backgroundColor: '#dcfce7' }}>
-                            <CheckCircle color="#166534" size={24} />
+                        <div style={{ padding: '12px', borderRadius: '50%', backgroundColor: '#FEE2E2' }}>
+                            <CheckCircle color="#B91C1C" size={24} />
                         </div>
                         <div>
                             <h2 style={{ fontSize: '1.2rem', fontWeight: 700 }}>Email Verification</h2>
@@ -85,7 +85,7 @@ export default function VerifyPage() {
                     </div>
 
                     {true ? (
-                        <div style={{ padding: '16px', backgroundColor: '#f0fdf4', borderRadius: '8px', color: '#166534', fontWeight: 600, textAlign: 'center' }}>
+                        <div style={{ padding: '16px', backgroundColor: '#f0fdf4', borderRadius: '8px', color: '#B91C1C', fontWeight: 600, textAlign: 'center' }}>
                             Verified Successfully
                         </div>
                     ) : (
@@ -125,7 +125,7 @@ export default function VerifyPage() {
                     </div>
 
                     {false ? (
-                        <div style={{ padding: '16px', backgroundColor: '#f0fdf4', borderRadius: '8px', color: '#166534', fontWeight: 600, textAlign: 'center' }}>
+                        <div style={{ padding: '16px', backgroundColor: '#f0fdf4', borderRadius: '8px', color: '#B91C1C', fontWeight: 600, textAlign: 'center' }}>
                             Verified Successfully
                         </div>
                     ) : (

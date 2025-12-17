@@ -1,12 +1,14 @@
 :root {
   /* Brand Colors */
-  --primary-color: #00A99D;
-  /* Medical Teal */
-  --primary-hover: #008f85;
-  --secondary-color: #E3F2FD;
-  /* Soft Blue */
-  --accent-color: #FFC107;
-  /* Warning/Action */
+  /* Brand Colors */
+  --primary-color: #DC2626;
+  /* Strong Red */
+  --primary-hover: #b91c1c;
+  /* Darker Red */
+  --secondary-color: #f3f4f6;
+  /* Neutral Gray (instead of Pink) */
+  --accent-color: #000000;
+  /* Black */
 
   /* Text Colors */
   --text-primary: #1F2937;

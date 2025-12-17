@@ -44,7 +44,7 @@ export default function ProfilePage() {
 
     // Real user stats (default to 0 for now)
     const stats = [
-        { label: 'Courses Enrolled', value: '0', icon: BookOpen, color: '#00A99D' },
+        { label: 'Courses Enrolled', value: '0', icon: BookOpen, color: '#DC2626' },
         { label: 'Tests Attempted', value: '0', icon: ShieldCheck, color: '#FF5722' },
         { label: 'Hours Studied', value: '0h', icon: Clock, color: '#2196F3' }
     ];
@@ -200,7 +200,7 @@ export default function ProfilePage() {
                         height: '100px',
                         borderRadius: '50%',
                         backgroundColor: '#e0f2f1',
-                        color: '#00A99D',
+                        color: '#DC2626',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
@@ -213,7 +213,7 @@ export default function ProfilePage() {
                         <h1 style={{ fontSize: '2rem', marginBottom: '8px', fontWeight: 800 }}>{user.name}</h1>
                         <p style={{ color: '#64748b', fontSize: '1.1rem', marginBottom: '12px' }}>{user.email}</p>
                         <div style={{ display: 'flex', gap: '12px' }}>
-                            <span style={{ padding: '6px 16px', backgroundColor: '#00A99D', color: 'white', borderRadius: '20px', fontSize: '0.85rem', fontWeight: 600 }}>
+                            <span style={{ padding: '6px 16px', backgroundColor: '#DC2626', color: 'white', borderRadius: '20px', fontSize: '0.85rem', fontWeight: 600 }}>
                                 {targetExam} Aspirant
                             </span>
                             <span style={{ padding: '6px 16px', backgroundColor: '#f1f5f9', color: '#475569', borderRadius: '20px', fontSize: '0.85rem', fontWeight: 600 }}>
@@ -240,11 +240,11 @@ export default function ProfilePage() {
                                             width: '100%',
                                             border: 'none',
                                             backgroundColor: activeTab === tab.id ? '#f0fdfa' : 'white',
-                                            color: activeTab === tab.id ? '#00A99D' : '#64748b',
+                                            color: activeTab === tab.id ? '#DC2626' : '#64748b',
                                             fontWeight: activeTab === tab.id ? 600 : 500,
                                             cursor: 'pointer',
                                             textAlign: 'left',
-                                            borderLeft: activeTab === tab.id ? '4px solid #00A99D' : '4px solid transparent',
+                                            borderLeft: activeTab === tab.id ? '4px solid #DC2626' : '4px solid transparent',
                                             transition: 'all 0.2s ease'
                                         }}
                                     >
@@ -284,7 +284,7 @@ export default function ProfilePage() {
                                         {myCourses.slice(0, 6).map((course, i) => (
                                             <Card key={i} padding="lg">
                                                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '16px' }}>
-                                                    <span style={{ fontSize: '0.8rem', fontWeight: 600, color: '#00A99D', backgroundColor: '#e0f2f1', padding: '4px 8px', borderRadius: '4px' }}>
+                                                    <span style={{ fontSize: '0.8rem', fontWeight: 600, color: '#DC2626', backgroundColor: '#e0f2f1', padding: '4px 8px', borderRadius: '4px' }}>
                                                         {course.subject}
                                                     </span>
                                                 </div>
@@ -295,7 +295,7 @@ export default function ProfilePage() {
                                                         <span>{course.progress}%</span>
                                                     </div>
                                                     <div style={{ width: '100%', height: '6px', backgroundColor: '#f1f5f9', borderRadius: '4px' }}>
-                                                        <div style={{ width: `${course.progress}%`, height: '100%', backgroundColor: '#00A99D', borderRadius: '4px' }}></div>
+                                                        <div style={{ width: `${course.progress}%`, height: '100%', backgroundColor: '#DC2626', borderRadius: '4px' }}></div>
                                                     </div>
                                                 </div>
                                                 <Link href="/dashboard">
@@ -307,7 +307,7 @@ export default function ProfilePage() {
                                 ) : (
                                     <div style={{ padding: '40px', textAlign: 'center', backgroundColor: 'white', borderRadius: '16px', border: '1px dashed #cbd5e1' }}>
                                         <p style={{ color: '#64748b' }}>You haven't enrolled in any courses yet.</p>
-                                        <Link href="/pricing" style={{ color: '#00A99D', fontWeight: 600, marginTop: '8px', display: 'inline-block' }}>Browse Courses &rarr;</Link>
+                                        <Link href="/pricing" style={{ color: '#DC2626', fontWeight: 600, marginTop: '8px', display: 'inline-block' }}>Browse Courses &rarr;</Link>
                                     </div>
                                 )}
                             </div>
@@ -378,8 +378,8 @@ export default function ProfilePage() {
                                                                     borderRadius: '20px',
                                                                     fontSize: '0.75rem',
                                                                     fontWeight: 600,
-                                                                    backgroundColor: '#dcfce7',
-                                                                    color: '#166534'
+                                                                    backgroundColor: '#FEE2E2',
+                                                                    color: '#B91C1C'
                                                                 }}>
                                                                     Success
                                                                 </span>
@@ -407,8 +407,8 @@ export default function ProfilePage() {
                                         <div style={{
                                             marginBottom: '24px',
                                             padding: '12px',
-                                            backgroundColor: '#dcfce7',
-                                            color: '#166534',
+                                            backgroundColor: '#FEE2E2',
+                                            color: '#B91C1C',
                                             borderRadius: '8px',
                                             fontWeight: 500,
                                             display: 'flex',

@@ -69,8 +69,8 @@ export default function UpdatePasswordPage() {
                 {success ? (
                     <div style={{ textAlign: 'center', padding: '20px 0' }}>
                         <div style={{
-                            backgroundColor: '#dcfce7',
-                            color: '#166534',
+                            backgroundColor: '#FEE2E2',
+                            color: '#B91C1C',
                             padding: '16px',
                             borderRadius: '8px',
                             marginBottom: '20px',

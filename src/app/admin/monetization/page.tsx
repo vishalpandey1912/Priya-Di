@@ -67,11 +67,11 @@ const SubjectLockManager = ({ subject, locks, toggleLock }: {
                     <button style={{ border: 'none', background: 'none', cursor: 'pointer' }}>
                         {expanded ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
                     </button>
-                    {locks[subject] ? <Lock size={18} color="#dc2626" /> : <Lock size={18} color="#166534" style={{ opacity: 0.5 }} />}
+                    {locks[subject] ? <Lock size={18} color="#dc2626" /> : <Lock size={18} color="#B91C1C" style={{ opacity: 0.5 }} />}
                     <span style={{ textTransform: 'capitalize', fontWeight: 600 }}>{subject}</span>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                    <span style={{ fontSize: '0.85rem', color: locks[subject] ? '#dc2626' : '#166534', fontWeight: 500 }}>
+                    <span style={{ fontSize: '0.85rem', color: locks[subject] ? '#dc2626' : '#B91C1C', fontWeight: 500 }}>
                         {locks[subject] ? 'Course Locked' : 'Course Free'}
                     </span>
                     <label className="switch" onClick={(e) => e.stopPropagation()}>
@@ -201,7 +201,7 @@ const ProductManager = () => {
         targetIds: '',
         features: '',
         isActive: true,
-        color: '#00A99D',
+        color: '#DC2626',
         isRecommended: false
     };
 
@@ -244,7 +244,7 @@ const ProductManager = () => {
             targetIds: product.targetIds.join(', '),
             features: product.features.join(', '),
             isRecommended: product.isRecommended || false,
-            color: product.color || '#00A99D'
+            color: product.color || '#DC2626'
         });
         setCurrentProduct(product);
         setIsEditing(true);
@@ -312,7 +312,7 @@ const ProductManager = () => {
                                                     style={{
                                                         padding: '6px 12px',
                                                         borderRadius: '20px',
-                                                        border: isSelected ? '1px solid #00A99D' : '1px solid #cbd5e1',
+                                                        border: isSelected ? '1px solid #DC2626' : '1px solid #cbd5e1',
                                                         backgroundColor: isSelected ? '#ecfdf5' : 'white',
                                                         color: isSelected ? '#065f46' : '#64748b',
                                                         cursor: 'pointer',
@@ -348,7 +348,7 @@ const ProductManager = () => {
                                                                 style={{
                                                                     padding: '6px 10px',
                                                                     borderRadius: '6px',
-                                                                    border: isSelected ? '1px solid #00A99D' : '1px solid #e2e8f0',
+                                                                    border: isSelected ? '1px solid #DC2626' : '1px solid #e2e8f0',
                                                                     backgroundColor: isSelected ? '#ecfdf5' : 'white',
                                                                     cursor: 'pointer',
                                                                     fontSize: '0.8rem',
@@ -416,7 +416,7 @@ const ProductManager = () => {
                             <div>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
                                     <h3 style={{ fontSize: '1.1rem', fontWeight: 700 }}>{product.name}</h3>
-                                    {product.isRecommended && <span style={{ fontSize: '0.7rem', backgroundColor: '#00A99D', color: 'white', padding: '2px 6px', borderRadius: '4px' }}>REC</span>}
+                                    {product.isRecommended && <span style={{ fontSize: '0.7rem', backgroundColor: '#DC2626', color: 'white', padding: '2px 6px', borderRadius: '4px' }}>REC</span>}
                                     {!product.isActive && <span style={{ fontSize: '0.7rem', backgroundColor: '#ef4444', color: 'white', padding: '2px 6px', borderRadius: '4px' }}>INACTIVE</span>}
                                 </div>
                                 <p style={{ fontSize: '0.9rem', color: '#64748b', marginBottom: '8px' }}>{product.description}</p>
@@ -526,8 +526,8 @@ export default function MonetizationPage() {
                             padding: '12px 24px',
                             border: 'none',
                             background: 'none',
-                            borderBottom: activeTab === tab ? '2px solid #00A99D' : '2px solid transparent',
-                            color: activeTab === tab ? '#00A99D' : '#64748b',
+                            borderBottom: activeTab === tab ? '2px solid #DC2626' : '2px solid transparent',
+                            color: activeTab === tab ? '#DC2626' : '#64748b',
                             fontWeight: activeTab === tab ? 600 : 500,
                             fontSize: '1rem',
                             cursor: 'pointer',
@@ -602,7 +602,7 @@ export default function MonetizationPage() {
                                 borderRadius: '8px'
                             }}>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                    <Tag size={16} color="#00A99D" />
+                                    <Tag size={16} color="#DC2626" />
                                     <span style={{ fontWeight: 700, fontFamily: 'monospace' }}>{coupon.code}</span>
                                 </div>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
@@ -657,7 +657,7 @@ export default function MonetizationPage() {
                     border-radius: 50%;
                 }
                 input:checked + .slider {
-                    background-color: #00A99D;
+                    background-color: #DC2626;
                 }
                 input:checked + .slider:before {
                     transform: translateX(20px);

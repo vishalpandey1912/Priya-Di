@@ -21,7 +21,7 @@ export default function AdminSupportPage() {
                         <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
                             <div style={{
                                 width: '40px', height: '40px', borderRadius: '50%',
-                                background: ticket.status === 'Open' ? '#fee2e2' : ticket.status === 'Resolved' ? '#dcfce7' : '#fef9c3',
+                                background: ticket.status === 'Open' ? '#fee2e2' : ticket.status === 'Resolved' ? '#FEE2E2' : '#fef9c3',
                                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                                 color: ticket.status === 'Open' ? '#ef4444' : ticket.status === 'Resolved' ? '#10b981' : '#eab308'
                             }}>
@@ -38,7 +38,7 @@ export default function AdminSupportPage() {
                         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                             <span style={{
                                 fontSize: '0.8rem', padding: '4px 8px', borderRadius: '12px', fontWeight: 500,
-                                backgroundColor: ticket.status === 'Open' ? '#fee2e2' : ticket.status === 'Resolved' ? '#dcfce7' : '#fef9c3',
+                                backgroundColor: ticket.status === 'Open' ? '#fee2e2' : ticket.status === 'Resolved' ? '#FEE2E2' : '#fef9c3',
                                 color: ticket.status === 'Open' ? '#b91c1c' : ticket.status === 'Resolved' ? '#15803d' : '#a16207'
                             }}>
                                 {ticket.status}

@@ -28,7 +28,7 @@ const DEFAULT_PRODUCTS: Product[] = [
         features: ['All 3 Subjects', 'Live Classes', 'Physical Study Material', 'Personal Mentor', 'Doubt Support'],
         isActive: true,
         isRecommended: true,
-        color: '#00A99D'
+        color: '#DC2626'
     },
     {
         id: 'crash-course',
