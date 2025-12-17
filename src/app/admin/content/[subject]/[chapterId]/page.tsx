@@ -33,7 +33,7 @@ export default function AdminChapterPage({
     const [editingQuizId, setEditingQuizId] = useState<string | null>(null);
     const [quizInitialData, setQuizInitialData] = useState<{ title: string, questions: any[] } | undefined>(undefined);
 
-    const [materialType, setMaterialType] = useState<'pdf' | 'video' | 'image' | 'document'>('pdf');
+    const [materialType, setMaterialType] = useState<'pdf' | 'video' | 'image' | 'document' | 'test'>('pdf');
     const [materialTitle, setMaterialTitle] = useState('');
     const [materialUrl, setMaterialUrl] = useState(''); // Keep for manual URL
     const [uploadedFile, setUploadedFile] = useState<File | null>(null);
@@ -153,7 +153,7 @@ export default function AdminChapterPage({
         setEditingMaterialId(material.id);
         setMaterialTitle(material.title);
         setMaterialType(material.type);
-        setMaterialUrl(material.url);
+        setMaterialUrl(material.url || '');
         setMaterialModalOpen(true);
     };
 
