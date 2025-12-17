@@ -21,13 +21,19 @@ interface Quiz {
     topic_id?: string;
 }
 
+import { useRouter } from 'next/navigation';
+import { useAuth } from '@/context/AuthContext';
+
 export default function QuizPage({ params }: { params: Promise<{ quizId: string }> }) {
     const { quizId } = use(params);
+    const router = useRouter();
+    const { user, isLoading: authLoading } = useAuth();
+
     const [quiz, setQuiz] = useState<Quiz | null>(null);
     const [questions, setQuestions] = useState<Question[]>([]);
     const [loading, setLoading] = useState(true);
 
-    // Quiz State
+    // Quiz State (Restored)
     const [activeQuestionIndex, setActiveQuestionIndex] = useState(0);
     const [selectedAnswers, setSelectedAnswers] = useState<Record<string, number>>({});
     const [isSubmitted, setIsSubmitted] = useState(false);
@@ -35,8 +41,16 @@ export default function QuizPage({ params }: { params: Promise<{ quizId: string 
     const [timeLeft, setTimeLeft] = useState(0);
 
     useEffect(() => {
-        fetchQuiz();
-    }, [quizId]);
+        if (!authLoading && !user) {
+            router.push(`/login?next=/quiz/${quizId}`);
+        }
+    }, [user, authLoading, router, quizId]);
+
+    useEffect(() => {
+        if (user) {
+            fetchQuiz();
+        }
+    }, [quizId, user]);
 
     const fetchQuiz = async () => {
         try {
@@ -111,7 +125,8 @@ export default function QuizPage({ params }: { params: Promise<{ quizId: string 
         return `${mins}:${secs.toString().padStart(2, '0')}`;
     };
 
-    if (loading) return <div style={{ padding: '40px', textAlign: 'center' }}>Loading Quiz...</div>;
+    if (authLoading || (loading && user)) return <div style={{ padding: '40px', textAlign: 'center' }}>Loading Quiz...</div>;
+    if (!user) return null; // Will redirect
     if (!quiz) return <div style={{ padding: '40px', textAlign: 'center' }}>Quiz not found</div>;
 
     const activeQuestion = questions[activeQuestionIndex];

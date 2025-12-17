@@ -60,6 +60,13 @@ export default function ChapterPage({
 
     const handleBuyItem = (e: React.MouseEvent, item: { id: string, title: string, price: string }) => {
         e.preventDefault();
+
+        if (!user) {
+            // Redirect to login if not authenticated
+            window.location.href = `/login?next=${window.location.pathname}`;
+            return;
+        }
+
         setSelectedItem({
             id: item.id,
             name: item.title,
