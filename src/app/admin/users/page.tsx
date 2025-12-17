@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { Card, Button, Input } from '@/components/ui';
 import { Search, Shield, Ban, CheckCircle, MoreHorizontal } from 'lucide-react';
 import { UserFormModal } from '@/components/admin/UserFormModal';
+import { supabase } from '@/lib/supabase';
 
 interface User {
     name: string;
@@ -30,49 +31,41 @@ export default function UsersManagementPage() {
     const [userPlans, setUserPlans] = useState<Record<string, string[]>>({});
 
     useEffect(() => {
-        // Load users from local storage
-        const storedUsers = JSON.parse(localStorage.getItem('users') || '[]');
-        const storedOrders = JSON.parse(localStorage.getItem('orders') || '[]');
+        const fetchUsers = async () => {
+            // 1. Fetch Profiles from Supabase
+            const { data: profiles, error } = await supabase
+                .from('profiles')
+                .select('*')
+                .order('created_at', { ascending: false });
 
-        // Add some mock metadata if missing for stored users
-        let enrichedUsers = storedUsers.map((u: User) => ({
-            ...u,
-            role: u.role || 'student',
-            status: u.status || 'active',
-            joinedAt: u.joinedAt || new Date().toLocaleDateString()
-        }));
-
-        // Merge with MOCK_USERS (avoid duplicates by email)
-        const allUsers = [...enrichedUsers];
-        MOCK_USERS.forEach(mockUser => {
-            if (!allUsers.find((u: User) => u.email === mockUser.email)) {
-                allUsers.push(mockUser);
+            if (error) {
+                console.error('Error fetching users:', error);
+                return;
             }
-        });
 
-        // Ensure Admin is in the list
-        if (!allUsers.find((u: User) => u.email === 'admin@desi.com')) {
-            allUsers.unshift({ name: 'Super Admin', email: 'admin@desi.com', role: 'admin', status: 'active', joinedAt: 'System' });
-        }
+            // 2. Map to UI User format
+            let dbUsers: User[] = (profiles || []).map(p => ({
+                name: p.name || 'Unknown',
+                email: p.email,
+                role: p.role || 'student',
+                status: 'active', // Default to active as we don't have block status in DB yet
+                joinedAt: p.created_at ? new Date(p.created_at).toLocaleDateString() : 'N/A'
+            }));
 
-        setUsers(allUsers);
-
-        // Map plans from orders
-        const plansMap: Record<string, string[]> = {};
-        allUsers.forEach((u: User) => {
-            if (u.role === 'admin') return;
-            // Find orders for this user by name (mock correlation) or email if available in order
-            // Our Order system used 'user' field as Name. 
-            const userOrders = storedOrders.filter((o: any) => o.user === u.name && o.status === 'Success');
-            plansMap[u.email] = userOrders.length > 0 ? userOrders.map((o: any) => o.plan) : ['None'];
-
-            // Add mock plans for MOCK_USERS if no orders found
-            if (userOrders.length === 0 && MOCK_USERS.find(mu => mu.email === u.email)) {
-                plansMap[u.email] = ['None'];
+            // 3. Ensure Super Admin is visible
+            if (!dbUsers.find(u => u.email === 'admin@desi.com')) {
+                dbUsers.unshift({ name: 'Super Admin', email: 'admin@desi.com', role: 'admin', status: 'active', joinedAt: 'System' });
             }
-        });
-        setUserPlans(plansMap);
 
+            setUsers(dbUsers);
+
+            // 4. Fetch Plans (Optional: Fetching orders to show badges)
+            // For now, we'll skip complex join and just show 'None' or fetch real orders later.
+            // Let's at least keep the mock logic if available or just empty.
+            setUserPlans({});
+        };
+
+        fetchUsers();
     }, []);
 
     const toggleUserStatus = (email: string) => {

@@ -79,7 +79,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     };
 
     const signup = async (name: string, email: string, password: string, phone?: string) => {
-        const { error } = await supabase.auth.signUp({
+        const { data, error } = await supabase.auth.signUp({
             email,
             password,
             options: {
@@ -89,6 +89,26 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         if (error) {
             console.error("Signup error:", error);
             return false;
+        }
+        if (data.user) {
+            // Create Profile in Public Table
+            const { error: profileError } = await supabase
+                .from('profiles')
+                .insert([
+                    {
+                        id: data.user.id,
+                        name: name,
+                        email: email,
+                        phone: phone,
+                        role: 'student', // Default role
+                        created_at: new Date().toISOString()
+                    }
+                ]);
+
+            if (profileError) {
+                console.error("Error creating profile:", profileError);
+                // Optional: We could delete the auth user if profile fails, but let's keep it simple
+            }
         }
         return true;
     };
