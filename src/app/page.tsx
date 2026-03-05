@@ -368,10 +368,7 @@ export default function DesiEducatorsHome() {
           </div>
           <div className="fade-up fade-up-2" style={{display:"flex",justifyContent:"center"}}>
             <div style={{position:"relative",width:380,height:460,background:"#111",borderRadius:24,overflow:"hidden",boxShadow:"0 20px 60px rgba(0,0,0,0.15)"}}>
-              <div style={{width:"100%",height:"100%",display:"flex",alignItems:"center",justifyContent:"center",background:"linear-gradient(135deg,#1a1a1a,#2d2d2d)",flexDirection:"column",gap:12}}>
-                <div style={{fontSize:80,opacity:0.2,color:"#fff",fontFamily:"'DM Serif Display',serif"}}>P</div>
-                <div style={{fontSize:11,color:"#666",letterSpacing:1}}>priya.png</div>
-              </div>
+             <img src="/priya.png" alt="Priya Pandey" style={{width:"100%",height:"100%",objectFit:"cover"}} />
               <div style={{position:"absolute",bottom:20,left:20,right:20,background:"rgba(255,255,255,0.15)",backdropFilter:"blur(12px)",borderRadius:12,padding:"12px 16px",display:"flex",alignItems:"center",gap:10}}>
                 <div style={{width:8,height:8,borderRadius:4,background:"#fbbf24"}}/>
                 <div>
