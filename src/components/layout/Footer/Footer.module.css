@@ -2,11 +2,11 @@
 .inner { max-width: 1200px; margin: 0 auto; }
 .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 48px; margin-bottom: 64px; }
 .brand { font-family: var(--font-display); font-size: 18px; margin-bottom: 14px; color: var(--text-primary); }
-.tagline { font-family: var(--font-body); font-size: 13px; line-height: 1.7; color: var(--text-muted); font-weight: 300; }
+.tagline { font-family: var(--font-body); font-size: 13px; line-height: 1.7; color: var(--text-muted); font-weight: 300; margin-bottom: 12px; }
+.email { font-family: var(--font-body); font-size: 13px; color: #c41e1e; text-decoration: none; transition: opacity 0.3s; display: inline-block; }
+.email:hover { opacity: 0.7; }
 .colTitle { font-family: var(--font-body); font-size: 9px; letter-spacing: 0.25em; color: var(--text-faint); text-transform: uppercase; margin-bottom: 20px; }
-.colLink { font-family: var(--font-body); font-size: 13px; color: var(--text-body); margin-bottom: 12px; cursor: pointer; transition: color 0.3s; display: block; }
+.colLink { font-family: var(--font-body); font-size: 13px; color: var(--text-body); margin-bottom: 12px; cursor: pointer; transition: color 0.3s; display: block; text-decoration: none; }
 .colLink:hover { color: var(--text-primary); }
 .bottom { border-top: 1px solid rgba(0,0,0,0.04); padding-top: 24px; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 16px; font-family: var(--font-body); font-size: 11px; color: var(--text-faint); }
-.whatsapp { position: fixed; bottom: 24px; right: 24px; z-index: 100; width: 52px; height: 52px; border-radius: 50%; background: #25D366; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 20px rgba(37,211,102,0.2); transition: transform 0.3s; }
-.whatsapp:hover { transform: scale(1.08); }
 @media (max-width: 768px) { .footer { padding: 60px 24px 32px; } .grid { gap: 32px; } }
