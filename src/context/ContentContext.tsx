@@ -340,68 +340,30 @@ export const ContentProvider = ({ children }: { children: React.ReactNode }) => 
     };
 
     const fetchData = async () => {
-
         try {
-            // Fetch Subjects
-            const { data: subjectsData, error: subjectsError } = await supabase
-                .from('subjects')
-                .select('*')
-                .order('order_index', { ascending: true })
-                .order('created_at', { ascending: true });
+            // Server-side fetch via API route (bypasses India Supabase block)
+            const response = await fetch('/api/content');
+            if (!response.ok) throw new Error('Failed to load content');
+            const { subjects: subjectsData, chapters: chaptersData, topics: topicsData, materials: materialsData, quizzes: quizzesData } = await response.json();
 
-            if (subjectsError) throw subjectsError;
-
-            // Fetch Chapters
-            const { data: chaptersData, error: chaptersError } = await supabase
-                .from('chapters')
-                .select('*')
-                .order('created_at', { ascending: true });
-
-            if (chaptersError) throw chaptersError;
-
-            // Fetch Topics
-            const { data: topicsData, error: topicsError } = await supabase
-                .from('topics')
-                .select('*')
-                .order('created_at', { ascending: true });
-
-            if (topicsError) throw topicsError;
-
-            // Fetch Materials
-            const { data: materialsData, error: materialsError } = await supabase
-                .from('materials')
-                .select('*')
-                .order('created_at', { ascending: true });
-
-            if (materialsError) throw materialsError;
-
-            // Fetch Quizzes
-            const { data: quizzesData, error: quizzesError } = await supabase
-                .from('quizzes')
-                .select('id, topic_id, title, duration_minutes, price, created_at');
-
-            if (quizzesError) console.error('Error fetching quizzes:', quizzesError); // Non-critical
             if (quizzesData) setQuizzes(quizzesData);
-
-            // Reconstruct nested structure
-            // Reconstruct nested structure
             if (subjectsData) setSubjects(subjectsData);
 
             if (chaptersData) {
-                const nestedChapters = chaptersData.map(c => {
-                    const cTopics = topicsData?.filter(t => t.chapter_id === c.id) || [];
+                const nestedChapters = chaptersData.map((c: any) => {
+                    const cTopics = topicsData?.filter((t: any) => t.chapter_id === c.id) || [];
                     return {
                         id: c.id,
                         subjectId: c.subject_id,
                         title: c.title,
                         is_locked: c.is_locked,
                         price: c.price,
-                        topics: cTopics.map(t => {
-                            const tMaterials = materialsData?.filter(m => m.topic_id === t.id) || [];
+                        topics: cTopics.map((t: any) => {
+                            const tMaterials = materialsData?.filter((m: any) => m.topic_id === t.id) || [];
                             return {
                                 id: t.id,
                                 title: t.title,
-                                materials: tMaterials.map(m => ({
+                                materials: tMaterials.map((m: any) => ({
                                     id: m.id,
                                     title: m.title,
                                     type: m.type as 'pdf' | 'video',
