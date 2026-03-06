@@ -23,8 +23,8 @@ export const Navbar = () => {
   const navLinks = [
     { name: 'Lectures', href: '/neet' },
     { name: 'Episodes', href: '/episodes' },
-    { name: 'Research', href: '#ncert' },
-    { name: 'Priya AI', href: '#priya-ai' },
+    { name: 'Research', href: '/#ncert' },
+    { name: 'Priya AI', href: '/priya-ai' },
   ];
 
   return (
