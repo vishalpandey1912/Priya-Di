@@ -50,9 +50,6 @@ export const metadata: Metadata = {
     description: "Crack NEET with Concept-First Learning",
     images: ['/logo-v4.png'],
   },
-  verification: {
-    google: 'YOUR_GOOGLE_VERIFICATION_CODE', // Placeholder as requested
-  },
   icons: {
     icon: '/logo-v4.png',
     apple: '/apple-logo-v4.png',
