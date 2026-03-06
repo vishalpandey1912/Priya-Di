@@ -1,198 +1,212 @@
 'use client';
 
-import React, { useState, useEffect, useMemo } from 'react';
-import { Card, Button, PaymentModal } from '@/components/ui';
-import { Check, Star, Zap, BookOpen } from 'lucide-react';
+import React, { useState } from 'react';
+import { Check, X, ArrowRight, Sparkles } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
-import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { useCart } from '@/context/CartContext';
-import { useProduct } from '@/context/ProductContext';
-import { useContent } from '@/context/ContentContext';
+import { PaymentModal } from '@/components/ui';
 import styles from './Pricing.module.css';
 
+/* ─────────────────────────────────────────────
+   PLAN DATA - Hardcoded per Santosh's decision
+   
+   TODO (Vishal): Create matching products in Supabase
+   "products" table with these IDs so enrollments work
+   after payment. Until then, payment goes through
+   Razorpay but enrollment must be done manually.
+   ───────────────────────────────────────────── */
+
+const PLANS = [
+  {
+    id: 'free',
+    name: 'Explorer',
+    price: 0,
+    period: 'forever',
+    description: 'Browse the platform and get a taste of what NEET prep should feel like.',
+    accessLevel: '15% of all content',
+    features: [
+      { text: '3 free quizzes per subject', included: true },
+      { text: 'Sample NCERT-aligned notes', included: true },
+      { text: 'Audio episodes (free catalog)', included: true },
+      { text: 'XP and streak tracking', included: true },
+      { text: 'Priya AI on Telegram', included: true },
+      { text: 'Full chapter notes and PDFs', included: false },
+      { text: 'All 93+ topic quizzes', included: false },
+      { text: 'One-on-one sessions', included: false },
+    ],
+    cta: 'Start Free',
+    recommended: false,
+  },
+  {
+    id: 'basic',
+    name: 'Standard',
+    price: 299,
+    period: 'one-time',
+    description: 'Unlock 30% of lectures, notes, and quizzes. Ideal to get serious about Biology.',
+    accessLevel: '30% of all content',
+    features: [
+      { text: '~30 quizzes with solutions', included: true },
+      { text: 'NCERT line-by-line notes (select chapters)', included: true },
+      { text: 'All audio episodes', included: true },
+      { text: 'XP, streaks, and leaderboard', included: true },
+      { text: 'Priya AI on Telegram', included: true },
+      { text: 'PDF downloads for select topics', included: true },
+      { text: 'All 93+ topic quizzes', included: false },
+      { text: 'One-on-one sessions', included: false },
+    ],
+    cta: 'Get Standard',
+    recommended: true,
+  },
+  {
+    id: 'premium',
+    name: 'Premium',
+    price: 999,
+    period: 'one-time',
+    description: 'Everything. Full access to all content, quizzes, and upcoming premium features.',
+    accessLevel: '100% of all content',
+    features: [
+      { text: 'All 93+ quizzes with detailed solutions', included: true },
+      { text: 'Complete NCERT notes for every chapter', included: true },
+      { text: 'All audio episodes + future releases', included: true },
+      { text: 'XP, streaks, and leaderboard', included: true },
+      { text: 'Priya AI on Telegram', included: true },
+      { text: 'All PDF materials and downloads', included: true },
+      { text: 'One-on-one doubt sessions', included: true, comingSoon: true },
+      { text: 'Advanced practice sets', included: true, comingSoon: true },
+    ],
+    cta: 'Get Premium',
+    recommended: false,
+  },
+];
+
 export default function PricingPage() {
-    const { user } = useAuth();
-    const { addToCart } = useCart();
-    const { products } = useProduct();
-    const { hasAccess, enrolledTargetIds } = useContent(); // Use robust access logic
-    const router = useRouter();
-    const [selectedPlan, setSelectedPlan] = useState<any>(null);
-    const [isModalOpen, setIsModalOpen] = useState(false);
+  const { user } = useAuth();
+  const router = useRouter();
+  const [selectedPlan, setSelectedPlan] = useState<typeof PLANS[0] | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
-    // Filter products to display on Pricing Page
-    // Show Bundles, Test Series, and promoted Subjects
-    const displayPlans = useMemo(() => {
-        const filtered = products.filter(p => p.isActive && ['bundle', 'test_series', 'subject'].includes(p.type));
-        // Sort: Recommended first
-        return filtered.sort((a, b) => (b.isRecommended ? 1 : 0) - (a.isRecommended ? 1 : 0));
-    }, [products]);
+  const handlePlanAction = (plan: typeof PLANS[0]) => {
+    if (plan.id === 'free') {
+      router.push('/signup');
+      return;
+    }
 
-    // Note: We no longer need manual effect to load purchases. 
-    // ContentContext handles all that logic securely via proxies and wildcard rules.
+    if (!user) {
+      router.push(`/login?next=/pricing`);
+      return;
+    }
 
-    const handleAddToCart = (plan: any) => {
-        addToCart({
-            id: plan.id,
-            name: plan.name,
-            price: plan.price,
-            type: plan.type,
-            targetIds: plan.targetIds
-        });
-    };
+    setSelectedPlan(plan);
+    setIsModalOpen(true);
+  };
 
-    const handlePaymentSuccess = async () => {
-        if (!selectedPlan || !user) return;
-        // The modal calls refresh in ContentContext via onSuccess callback if wired, 
-        // but simple reload or context update works too.
-        // For now, we rely on ContentContext polling or simple refresh.
-        setIsModalOpen(false);
-        // Force reload to get fresh permissions if needed, or rely on context logic
-        window.location.reload();
-    };
+  const handlePaymentSuccess = () => {
+    setIsModalOpen(false);
+    setSelectedPlan(null);
+    window.location.reload();
+  };
 
-    return (
-        <div className={styles.container}>
-            <div className={styles.wrapper}>
-                <div className={styles.header}>
-                    <h1 className={styles.title}>
-                        Invest in Your Future
-                    </h1>
-                    <p className={styles.subtitle}>
-                        Choose the perfect plan to crack NEET with ease. Transparent pricing, no hidden fees.
-                    </p>
-                </div>
-
-                <div className={styles.grid}>
-                    {displayPlans.map((plan) => {
-                        // ROBUST CHECK:
-                        // 1. If we own the specific product ID directly (e.g. from restore)
-                        // 2. OR if we have access to ALL targets this plan provides (e.g. via Full Bundle)
-                        const isPurchased = enrolledTargetIds.includes(plan.id) ||
-                            (plan.targetIds && plan.targetIds.length > 0 && plan.targetIds.every((tid: string) => hasAccess(tid)));
-
-                        // Determine icon
-                        let PlanIcon = BookOpen;
-                        if (plan.type === 'test_series') PlanIcon = Star;
-
-                        // Check if it's a bundle to show custom logo
-                        const isBundle = plan.type === 'bundle' || plan.name.toLowerCase().includes('full');
-
-                        return (
-                            <div
-                                key={plan.id}
-                                className={`${styles.card} ${plan.isRecommended ? styles.recommended : ''} ${isPurchased ? styles.owned : ''}`}
-                            >
-                                {plan.isRecommended && !isPurchased && (
-                                    <div className={styles.bestValue}>
-                                        BEST VALUE
-                                    </div>
-                                )}
-
-                                {isPurchased && (
-                                    <div className={styles.purchasedBadge}>
-                                        <Check size={12} /> Owned
-                                    </div>
-                                )}
-
-                                <div className={styles.iconWrapper} style={{
-                                    backgroundColor: isBundle ? 'transparent' : `${plan.color}10`,
-                                    color: plan.color || '#0f172a',
-                                    overflow: 'hidden'
-                                }}>
-                                    {isBundle ? (
-                                        <div style={{ width: '100%', height: '100%', position: 'relative' }}>
-                                            <Image
-                                                src="/logo-v4.png"
-                                                alt="Desi Educators"
-                                                fill
-                                                style={{ objectFit: 'contain' }}
-                                            />
-                                        </div>
-                                    ) : (
-                                        <PlanIcon size={32} />
-                                    )}
-                                </div>
-
-                                <h3 className={styles.planName}>{plan.name}</h3>
-                                <p className={styles.planDescription}>
-                                    {plan.description || "Complete access to all materials and tests."}
-                                </p>
-
-                                <div className={styles.pricing}>
-                                    {plan.originalPrice && plan.originalPrice > plan.price && (
-                                        <div className={styles.originalPriceWrapper}>
-                                            <span className={styles.originalPrice}>₹{plan.originalPrice.toLocaleString()}</span>
-                                            <span className={styles.saveBadge}>
-                                                SAVE {Math.round(((plan.originalPrice - plan.price) / plan.originalPrice) * 100)}%
-                                            </span>
-                                        </div>
-                                    )}
-                                    <div className={styles.currentPriceWrapper}>
-                                        <span className={styles.currency}>₹</span>
-                                        <span className={styles.amount}>{plan.price.toLocaleString()}</span>
-                                        <span className={styles.period}>/ one-time</span>
-                                    </div>
-                                </div>
-
-                                <div className={styles.divider}></div>
-
-                                <div className={styles.featuresList}>
-                                    {plan.features.map((feature: string, i: number) => (
-                                        <div key={i} className={styles.featureItem}>
-                                            <div className={styles.checkIcon}>
-                                                <Check size={18} />
-                                            </div>
-                                            <span>{feature}</span>
-                                        </div>
-                                    ))}
-                                </div>
-
-                                <div className={styles.actions}>
-                                    <button
-                                        onClick={() => handleAddToCart(plan)}
-                                        disabled={isPurchased}
-                                        className={styles.addToCartBtn}
-                                    >
-                                        Add to Cart
-                                    </button>
-                                    <button
-                                        onClick={() => {
-                                            if (!user) {
-                                                window.location.href = `/login?next=${window.location.pathname}`;
-                                                return;
-                                            }
-                                            setSelectedPlan(plan);
-                                            setIsModalOpen(true);
-                                        }}
-                                        disabled={isPurchased}
-                                        className={`${styles.buyNowBtn} ${plan.isRecommended ? styles.recommended : ''}`}
-                                    >
-                                        {isPurchased ? 'Owned' : 'Buy Now'}
-                                    </button>
-                                </div>
-                            </div>
-                        );
-                    })}
-                </div>
-            </div>
-
-            {selectedPlan && (
-                <PaymentModal
-                    isOpen={isModalOpen}
-                    onClose={() => setIsModalOpen(false)}
-                    amount={selectedPlan.price}
-                    planName={selectedPlan.name}
-                    onSuccess={handlePaymentSuccess}
-                    items={[{
-                        id: selectedPlan.id,
-                        name: selectedPlan.name,
-                        price: selectedPlan.price,
-                        type: selectedPlan.type,
-                        targetIds: selectedPlan.targetIds
-                    }]}
-                />
-            )}
+  return (
+    <div className={styles.container}>
+      <div className={styles.wrapper}>
+        {/* Header */}
+        <div className={styles.header}>
+          <p className={styles.eyebrow}>Simple Pricing</p>
+          <h1 className={styles.title}>
+            Pick a plan.<br />Start preparing.
+          </h1>
+          <p className={styles.subtitle}>
+            One-time payment. No subscriptions. No hidden charges. Access stays forever.
+          </p>
         </div>
-    );
+
+        {/* Plans Grid */}
+        <div className={styles.grid}>
+          {PLANS.map((plan) => (
+            <div
+              key={plan.id}
+              className={`${styles.card} ${plan.recommended ? styles.recommended : ''}`}
+            >
+              {plan.recommended && (
+                <div className={styles.badge}>
+                  <Sparkles size={12} />
+                  Most Popular
+                </div>
+              )}
+
+              <div className={styles.cardHeader}>
+                <h3 className={styles.planName}>{plan.name}</h3>
+                <p className={styles.planDesc}>{plan.description}</p>
+              </div>
+
+              <div className={styles.priceBlock}>
+                {plan.price === 0 ? (
+                  <div className={styles.priceRow}>
+                    <span className={styles.priceAmount}>Free</span>
+                  </div>
+                ) : (
+                  <div className={styles.priceRow}>
+                    <span className={styles.priceCurrency}>&#8377;</span>
+                    <span className={styles.priceAmount}>{plan.price}</span>
+                    <span className={styles.pricePeriod}>/ {plan.period}</span>
+                  </div>
+                )}
+                <p className={styles.accessNote}>{plan.accessLevel}</p>
+              </div>
+
+              <button
+                className={`${styles.ctaBtn} ${plan.recommended ? styles.ctaPrimary : ''} ${plan.price === 0 ? styles.ctaOutline : ''}`}
+                onClick={() => handlePlanAction(plan)}
+              >
+                {plan.cta}
+                <ArrowRight size={16} />
+              </button>
+
+              <div className={styles.divider} />
+
+              <ul className={styles.featureList}>
+                {plan.features.map((f, i) => (
+                  <li key={i} className={`${styles.featureItem} ${!f.included ? styles.featureDisabled : ''}`}>
+                    {f.included ? (
+                      <Check size={16} className={styles.checkIcon} />
+                    ) : (
+                      <X size={16} className={styles.xIcon} />
+                    )}
+                    <span>{f.text}</span>
+                    {f.comingSoon && (
+                      <span className={styles.comingSoon}>Coming Soon</span>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
+
+        {/* Bottom Note */}
+        <div className={styles.bottomNote}>
+          <p>Questions? Write to <a href="mailto:support@desieducators.com">support@desieducators.com</a></p>
+          <p className={styles.finePrint}>Coupon code PP99 available at checkout. Payments secured by Razorpay.</p>
+        </div>
+      </div>
+
+      {/* Payment Modal */}
+      {selectedPlan && selectedPlan.price > 0 && (
+        <PaymentModal
+          isOpen={isModalOpen}
+          onClose={() => { setIsModalOpen(false); setSelectedPlan(null); }}
+          amount={selectedPlan.price}
+          planName={selectedPlan.name}
+          onSuccess={handlePaymentSuccess}
+          items={[{
+            id: selectedPlan.id,
+            name: selectedPlan.name,
+            price: selectedPlan.price,
+            type: 'bundle',
+            targetIds: [],
+          }]}
+        />
+      )}
+    </div>
+  );
 }
