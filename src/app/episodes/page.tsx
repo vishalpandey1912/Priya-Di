@@ -22,7 +22,6 @@ export default function EpisodesPage() {
         padding: '32px 16px 120px',
       }}
     >
-      {/* Header */}
       <div style={{ marginBottom: '24px' }}>
         <div
           style={{
@@ -32,25 +31,24 @@ export default function EpisodesPage() {
             marginBottom: '8px',
           }}
         >
-          <Headphones size={28} style={{ color: '#6366f1' }} />
+          <Headphones size={28} style={{ color: '#c41e1e' }} />
           <h1
             style={{
               margin: 0,
               fontSize: '24px',
               fontWeight: 800,
-              color: '#e2e8f0',
+              color: 'var(--text-primary)',
             }}
           >
             Summit Neuro
           </h1>
         </div>
-        <p style={{ margin: 0, fontSize: '14px', color: '#9ca3af' }}>
+        <p style={{ margin: 0, fontSize: '14px', color: 'var(--text-muted)' }}>
           Audio episodes by Priya Ma&apos;am. Learn NEET Biology concepts while you commute, cook, or chill.
           Watch 85% of any episode to earn 25 XP.
         </p>
       </div>
 
-      {/* Subject tabs */}
       <div
         style={{
           display: 'flex',
@@ -66,15 +64,13 @@ export default function EpisodesPage() {
             style={{
               padding: '8px 16px',
               borderRadius: '20px',
-              border: 'none',
+              border: activeSubject === s.key ? '1px solid #c41e1e' : '1px solid var(--border)',
               fontSize: '13px',
               fontWeight: 600,
               cursor: 'pointer',
               whiteSpace: 'nowrap',
-              backgroundColor:
-                activeSubject === s.key ? '#6366f1' : '#1f2937',
-              color:
-                activeSubject === s.key ? '#fff' : '#9ca3af',
+              backgroundColor: activeSubject === s.key ? '#c41e1e' : 'var(--bg-card)',
+              color: activeSubject === s.key ? '#fff' : 'var(--text-body)',
               transition: 'all 0.2s ease',
             }}
           >
@@ -83,7 +79,6 @@ export default function EpisodesPage() {
         ))}
       </div>
 
-      {/* Episode List */}
       <EpisodeList
         subject={activeSubject || undefined}
         showTitle={false}
