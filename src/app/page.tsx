@@ -432,7 +432,6 @@ const Reveal = ({ children, delay = 0, direction = "up" }: { children: React.Rea
 
 // ─── MAIN COMPONENT ───
 export default function DesiEducatorsHome() {
-  const [mobileMenu, setMobileMenu] = useState(false);
   const [scrollY, setScrollY] = useState(0);
 
   useEffect(() => {
@@ -455,8 +454,6 @@ export default function DesiEducatorsHome() {
         @keyframes breathe{0%,100%{transform:scale(1)}50%{transform:scale(1.02)}}
         .feature-card{transition:all 0.3s cubic-bezier(.4,0,.2,1)}
         .feature-card:hover{transform:translateY(-4px);box-shadow:0 12px 40px rgba(0,0,0,0.1)}
-        .nav-links{display:flex;gap:28px;align-items:center}
-        .nav-hamburger{display:none;background:none;border:none;cursor:pointer;padding:4px}
         .hero-grid{display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:center}
         .hero-img-wrap{width:380px;height:460px}
         .hero-title{font-size:64px}
@@ -468,24 +465,16 @@ export default function DesiEducatorsHome() {
         .quiz-grid{display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:start}
         .episodes-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
         .research-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-bottom:40px}
-        .footer-inner{display:flex;justify-content:space-between;align-items:center}
-        .footer-links{display:flex;gap:24px}
         .section-h2{font-size:40px}
         .section-h2-lg{font-size:44px}
         .section-h2-m{font-size:36px}
         .priya-ai-buttons{display:flex;gap:12px;justify-content:center}
         .ncert-stats{display:inline-flex;gap:24px;padding:16px 28px}
-        .mobile-menu{display:none;position:fixed;top:57px;left:0;right:0;background:#fafaf9;border-bottom:1px solid #e5e5e4;padding:16px 24px;z-index:49;flex-direction:column;gap:16px}
-        .mobile-menu.open{display:flex}
         .episode-card{transition:all 0.3s cubic-bezier(.4,0,.2,1)}
         .episode-card:hover{transform:translateY(-2px);border-color:#c41e1e!important;box-shadow:0 8px 24px rgba(196,30,30,0.08)!important}
         .cta-btn{transition:all 0.3s cubic-bezier(.4,0,.2,1)}
         .cta-btn:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(196,30,30,0.35)!important}
-        .nav-link{transition:color 0.2s}
-        .nav-link:hover{color:#c41e1e!important}
         @media(max-width:768px){
-          .nav-links{display:none}
-          .nav-hamburger{display:block}
           .hero-grid{grid-template-columns:1fr;gap:24px;padding:32px 16px 24px!important}
           .hero-img-wrap{width:100%;height:320px;margin:0 auto}
           .hero-title{font-size:36px}
@@ -497,52 +486,14 @@ export default function DesiEducatorsHome() {
           .quiz-grid{grid-template-columns:1fr;gap:24px}
           .episodes-grid{grid-template-columns:1fr;gap:12px}
           .research-grid{grid-template-columns:1fr;gap:12px}
-          .footer-inner{flex-direction:column;gap:20px;text-align:center}
-          .footer-links{flex-wrap:wrap;justify-content:center;gap:16px}
           .section-h2{font-size:28px}
           .section-h2-lg{font-size:30px}
           .section-h2-m{font-size:26px}
           .priya-ai-buttons{flex-direction:column;align-items:center}
           .ncert-stats{flex-direction:row;gap:16px;padding:12px 16px}
-          .mobile-menu.open{display:flex}
         }
       `}</style>
 
-      {/* NAV */}
-      <nav style={{position:"sticky",top:0,zIndex:50,background:"rgba(250,250,249,0.92)",backdropFilter:"blur(12px)",borderBottom:"1px solid #e5e5e4",transition:"all 0.3s"}}>
-        <div style={{maxWidth:1200,margin:"0 auto",padding:"12px 24px",display:"flex",alignItems:"center",justifyContent:"space-between"}}>
-          <a href="/" style={{display:"flex",alignItems:"center",gap:10,textDecoration:"none"}}>
-            <div style={{width:32,height:32,background:BRAND.red,borderRadius:8,display:"flex",alignItems:"center",justifyContent:"center"}}>
-              <span style={{color:"#fff",fontWeight:700,fontSize:16,fontFamily:"'DM Serif Display',serif"}}>D</span>
-            </div>
-            <span style={{fontFamily:"'DM Serif Display',serif",fontSize:20,color:"#111"}}>Desi Educators</span>
-          </a>
-          <div className="nav-links">
-            {[{label:"Episodes",href:"/episodes"},{label:"Chapters",href:"#chapters"},{label:"Quizzes",href:"#quizzes"},{label:"Research",href:"#research"},{label:"Priya AI",href:"/priya-ai"}].map(l=>(
-              <a key={l.label} href={l.href} className="nav-link" style={{fontSize:12,fontWeight:600,color:"#6b7280",textDecoration:"none",letterSpacing:1.5,textTransform:"uppercase",fontFamily:"'DM Sans',sans-serif"}}>{l.label}</a>
-            ))}
-            <a href="/login" style={{fontSize:13,fontWeight:500,color:"#374151",textDecoration:"none"}}>Log In</a>
-            <a href="/signup" className="cta-btn" style={{padding:"8px 20px",background:BRAND.red,color:"#fff",border:"none",borderRadius:8,fontWeight:600,fontSize:13,letterSpacing:0.5,textDecoration:"none",display:"inline-block"}}>Start Learning</a>
-          </div>
-          <button className="nav-hamburger" onClick={()=>setMobileMenu(!mobileMenu)} aria-label="Menu">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#111" strokeWidth="2" strokeLinecap="round">
-              {mobileMenu?<><line x1="6" y1="6" x2="18" y2="18"/><line x1="6" y1="18" x2="18" y2="6"/></>:<><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></>}
-            </svg>
-          </button>
-        </div>
-      </nav>
-      {/* MOBILE MENU */}
-      <div className={`mobile-menu${mobileMenu?" open":""}`}>
-        <a href="/episodes" onClick={()=>setMobileMenu(false)} style={{fontSize:14,fontWeight:600,color:"#374151",textDecoration:"none"}}>Episodes</a>
-        <a href="#chapters" onClick={()=>setMobileMenu(false)} style={{fontSize:14,fontWeight:600,color:"#374151",textDecoration:"none"}}>Chapters</a>
-        <a href="#quizzes" onClick={()=>setMobileMenu(false)} style={{fontSize:14,fontWeight:600,color:"#374151",textDecoration:"none"}}>Quizzes</a>
-        <a href="#research" onClick={()=>setMobileMenu(false)} style={{fontSize:14,fontWeight:600,color:"#374151",textDecoration:"none"}}>Research</a>
-        <a href="/priya-ai" onClick={()=>setMobileMenu(false)} style={{fontSize:14,fontWeight:600,color:BRAND.red,textDecoration:"none"}}>Priya AI</a>
-        <div style={{display:"flex",gap:12,paddingTop:8,borderTop:"1px solid #e5e5e4"}}>
-          <a href="/login" style={{flex:1,padding:"10px",textAlign:"center",border:"1px solid #d1d5db",borderRadius:8,fontSize:14,fontWeight:600,color:"#374151",textDecoration:"none"}}>Log In</a>
-          <a href="/signup" style={{flex:1,padding:"10px",textAlign:"center",background:BRAND.red,borderRadius:8,fontSize:14,fontWeight:600,color:"#fff",textDecoration:"none"}}>Sign Up</a>
-        </div>
-      </div>
 
       {/* HERO */}
       <section style={{position:"relative",overflow:"hidden",background:"#fafaf9"}}>
@@ -869,25 +820,6 @@ export default function DesiEducatorsHome() {
         </Reveal>
       </section>
 
-      {/* FOOTER */}
-      <footer style={{background:"#111",padding:"40px 24px",borderTop:"1px solid #222"}}>
-        <div className="footer-inner" style={{maxWidth:1200,margin:"0 auto"}}>
-          <div>
-            <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:8}}>
-              <div style={{width:24,height:24,background:BRAND.red,borderRadius:6,display:"flex",alignItems:"center",justifyContent:"center"}}><span style={{color:"#fff",fontWeight:700,fontSize:12,fontFamily:"'DM Serif Display',serif"}}>D</span></div>
-              <span style={{fontFamily:"'DM Serif Display',serif",fontSize:16,color:"#fff"}}>Desi Educators</span>
-            </div>
-            <p style={{fontSize:12,color:"#6b7280"}}>Biology with Priya Ma'am. Built for NEET. A Summit Neuro Educational Research initiative.</p>
-          </div>
-          <div className="footer-links">
-            {[{label:"Privacy",href:"/privacy-policy"},{label:"Terms",href:"/terms"},{label:"Refunds",href:"/refund-policy"},{label:"Contact",href:"/contact"}].map(l=>(
-              <a key={l.label} href={l.href} style={{fontSize:12,color:"#6b7280",textDecoration:"none",letterSpacing:1,textTransform:"uppercase",fontFamily:"'DM Sans',sans-serif",transition:"color 0.2s"}}
-                onMouseEnter={e=>{(e.target as HTMLElement).style.color="#fff"}}
-                onMouseLeave={e=>{(e.target as HTMLElement).style.color="#6b7280"}}>{l.label}</a>
-            ))}
-          </div>
-        </div>
-      </footer>
     </div>
   );
 }
