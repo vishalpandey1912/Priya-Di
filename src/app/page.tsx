@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 
 // ─── CONSTANTS ───
 const BRAND = { red: "#c41e1e", redLight: "#fef2f2", redDark: "#991b1b" };
@@ -9,47 +9,47 @@ const NEET_DATE = new Date("2026-05-04T09:30:00+05:30");
 // ─── SVG ICONS ───
 const Icons = {
   microscope: (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{width:24,height:24}}>
       <circle cx="12" cy="7" r="3"/><line x1="12" y1="10" x2="12" y2="18"/><line x1="8" y1="22" x2="16" y2="22"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="7" y1="18" x2="17" y2="18"/>
     </svg>
   ),
   dna: (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" className="w-6 h-6">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" style={{width:24,height:24}}>
       <path d="M4 2c0 5 4 7 8 7s8 2 8 7"/><path d="M20 2c0 5-4 7-8 7s-8 2-8 7"/><line x1="6" y1="6" x2="18" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="6" y1="18" x2="18" y2="18"/>
     </svg>
   ),
   flask: (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{width:24,height:24}}>
       <path d="M9 3h6v6l5 8H4l5-8V3z"/><line x1="9" y1="3" x2="15" y2="3"/>
     </svg>
   ),
   bolt: (
-    <svg viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6">
+    <svg viewBox="0 0 24 24" fill="currentColor" style={{width:24,height:24}}>
       <path d="M13 2L3 14h8l-1 8 10-12h-8l1-8z"/>
     </svg>
   ),
   brain: (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" className="w-6 h-6">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" style={{width:24,height:24}}>
       <path d="M12 2a5 5 0 00-4.8 3.6A4 4 0 004 9.5a4 4 0 001.2 7A3.5 3.5 0 008 22h8a3.5 3.5 0 002.8-5.5A4 4 0 0020 9.5a4 4 0 00-3.2-3.9A5 5 0 0012 2z"/><path d="M12 2v20"/>
     </svg>
   ),
   headphones: (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{width:24,height:24}}>
       <path d="M3 18v-6a9 9 0 0118 0v6"/><path d="M21 19a2 2 0 01-2 2h-1a2 2 0 01-2-2v-3a2 2 0 012-2h3v5z"/><path d="M3 19a2 2 0 002 2h1a2 2 0 002-2v-3a2 2 0 00-2-2H3v5z"/>
     </svg>
   ),
   trophy: (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{width:24,height:24}}>
       <path d="M6 9H3V5h3"/><path d="M18 9h3V5h-3"/><path d="M6 5h12v7a6 6 0 01-12 0V5z"/><line x1="12" y1="17" x2="12" y2="20"/><line x1="8" y1="22" x2="16" y2="22"/>
     </svg>
   ),
   robot: (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{width:24,height:24}}>
       <rect x="4" y="8" width="16" height="12" rx="2"/><circle cx="9" cy="14" r="1.5"/><circle cx="15" cy="14" r="1.5"/><line x1="12" y1="4" x2="12" y2="8"/><circle cx="12" cy="3" r="1"/>
     </svg>
   ),
   target: (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-6 h-6">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" style={{width:24,height:24}}>
       <circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>
     </svg>
   ),
@@ -64,14 +64,56 @@ const Icons = {
     </svg>
   ),
   globe: (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" className="w-6 h-6">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" style={{width:24,height:24}}>
       <circle cx="12" cy="12" r="10"/><ellipse cx="12" cy="12" rx="4" ry="10"/><line x1="2" y1="12" x2="22" y2="12"/>
+    </svg>
+  ),
+  arrowRight: (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{width:16,height:16}}>
+      <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
+    </svg>
+  ),
+  sparkle: (
+    <svg viewBox="0 0 24 24" fill="currentColor" style={{width:16,height:16}}>
+      <path d="M12 2l2.4 7.2L22 12l-7.6 2.8L12 22l-2.4-7.2L2 12l7.6-2.8z"/>
     </svg>
   ),
 };
 
+// ─── SCROLL REVEAL HOOK ───
+const useScrollReveal = (threshold = 0.15) => {
+  const ref = useRef(null);
+  const [visible, setVisible] = useState(false);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(([e]) => { if (e.isIntersecting) { setVisible(true); obs.disconnect(); } }, { threshold });
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, [threshold]);
+  return { ref, visible };
+};
+
+// ─── ANIMATED COUNTER ───
+const AnimatedCounter = ({ end, suffix = "", duration = 1500 }) => {
+  const [count, setCount] = useState(0);
+  const { ref, visible } = useScrollReveal(0.3);
+  useEffect(() => {
+    if (!visible) return;
+    let start = 0;
+    const step = Math.max(1, Math.floor(end / (duration / 16)));
+    const timer = setInterval(() => {
+      start += step;
+      if (start >= end) { setCount(end); clearInterval(timer); }
+      else setCount(start);
+    }, 16);
+    return () => clearInterval(timer);
+  }, [visible, end, duration]);
+  return <span ref={ref}>{count.toLocaleString()}{suffix}</span>;
+};
+
 // ─── SVG AVATAR GENERATOR ───
-const StudentAvatar = ({ seed, size = 32 }) => {
+const StudentAvatar = ({ seed, size = 32 }: { seed: number; size?: number }) => {
   const colors = ["#c41e1e","#2563eb","#16a34a","#d97706","#7c3aed","#ec4899","#0891b2"];
   const hairColors = ["#1a1a1a","#3d2314","#6b4423","#1a1a2e","#4a2511"];
   const skinTones = ["#f5d0a9","#e8b88a","#c68642","#8d5524","#fde2c4"];
@@ -96,7 +138,7 @@ const Countdown = () => {
   const [time, setTime] = useState({ d: 0, h: 0, m: 0, s: 0 });
   useEffect(() => {
     const tick = () => {
-      const diff = Math.max(0, NEET_DATE - new Date());
+      const diff = Math.max(0, NEET_DATE.getTime() - Date.now());
       setTime({ d: Math.floor(diff/86400000), h: Math.floor((diff%86400000)/3600000), m: Math.floor((diff%3600000)/60000), s: Math.floor((diff%60000)/1000) });
     };
     tick(); const i = setInterval(tick, 1000); return () => clearInterval(i);
@@ -104,28 +146,51 @@ const Countdown = () => {
   return (
     <div style={{display:"flex",gap:8}}>
       {[["d",time.d,"DAYS"],["h",time.h,"HRS"],["m",time.m,"MIN"],["s",time.s,"SEC"]].map(([k,v,l])=>(
-        <div key={k} style={{textAlign:"center"}}>
+        <div key={k as string} style={{textAlign:"center"}}>
           <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:28,fontWeight:700,color:"#111",lineHeight:1}}>{String(v).padStart(2,"0")}</div>
-          <div style={{fontSize:9,fontWeight:600,color:"#999",letterSpacing:1.5,marginTop:2}}>{l}</div>
+          <div style={{fontSize:9,fontWeight:600,color:"#999",letterSpacing:1.5,marginTop:2}}>{l as string}</div>
         </div>
       ))}
     </div>
   );
 };
 
-// ─── BIOLOGY DECORATIONS ───
-const BioDeco = () => (
-  <div style={{position:"absolute",inset:0,overflow:"hidden",pointerEvents:"none",zIndex:0}}>
-    <svg viewBox="0 0 120 60" style={{position:"absolute",top:"8%",right:"5%",width:100,opacity:0.07}}>
-      <ellipse cx="60" cy="30" rx="55" ry="25" fill="none" stroke="#16a34a" strokeWidth="2"/>
-      <path d="M15 30 Q30 15 45 30 Q60 45 75 30 Q90 15 105 30" fill="none" stroke="#16a34a" strokeWidth="1.5"/>
-    </svg>
-    <svg viewBox="0 0 40 200" style={{position:"absolute",top:"20%",left:"3%",width:30,opacity:0.06}}>
-      <path d="M5 0 Q20 25 35 50 Q20 75 5 100 Q20 125 35 150 Q20 175 5 200" fill="none" stroke={BRAND.red} strokeWidth="2"/>
-      <path d="M35 0 Q20 25 5 50 Q20 75 35 100 Q20 125 5 150 Q20 175 35 200" fill="none" stroke={BRAND.red} strokeWidth="2"/>
-    </svg>
-  </div>
-);
+// ─── FLOATING PARTICLES ───
+const FloatingParticles = () => {
+  const particles = [
+    { shape:"cell", x:"8%", y:"15%", size:60, delay:0, dur:18 },
+    { shape:"helix", x:"85%", y:"25%", size:50, delay:2, dur:22 },
+    { shape:"cell", x:"92%", y:"65%", size:40, delay:4, dur:20 },
+    { shape:"helix", x:"5%", y:"75%", size:45, delay:6, dur:16 },
+    { shape:"cell", x:"50%", y:"10%", size:35, delay:8, dur:24 },
+    { shape:"helix", x:"70%", y:"80%", size:55, delay:1, dur:19 },
+    { shape:"cell", x:"25%", y:"85%", size:30, delay:3, dur:21 },
+    { shape:"helix", x:"40%", y:"45%", size:28, delay:5, dur:17 },
+  ];
+  return (
+    <div style={{position:"absolute",inset:0,overflow:"hidden",pointerEvents:"none",zIndex:0}}>
+      {particles.map((p, i) => (
+        <div key={i} style={{
+          position:"absolute", left:p.x, top:p.y, width:p.size, height:p.size, opacity:0.04,
+          animation:`floatParticle ${p.dur}s ease-in-out ${p.delay}s infinite alternate`,
+        }}>
+          {p.shape === "cell" ? (
+            <svg viewBox="0 0 60 60" fill="none" stroke="#16a34a" strokeWidth="1.5">
+              <ellipse cx="30" cy="30" rx="25" ry="20"/>
+              <ellipse cx="30" cy="30" rx="8" ry="6" fill="none" stroke="#16a34a"/>
+              <circle cx="26" cy="28" r="2" fill="#16a34a" opacity="0.3"/>
+            </svg>
+          ) : (
+            <svg viewBox="0 0 40 80" fill="none" stroke="#c41e1e" strokeWidth="1.2">
+              <path d="M5 0 Q20 10 35 20 Q20 30 5 40 Q20 50 35 60 Q20 70 5 80"/>
+              <path d="M35 0 Q20 10 5 20 Q20 30 35 40 Q20 50 5 60 Q20 70 35 80"/>
+            </svg>
+          )}
+        </div>
+      ))}
+    </div>
+  );
+};
 
 // ─── DNA HELIX INTERACTIVE ───
 const basePairs = [
@@ -137,25 +202,29 @@ const basePairs = [
 ];
 
 const DNAHelix = () => {
-  const [hovered, setHovered] = useState(null);
+  const [hovered, setHovered] = useState<number | null>(null);
   return (
     <div style={{maxWidth:340,margin:"0 auto"}}>
       <div style={{display:"flex",flexDirection:"column",gap:6}}>
         {basePairs.map((bp, i) => (
           <div key={i} onMouseEnter={()=>setHovered(i)} onMouseLeave={()=>setHovered(null)}
-            style={{display:"flex",alignItems:"center",justifyContent:"center",gap:4,cursor:"pointer",padding:"6px 0",borderRadius:8,background:hovered===i?"#fef2f2":"transparent",transition:"all 0.2s"}}>
+            style={{display:"flex",alignItems:"center",justifyContent:"center",gap:4,cursor:"pointer",padding:"6px 0",borderRadius:8,background:hovered===i?"#fef2f2":"transparent",transition:"all 0.3s cubic-bezier(.4,0,.2,1)",transform:hovered===i?"scale(1.04)":"scale(1)"}}>
             <span style={{fontFamily:"'JetBrains Mono',monospace",fontWeight:700,fontSize:18,color:bp.left==="A"||bp.left==="T"?BRAND.red:SUBJECT.bio,width:28,textAlign:"right"}}>{bp.left}</span>
-            <div style={{display:"flex",gap:2,width:60,justifyContent:"center"}}>{Array(bp.bonds).fill(0).map((_,j)=>(<div key={j} style={{height:2,flex:1,background:"#d1d5db",borderRadius:1}}/>))}</div>
+            <div style={{display:"flex",gap:2,width:60,justifyContent:"center"}}>{Array(bp.bonds).fill(0).map((_,j)=>(
+              <div key={j} style={{height:2,flex:1,background:hovered===i?BRAND.red:"#d1d5db",borderRadius:1,transition:"all 0.3s"}}/>
+            ))}</div>
             <span style={{fontFamily:"'JetBrains Mono',monospace",fontWeight:700,fontSize:18,color:bp.right==="A"||bp.right==="T"?BRAND.red:SUBJECT.bio,width:28,textAlign:"left"}}>{bp.right}</span>
           </div>
         ))}
       </div>
-      {hovered!==null && <div style={{marginTop:12,padding:"10px 14px",background:"#f9fafb",borderRadius:8,fontSize:12,color:"#4b5563",textAlign:"center",border:"1px solid #e5e7eb"}}>{basePairs[hovered].fact}</div>}
+      <div style={{marginTop:12,padding:"10px 14px",background:hovered!==null?"#fef2f2":"#f9fafb",borderRadius:8,fontSize:12,color:"#4b5563",textAlign:"center",border:"1px solid #e5e7eb",transition:"all 0.3s",minHeight:40}}>
+        {hovered!==null ? basePairs[hovered].fact : "Hover or tap a base pair to see NCERT facts"}
+      </div>
     </div>
   );
 };
 
-// ─── 10 INTERACTIVE BIOLOGY EXAMPLES ───
+// ─── 15 INTERACTIVE BIOLOGY EXAMPLES ───
 const bioExamples = [
   { id:"cell", title:"Animal Cell", chapter:"Ch 8", color:"#7c3aed", items:[
     { label:"Nucleus", detail:"Double membrane, contains chromatin. Controls gene expression." },
@@ -207,23 +276,49 @@ const bioExamples = [
     { label:"Products per turn", detail:"3 NADH, 1 FADH2, 1 GTP, 2 CO2. Two turns per glucose (2 pyruvate)." },
     { label:"Regulation", detail:"Isocitrate dehydrogenase is rate limiting. Inhibited by ATP, NADH. Activated by ADP." },
   ]},
+  // ─── 5 NEW TOPICS ───
+  { id:"nephron", title:"Nephron Structure", chapter:"Ch 19", color:"#8b5cf6", items:[
+    { label:"Bowman's Capsule", detail:"Surrounds glomerulus (capillary tuft). Ultrafiltration: water, ions, glucose, urea pass through. Proteins, cells retained." },
+    { label:"Loop of Henle", detail:"Descending limb: permeable to water (concentrates filtrate). Ascending limb: impermeable to water, actively pumps NaCl (countercurrent multiplier)." },
+    { label:"DCT and Collecting Duct", detail:"DCT: selective reabsorption under aldosterone. Collecting duct: ADH controls water reabsorption. Final urine concentration adjusted here." },
+  ]},
+  { id:"respiratory", title:"Respiratory System", chapter:"Ch 17", color:"#10b981", items:[
+    { label:"Alveoli", detail:"300 million per lung. Thin walled (0.2 micrometer), surrounded by capillaries. O2 diffuses in, CO2 out by partial pressure gradient." },
+    { label:"Gas transport", detail:"O2: 97% bound to Hb as oxyhaemoglobin, 3% dissolved. CO2: 70% as bicarbonate (HCO3-), 23% as carbaminohaemoglobin, 7% dissolved." },
+    { label:"Respiratory volumes", detail:"Tidal volume: 500 mL. Vital capacity: 3.5 to 4.5 L. Residual volume: 1.2 L. Total lung capacity = VC + RV." },
+  ]},
+  { id:"synapse", title:"Synapse Detail", chapter:"Ch 21", color:"#06b6d4", items:[
+    { label:"Chemical synapse", detail:"Presynaptic terminal has vesicles with neurotransmitters. Action potential triggers Ca2+ influx, vesicles fuse with membrane (exocytosis)." },
+    { label:"Neurotransmitters", detail:"Acetylcholine (NMJ, parasympathetic), Noradrenaline (sympathetic), Dopamine, Serotonin, GABA (inhibitory), Glutamate (excitatory in CNS)." },
+    { label:"Synaptic cleft", detail:"20 to 40 nm gap. Neurotransmitter binds post-synaptic receptors. Signal terminated by enzymatic degradation or reuptake." },
+  ]},
+  { id:"mendelian", title:"Mendelian Genetics", chapter:"Ch 5 (XII)", color:"#f43f5e", items:[
+    { label:"Monohybrid cross", detail:"Tt x Tt gives 1 TT : 2 Tt : 1 tt genotypic ratio. Phenotypic ratio 3:1. Law of Segregation: alleles separate in gamete formation." },
+    { label:"Dihybrid cross", detail:"TtRr x TtRr gives 9:3:3:1 phenotypic ratio. Law of Independent Assortment: genes on different chromosomes sort independently." },
+    { label:"Incomplete dominance", detail:"Snapdragon: RR (red) x rr (white) = Rr (pink). 1:2:1 phenotypic ratio in F2. Neither allele is fully dominant." },
+  ]},
+  { id:"ecosystem", title:"Ecosystem Energy Flow", chapter:"Ch 14 (XII)", color:"#84cc16", items:[
+    { label:"Energy flow", detail:"Unidirectional: Sun to producers to consumers. Only 10% energy transfers per trophic level (Lindeman's 10% law)." },
+    { label:"Food web", detail:"Interconnected food chains. Removal of one species affects entire web. Trophic levels: producers, primary consumers, secondary, tertiary." },
+    { label:"Nutrient cycling", detail:"Biogeochemical cycles (C, N, P). Carbon cycle: photosynthesis fixes CO2, respiration releases it. Nitrogen fixation by Rhizobium, Azotobacter." },
+  ]},
 ];
 
 const InteractiveBioShowcase = () => {
   const [activeTab, setActiveTab] = useState(0);
-  const [activeItem, setActiveItem] = useState(null);
+  const [activeItem, setActiveItem] = useState<number | null>(null);
   const ex = bioExamples[activeTab];
   return (
     <div>
       <div style={{display:"flex",flexWrap:"wrap",gap:6,marginBottom:24}}>
         {bioExamples.map((b, i) => (
           <button key={b.id} onClick={() => { setActiveTab(i); setActiveItem(null); }}
-            style={{padding:"6px 14px",borderRadius:99,border:"none",cursor:"pointer",fontSize:12,fontWeight:600,fontFamily:"'DM Sans',sans-serif",background:activeTab===i?b.color:"#f3f4f6",color:activeTab===i?"#fff":"#6b7280",transition:"all 0.15s"}}>
+            style={{padding:"6px 14px",borderRadius:99,border:"none",cursor:"pointer",fontSize:12,fontWeight:600,fontFamily:"'DM Sans',sans-serif",background:activeTab===i?b.color:"#f3f4f6",color:activeTab===i?"#fff":"#6b7280",transition:"all 0.2s cubic-bezier(.4,0,.2,1)",transform:activeTab===i?"scale(1.05)":"scale(1)"}}>
             {b.title}
           </button>
         ))}
       </div>
-      <div style={{background:"#fff",borderRadius:16,border:`2px solid ${ex.color}22`,overflow:"hidden"}}>
+      <div style={{background:"#fff",borderRadius:16,border:`2px solid ${ex.color}22`,overflow:"hidden",transition:"border-color 0.3s"}}>
         <div style={{padding:"16px 20px",borderBottom:`1px solid ${ex.color}15`,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
           <div>
             <span style={{fontFamily:"'DM Serif Display',serif",fontSize:22,color:"#111"}}>{ex.title}</span>
@@ -235,12 +330,12 @@ const InteractiveBioShowcase = () => {
           <div style={{display:"flex",flexDirection:"column",gap:8}}>
             {ex.items.map((item, i) => (
               <div key={i} onClick={() => setActiveItem(activeItem === i ? null : i)}
-                style={{padding:"12px 16px",borderRadius:10,cursor:"pointer",border:activeItem===i?`1.5px solid ${ex.color}`:"1.5px solid #e5e7eb",background:activeItem===i?`${ex.color}08`:"#fafaf9",transition:"all 0.15s"}}>
+                style={{padding:"12px 16px",borderRadius:10,cursor:"pointer",border:activeItem===i?`1.5px solid ${ex.color}`:"1.5px solid #e5e7eb",background:activeItem===i?`${ex.color}08`:"#fafaf9",transition:"all 0.25s cubic-bezier(.4,0,.2,1)",transform:activeItem===i?"translateX(4px)":"translateX(0)"}}>
                 <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
                   <span style={{fontWeight:600,fontSize:14,color:activeItem===i?ex.color:"#374151"}}>{item.label}</span>
-                  <span style={{fontSize:18,color:"#9ca3af",lineHeight:1,transform:activeItem===i?"rotate(45deg)":"none",transition:"transform 0.15s"}}>+</span>
+                  <span style={{fontSize:18,color:"#9ca3af",lineHeight:1,transform:activeItem===i?"rotate(45deg)":"none",transition:"transform 0.2s"}}>+</span>
                 </div>
-                {activeItem === i && <div style={{marginTop:8,fontSize:13,lineHeight:1.6,color:"#4b5563"}}>{item.detail}</div>}
+                {activeItem === i && <div style={{marginTop:8,fontSize:13,lineHeight:1.6,color:"#4b5563",animation:"slideDown 0.25s ease"}}>{item.detail}</div>}
               </div>
             ))}
           </div>
@@ -258,10 +353,23 @@ const quizQs = [
 ];
 
 const QuizWidget = () => {
-  const [qi,setQi]=useState(0),[sel,setSel]=useState(null),[xp,setXp]=useState(0),[show,setShow]=useState(false),[done,setDone]=useState(false);
-  const handle=(idx)=>{if(sel!==null)return;setSel(idx);setShow(true);if(idx===quizQs[qi].correct)setXp(xp+10)};
+  const [qi,setQi]=useState(0);
+  const [sel,setSel]=useState<number|null>(null);
+  const [xp,setXp]=useState(0);
+  const [show,setShow]=useState(false);
+  const [done,setDone]=useState(false);
+  const handle=(idx:number)=>{if(sel!==null)return;setSel(idx);setShow(true);if(idx===quizQs[qi].correct)setXp(xp+10)};
   const next=()=>{if(qi<quizQs.length-1){setQi(qi+1);setSel(null);setShow(false)}else setDone(true)};
-  if(done)return(<div style={{textAlign:"center",padding:40}}><div style={{fontSize:48,fontFamily:"'DM Serif Display',serif",color:BRAND.red}}>{xp} XP</div><div style={{color:"#6b7280",fontSize:14,marginTop:8}}>Quiz complete.</div><button onClick={()=>{setQi(0);setSel(null);setShow(false);setDone(false);setXp(0)}} style={{marginTop:16,padding:"8px 20px",background:BRAND.red,color:"#fff",border:"none",borderRadius:8,cursor:"pointer",fontWeight:600,fontSize:14}}>Retry</button></div>);
+  if(done)return(
+    <div style={{textAlign:"center",padding:40}}>
+      <div style={{fontSize:48,fontFamily:"'DM Serif Display',serif",color:BRAND.red,animation:"scaleIn 0.4s cubic-bezier(.4,0,.2,1)"}}>{xp} XP</div>
+      <div style={{color:"#6b7280",fontSize:14,marginTop:8}}>Quiz complete.</div>
+      <div style={{display:"flex",gap:12,justifyContent:"center",marginTop:16}}>
+        <button onClick={()=>{setQi(0);setSel(null);setShow(false);setDone(false);setXp(0)}} style={{padding:"8px 20px",background:BRAND.red,color:"#fff",border:"none",borderRadius:8,cursor:"pointer",fontWeight:600,fontSize:14}}>Retry</button>
+        <a href="/signup" style={{padding:"8px 20px",background:"#fff",color:BRAND.red,border:`1.5px solid ${BRAND.red}`,borderRadius:8,fontWeight:600,fontSize:14,textDecoration:"none"}}>Sign Up for More</a>
+      </div>
+    </div>
+  );
   const q=quizQs[qi];
   return (
     <div>
@@ -274,11 +382,11 @@ const QuizWidget = () => {
         {q.opts.map((opt,i)=>{
           let bg="#fff",border="#e5e7eb",col="#374151";
           if(sel!==null){if(i===q.correct){bg="#f0fdf4";border="#16a34a";col="#15803d"}else if(i===sel){bg="#fef2f2";border=BRAND.red;col=BRAND.red}}
-          return(<button key={i} onClick={()=>handle(i)} style={{padding:"10px 14px",border:`1.5px solid ${border}`,borderRadius:10,background:bg,color:col,textAlign:"left",cursor:sel!==null?"default":"pointer",fontSize:14,fontWeight:500,transition:"all 0.15s"}}>{opt}</button>)
+          return(<button key={i} onClick={()=>handle(i)} style={{padding:"10px 14px",border:`1.5px solid ${border}`,borderRadius:10,background:bg,color:col,textAlign:"left",cursor:sel!==null?"default":"pointer",fontSize:14,fontWeight:500,transition:"all 0.2s cubic-bezier(.4,0,.2,1)"}}>{opt}</button>)
         })}
       </div>
-      {show&&<div style={{marginTop:12,padding:12,background:"#f9fafb",borderRadius:8,fontSize:13,color:"#4b5563",lineHeight:1.5,border:"1px solid #e5e7eb"}}>{q.explain}</div>}
-      {sel!==null&&<button onClick={next} style={{marginTop:16,padding:"10px 24px",background:BRAND.red,color:"#fff",border:"none",borderRadius:8,cursor:"pointer",fontWeight:600,fontSize:14,width:"100%"}}>{qi<quizQs.length-1?"Next":"See Score"}</button>}
+      {show&&<div style={{marginTop:12,padding:12,background:"#f9fafb",borderRadius:8,fontSize:13,color:"#4b5563",lineHeight:1.5,border:"1px solid #e5e7eb",animation:"slideDown 0.25s ease"}}>{q.explain}</div>}
+      {sel!==null&&<button onClick={next} style={{marginTop:16,padding:"10px 24px",background:BRAND.red,color:"#fff",border:"none",borderRadius:8,cursor:"pointer",fontWeight:600,fontSize:14,width:"100%",transition:"all 0.2s",boxShadow:`0 4px 12px ${BRAND.red}33`}}>{qi<quizQs.length-1?"Next":"See Score"}</button>}
     </div>
   );
 };
@@ -305,51 +413,147 @@ const features = [
   {icon:"bolt",title:"NEET Focused",desc:"Every question, every episode, every feature built for one exam: NEET."},
 ];
 
+// ─── SCROLL REVEAL WRAPPER ───
+const Reveal = ({ children, delay = 0, direction = "up" }: { children: React.ReactNode; delay?: number; direction?: string }) => {
+  const { ref, visible } = useScrollReveal(0.1);
+  const transforms: Record<string,string> = {
+    up: "translateY(40px)", down: "translateY(-40px)", left: "translateX(40px)", right: "translateX(-40px)", scale: "scale(0.95)",
+  };
+  return (
+    <div ref={ref} style={{
+      opacity: visible ? 1 : 0,
+      transform: visible ? "none" : transforms[direction] || transforms.up,
+      transition: `all 0.7s cubic-bezier(.4,0,.2,1) ${delay}s`,
+    }}>
+      {children}
+    </div>
+  );
+};
+
 // ─── MAIN COMPONENT ───
 export default function DesiEducatorsHome() {
+  const [mobileMenu, setMobileMenu] = useState(false);
+  const [scrollY, setScrollY] = useState(0);
+
+  useEffect(() => {
+    const handleScroll = () => setScrollY(window.scrollY);
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
   return (
     <div style={{fontFamily:"'DM Sans',sans-serif",color:"#111",background:"#fafaf9",minHeight:"100vh",overflowX:"hidden"}}>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Serif+Display&family=JetBrains+Mono:wght@500;700&display=swap');
         *{margin:0;padding:0;box-sizing:border-box}html{scroll-behavior:smooth}body{overflow-x:hidden}
-        @keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
-        @keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
-        .fade-up{animation:fadeUp .6s ease both}.fade-up-2{animation-delay:.2s}
-        .feature-card:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(0,0,0,0.08)}
+        @keyframes floatParticle{0%{transform:translateY(0) rotate(0deg)}100%{transform:translateY(-30px) rotate(8deg)}}
+        @keyframes slideDown{from{opacity:0;max-height:0;margin-top:0}to{opacity:1;max-height:200px;margin-top:8px}}
+        @keyframes scaleIn{from{transform:scale(0.5);opacity:0}to{transform:scale(1);opacity:1}}
+        @keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
+        @keyframes glowPulse{0%,100%{box-shadow:0 0 20px rgba(196,30,30,0.15)}50%{box-shadow:0 0 40px rgba(196,30,30,0.3)}}
+        @keyframes marquee{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+        @keyframes breathe{0%,100%{transform:scale(1)}50%{transform:scale(1.02)}}
+        .feature-card{transition:all 0.3s cubic-bezier(.4,0,.2,1)}
+        .feature-card:hover{transform:translateY(-4px);box-shadow:0 12px 40px rgba(0,0,0,0.1)}
+        .nav-links{display:flex;gap:28px;align-items:center}
+        .nav-hamburger{display:none;background:none;border:none;cursor:pointer;padding:4px}
+        .hero-grid{display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:center}
+        .hero-img-wrap{width:380px;height:460px}
+        .hero-title{font-size:64px}
+        .subject-strip{display:flex;justify-content:center;gap:40px}
+        .features-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+        .bio-grid{display:grid;grid-template-columns:1fr 1.2fr;gap:60px;align-items:start}
+        .bio-sticky{position:sticky;top:100px}
+        .dna-grid{display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center}
+        .quiz-grid{display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:start}
+        .episodes-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+        .research-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-bottom:40px}
+        .footer-inner{display:flex;justify-content:space-between;align-items:center}
+        .footer-links{display:flex;gap:24px}
+        .section-h2{font-size:40px}
+        .section-h2-lg{font-size:44px}
+        .section-h2-m{font-size:36px}
+        .priya-ai-buttons{display:flex;gap:12px;justify-content:center}
+        .ncert-stats{display:inline-flex;gap:24px;padding:16px 28px}
+        .mobile-menu{display:none;position:fixed;top:57px;left:0;right:0;background:#fafaf9;border-bottom:1px solid #e5e5e4;padding:16px 24px;z-index:49;flex-direction:column;gap:16px}
+        .mobile-menu.open{display:flex}
+        .episode-card{transition:all 0.3s cubic-bezier(.4,0,.2,1)}
+        .episode-card:hover{transform:translateY(-2px);border-color:#c41e1e!important;box-shadow:0 8px 24px rgba(196,30,30,0.08)!important}
+        .cta-btn{transition:all 0.3s cubic-bezier(.4,0,.2,1)}
+        .cta-btn:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(196,30,30,0.35)!important}
+        .nav-link{transition:color 0.2s}
+        .nav-link:hover{color:#c41e1e!important}
+        @media(max-width:768px){
+          .nav-links{display:none}
+          .nav-hamburger{display:block}
+          .hero-grid{grid-template-columns:1fr;gap:24px;padding:32px 16px 24px!important}
+          .hero-img-wrap{width:100%;height:320px;margin:0 auto}
+          .hero-title{font-size:36px}
+          .subject-strip{gap:16px;flex-wrap:wrap;padding:16px!important}
+          .features-grid{grid-template-columns:1fr;gap:12px}
+          .bio-grid{grid-template-columns:1fr;gap:24px}
+          .bio-sticky{position:static}
+          .dna-grid{grid-template-columns:1fr;gap:24px}
+          .quiz-grid{grid-template-columns:1fr;gap:24px}
+          .episodes-grid{grid-template-columns:1fr;gap:12px}
+          .research-grid{grid-template-columns:1fr;gap:12px}
+          .footer-inner{flex-direction:column;gap:20px;text-align:center}
+          .footer-links{flex-wrap:wrap;justify-content:center;gap:16px}
+          .section-h2{font-size:28px}
+          .section-h2-lg{font-size:30px}
+          .section-h2-m{font-size:26px}
+          .priya-ai-buttons{flex-direction:column;align-items:center}
+          .ncert-stats{flex-direction:row;gap:16px;padding:12px 16px}
+          .mobile-menu.open{display:flex}
+        }
       `}</style>
 
       {/* NAV */}
-      <nav style={{position:"sticky",top:0,zIndex:50,background:"rgba(250,250,249,0.92)",backdropFilter:"blur(12px)",borderBottom:"1px solid #e5e5e4"}}>
+      <nav style={{position:"sticky",top:0,zIndex:50,background:"rgba(250,250,249,0.92)",backdropFilter:"blur(12px)",borderBottom:"1px solid #e5e5e4",transition:"all 0.3s"}}>
         <div style={{maxWidth:1200,margin:"0 auto",padding:"12px 24px",display:"flex",alignItems:"center",justifyContent:"space-between"}}>
-          <div style={{display:"flex",alignItems:"center",gap:10}}>
+          <a href="/" style={{display:"flex",alignItems:"center",gap:10,textDecoration:"none"}}>
             <div style={{width:32,height:32,background:BRAND.red,borderRadius:8,display:"flex",alignItems:"center",justifyContent:"center"}}>
               <span style={{color:"#fff",fontWeight:700,fontSize:16,fontFamily:"'DM Serif Display',serif"}}>D</span>
             </div>
             <span style={{fontFamily:"'DM Serif Display',serif",fontSize:20,color:"#111"}}>Desi Educators</span>
-          </div>
-          <div style={{display:"flex",gap:28,alignItems:"center"}}>
-            {["Chapters","Quizzes","Podcast","Research","Priya AI"].map(item=>(
-              <a key={item} href={`#${item.toLowerCase().replace(' ','-')}`}
-                style={{fontSize:14,fontWeight:500,color:"#6b7280",textDecoration:"none",transition:"color 0.15s"}}
-                onMouseEnter={e=>e.target.style.color=BRAND.red} onMouseLeave={e=>e.target.style.color="#6b7280"}>
-                {item}
-              </a>
+          </a>
+          <div className="nav-links">
+            {[{label:"Episodes",href:"/episodes"},{label:"Chapters",href:"#chapters"},{label:"Quizzes",href:"#quizzes"},{label:"Research",href:"#research"},{label:"Priya AI",href:"/priya-ai"}].map(l=>(
+              <a key={l.label} href={l.href} className="nav-link" style={{fontSize:12,fontWeight:600,color:"#6b7280",textDecoration:"none",letterSpacing:1.5,textTransform:"uppercase",fontFamily:"'DM Sans',sans-serif"}}>{l.label}</a>
             ))}
-            <button style={{padding:"8px 20px",background:BRAND.red,color:"#fff",border:"none",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer"}}>Start Free</button>
+            <a href="/login" style={{fontSize:13,fontWeight:500,color:"#374151",textDecoration:"none"}}>Log In</a>
+            <a href="/signup" className="cta-btn" style={{padding:"8px 20px",background:BRAND.red,color:"#fff",border:"none",borderRadius:8,fontWeight:600,fontSize:13,letterSpacing:0.5,textDecoration:"none",display:"inline-block"}}>Start Learning</a>
           </div>
+          <button className="nav-hamburger" onClick={()=>setMobileMenu(!mobileMenu)} aria-label="Menu">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#111" strokeWidth="2" strokeLinecap="round">
+              {mobileMenu?<><line x1="6" y1="6" x2="18" y2="18"/><line x1="6" y1="18" x2="18" y2="6"/></>:<><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></>}
+            </svg>
+          </button>
         </div>
       </nav>
+      {/* MOBILE MENU */}
+      <div className={`mobile-menu${mobileMenu?" open":""}`}>
+        <a href="/episodes" onClick={()=>setMobileMenu(false)} style={{fontSize:14,fontWeight:600,color:"#374151",textDecoration:"none"}}>Episodes</a>
+        <a href="#chapters" onClick={()=>setMobileMenu(false)} style={{fontSize:14,fontWeight:600,color:"#374151",textDecoration:"none"}}>Chapters</a>
+        <a href="#quizzes" onClick={()=>setMobileMenu(false)} style={{fontSize:14,fontWeight:600,color:"#374151",textDecoration:"none"}}>Quizzes</a>
+        <a href="#research" onClick={()=>setMobileMenu(false)} style={{fontSize:14,fontWeight:600,color:"#374151",textDecoration:"none"}}>Research</a>
+        <a href="/priya-ai" onClick={()=>setMobileMenu(false)} style={{fontSize:14,fontWeight:600,color:BRAND.red,textDecoration:"none"}}>Priya AI</a>
+        <div style={{display:"flex",gap:12,paddingTop:8,borderTop:"1px solid #e5e5e4"}}>
+          <a href="/login" style={{flex:1,padding:"10px",textAlign:"center",border:"1px solid #d1d5db",borderRadius:8,fontSize:14,fontWeight:600,color:"#374151",textDecoration:"none"}}>Log In</a>
+          <a href="/signup" style={{flex:1,padding:"10px",textAlign:"center",background:BRAND.red,borderRadius:8,fontSize:14,fontWeight:600,color:"#fff",textDecoration:"none"}}>Sign Up</a>
+        </div>
+      </div>
 
       {/* HERO */}
       <section style={{position:"relative",overflow:"hidden",background:"#fafaf9"}}>
-        <BioDeco />
-        <div style={{maxWidth:1200,margin:"0 auto",padding:"60px 24px 40px",display:"grid",gridTemplateColumns:"1fr 1fr",gap:48,alignItems:"center",position:"relative",zIndex:1}}>
-          <div className="fade-up">
+        <FloatingParticles />
+        <div className="hero-grid" style={{maxWidth:1200,margin:"0 auto",padding:"60px 24px 40px",position:"relative",zIndex:1}}>
+          <Reveal>
             <div style={{display:"inline-flex",alignItems:"center",gap:6,padding:"4px 12px",background:"#f0fdf4",borderRadius:99,marginBottom:20}}>
-              <div style={{width:6,height:6,borderRadius:3,background:SUBJECT.bio,animation:"pulse 2s infinite"}}/>
+              <div style={{width:6,height:6,borderRadius:3,background:SUBJECT.bio,animation:"glowPulse 2s infinite"}}/>
               <span style={{fontSize:12,fontWeight:600,color:SUBJECT.bio}}>NEET 2026 Prep Live</span>
             </div>
-            <h1 style={{fontFamily:"'DM Serif Display',serif",fontSize:64,lineHeight:1.05,marginBottom:24}}>Recall. Retain. <span style={{color:BRAND.red}}>Rank.</span></h1>
+            <h1 className="hero-title" style={{fontFamily:"'DM Serif Display',serif",lineHeight:1.05,marginBottom:24}}>Recall. Retain. <span style={{color:BRAND.red}}>Rank.</span></h1>
             <p style={{fontSize:17,lineHeight:1.7,color:"#6b7280",maxWidth:440,marginBottom:28}}>Biology with Priya Ma'am. NCERT accurate audio lessons, active recall quizzes, and an AI tutor that never sleeps. Built for NEET.</p>
             <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:28}}>
               <div style={{display:"flex"}}>{[1,3,5,7,9].map((s,i)=>(<div key={s} style={{marginLeft:i===0?0:-8,border:"2px solid #fff",borderRadius:99}}><StudentAvatar seed={s} size={28}/></div>))}</div>
@@ -360,150 +564,208 @@ export default function DesiEducatorsHome() {
               <Countdown />
             </div>
             <div style={{display:"flex",gap:12}}>
-              <button style={{padding:"14px 28px",background:BRAND.red,color:"#fff",border:"none",borderRadius:10,fontWeight:600,fontSize:15,cursor:"pointer",boxShadow:`0 4px 14px ${BRAND.red}33`}}>Start Learning Free</button>
-              <button style={{padding:"14px 28px",background:"#fff",color:"#374151",border:"1.5px solid #d1d5db",borderRadius:10,fontWeight:600,fontSize:15,cursor:"pointer",display:"flex",alignItems:"center",gap:8}}>
-                <span style={{color:BRAND.red}}>{Icons.play}</span> Watch Demo
-              </button>
+              <a href="/signup" className="cta-btn" style={{padding:"14px 28px",background:BRAND.red,color:"#fff",border:"none",borderRadius:10,fontWeight:600,fontSize:15,cursor:"pointer",boxShadow:`0 4px 14px ${BRAND.red}33`,textDecoration:"none",display:"inline-block"}}>Start Learning Free</a>
+              <a href="/episodes" style={{padding:"14px 28px",background:"#fff",color:"#374151",border:"1.5px solid #d1d5db",borderRadius:10,fontWeight:600,fontSize:15,cursor:"pointer",display:"flex",alignItems:"center",gap:8,textDecoration:"none",transition:"all 0.2s"}}>
+                <span style={{color:BRAND.red}}>{Icons.play}</span> Listen Free
+              </a>
             </div>
-          </div>
-          <div className="fade-up fade-up-2" style={{display:"flex",justifyContent:"center"}}>
-            <div style={{position:"relative",width:380,height:460,background:"#111",borderRadius:24,overflow:"hidden",boxShadow:"0 20px 60px rgba(0,0,0,0.15)"}}>
-             <img src="/priya.png" alt="Priya Pandey" style={{width:"100%",height:"100%",objectFit:"cover"}} />
-              <div style={{position:"absolute",bottom:20,left:20,right:20,background:"rgba(255,255,255,0.15)",backdropFilter:"blur(12px)",borderRadius:12,padding:"12px 16px",display:"flex",alignItems:"center",gap:10}}>
-                <div style={{width:8,height:8,borderRadius:4,background:"#fbbf24"}}/>
-                <div>
-                  <div style={{color:"#fff",fontWeight:600,fontSize:13}}>Priya Pandey</div>
-                  <div style={{color:"rgba(255,255,255,0.7)",fontSize:11}}>MSc Gold Medalist | Biology Educator</div>
+          </Reveal>
+          <Reveal delay={0.15}>
+            <div style={{display:"flex",justifyContent:"center"}}>
+              <div className="hero-img-wrap" style={{position:"relative",background:"#f0f0ee",borderRadius:24,overflow:"hidden",boxShadow:"0 20px 60px rgba(0,0,0,0.08)",animation:"breathe 6s ease-in-out infinite"}}>
+                <img src="/priya.png" alt="Priya Pandey" style={{width:"100%",height:"100%",objectFit:"cover",objectPosition:"top"}} />
+                <div style={{position:"absolute",bottom:20,left:20,right:20,background:"rgba(0,0,0,0.55)",backdropFilter:"blur(12px)",borderRadius:12,padding:"12px 16px",display:"flex",alignItems:"center",gap:10}}>
+                  <div style={{width:8,height:8,borderRadius:4,background:"#fbbf24"}}/>
+                  <div>
+                    <div style={{color:"#fff",fontWeight:600,fontSize:13}}>Priya Pandey</div>
+                    <div style={{color:"rgba(255,255,255,0.7)",fontSize:11}}>MSc Gold Medalist | Biology Educator</div>
+                  </div>
                 </div>
+                <div style={{position:"absolute",top:16,right:16,background:"rgba(22,163,74,0.9)",borderRadius:8,padding:"6px 10px",fontSize:10,fontWeight:700,color:"#fff",fontFamily:"'JetBrains Mono',monospace"}}>38 ATP → 30-32 ATP</div>
               </div>
-              <div style={{position:"absolute",top:16,right:16,background:"rgba(22,163,74,0.9)",borderRadius:8,padding:"6px 10px",fontSize:10,fontWeight:700,color:"#fff",fontFamily:"'JetBrains Mono',monospace"}}>38 ATP → 30-32 ATP</div>
             </div>
-          </div>
+          </Reveal>
         </div>
       </section>
 
+      {/* SCROLLING TICKER */}
+      <div style={{background:"#111",padding:"10px 0",overflow:"hidden",whiteSpace:"nowrap"}}>
+        <div style={{display:"inline-flex",animation:"marquee 30s linear infinite"}}>
+          {[...Array(2)].map((_, rep) => (
+            <div key={rep} style={{display:"inline-flex",gap:40,paddingRight:40}}>
+              {["NCERT Aligned","Active Recall","Spaced Repetition","22 RTI Filed","30-32 ATP (Corrected)","AI Tutor","100 Quizzes","Audio Lessons","XP System","Free to Start"].map(t=>(
+                <span key={t+rep} style={{fontSize:12,fontWeight:600,color:"rgba(255,255,255,0.5)",letterSpacing:2,textTransform:"uppercase"}}>{t}</span>
+              ))}
+            </div>
+          ))}
+        </div>
+      </div>
+
       {/* SUBJECT STRIP */}
       <div style={{background:"#fff",borderTop:"1px solid #e5e5e4",borderBottom:"1px solid #e5e5e4"}}>
-        <div style={{maxWidth:1200,margin:"0 auto",padding:"20px 24px",display:"flex",justifyContent:"center",gap:40}}>
+        <div className="subject-strip" style={{maxWidth:1200,margin:"0 auto",padding:"20px 24px"}}>
           {[{label:"Biology",color:SUBJECT.bio,icon:"dna",count:"16 chapters"},{label:"Physics",color:SUBJECT.physics,icon:"bolt",count:"Coming soon"},{label:"Chemistry",color:SUBJECT.chemistry,icon:"flask",count:"Coming soon"}].map(s=>(
             <div key={s.label} style={{display:"flex",alignItems:"center",gap:10}}>
-              <div style={{color:s.color}}>{Icons[s.icon]}</div>
+              <div style={{color:s.color}}>{Icons[s.icon as keyof typeof Icons]}</div>
               <div><div style={{fontWeight:600,fontSize:14,color:s.color}}>{s.label}</div><div style={{fontSize:11,color:"#9ca3af"}}>{s.count}</div></div>
             </div>
           ))}
         </div>
       </div>
 
+      {/* STATS BAR */}
+      <Reveal>
+        <section style={{maxWidth:1000,margin:"40px auto",padding:"0 24px"}}>
+          <div style={{background:"#fff",borderRadius:16,border:"1px solid #e5e5e4",padding:"28px 40px",display:"flex",justifyContent:"space-around",flexWrap:"wrap",gap:20}}>
+            {[
+              {num:100,suffix:"+",label:"Quizzes",color:BRAND.red},
+              {num:1000,suffix:"+",label:"MCQs",color:SUBJECT.bio},
+              {num:22,suffix:"",label:"RTI Filed",color:SUBJECT.physics},
+              {num:2400,suffix:"+",label:"Students",color:"#7c3aed"},
+            ].map(s=>(
+              <div key={s.label} style={{textAlign:"center",flex:1,minWidth:100}}>
+                <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:28,fontWeight:700,color:s.color}}><AnimatedCounter end={s.num} suffix={s.suffix}/></div>
+                <div style={{fontSize:11,color:"#9ca3af",fontWeight:600,letterSpacing:1,marginTop:4}}>{s.label}</div>
+              </div>
+            ))}
+          </div>
+        </section>
+      </Reveal>
+
       {/* FEATURES */}
-      <section style={{maxWidth:1200,margin:"0 auto",padding:"80px 24px"}}>
-        <div style={{textAlign:"center",marginBottom:48}}>
-          <h2 style={{fontFamily:"'DM Serif Display',serif",fontSize:40,marginBottom:12}}>How it <span style={{color:BRAND.red}}>works</span></h2>
-          <p style={{color:"#9ca3af",fontSize:15,maxWidth:480,margin:"0 auto"}}>Every feature is designed for one outcome: your NEET rank.</p>
-        </div>
-        <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:20}}>
+      <section style={{maxWidth:1200,margin:"0 auto",padding:"60px 24px 80px"}}>
+        <Reveal>
+          <div style={{textAlign:"center",marginBottom:48}}>
+            <h2 className="section-h2" style={{fontFamily:"'DM Serif Display',serif",marginBottom:12}}>How it <span style={{color:BRAND.red}}>works</span></h2>
+            <p style={{color:"#9ca3af",fontSize:15,maxWidth:480,margin:"0 auto"}}>Every feature is designed for one outcome: your NEET rank.</p>
+          </div>
+        </Reveal>
+        <div className="features-grid">
           {features.map((f,i)=>(
-            <div key={i} className="feature-card" style={{background:"#fff",borderRadius:16,padding:28,border:"1px solid #e5e5e4",cursor:"default",transition:"all 0.2s"}}>
-              <div style={{width:44,height:44,borderRadius:12,background:BRAND.redLight,display:"flex",alignItems:"center",justifyContent:"center",color:BRAND.red,marginBottom:16}}>{Icons[f.icon]}</div>
-              <h3 style={{fontWeight:700,fontSize:16,marginBottom:8}}>{f.title}</h3>
-              <p style={{fontSize:13,lineHeight:1.6,color:"#6b7280"}}>{f.desc}</p>
-            </div>
+            <Reveal key={i} delay={i * 0.08}>
+              <div className="feature-card" style={{background:"#fff",borderRadius:16,padding:28,border:"1px solid #e5e5e4",cursor:"default",height:"100%"}}>
+                <div style={{width:44,height:44,borderRadius:12,background:BRAND.redLight,display:"flex",alignItems:"center",justifyContent:"center",color:BRAND.red,marginBottom:16}}>{Icons[f.icon as keyof typeof Icons]}</div>
+                <h3 style={{fontWeight:700,fontSize:16,marginBottom:8}}>{f.title}</h3>
+                <p style={{fontSize:13,lineHeight:1.6,color:"#6b7280"}}>{f.desc}</p>
+              </div>
+            </Reveal>
           ))}
         </div>
       </section>
 
-      {/* 10 INTERACTIVE BIOLOGY EXAMPLES */}
+      {/* 15 INTERACTIVE BIOLOGY EXAMPLES */}
       <section id="chapters" style={{background:"#fff",padding:"80px 24px"}}>
         <div style={{maxWidth:1200,margin:"0 auto"}}>
-          <div style={{display:"grid",gridTemplateColumns:"1fr 1.2fr",gap:60,alignItems:"start"}}>
-            <div style={{position:"sticky",top:100}}>
-              <div style={{fontSize:11,fontWeight:700,color:SUBJECT.bio,letterSpacing:1.5,marginBottom:12}}>INTERACTIVE BIOLOGY</div>
-              <h2 style={{fontFamily:"'DM Serif Display',serif",fontSize:36,marginBottom:16}}>10 topics. Tap to explore.</h2>
-              <p style={{color:"#6b7280",fontSize:15,lineHeight:1.7,marginBottom:20}}>Every diagram on Desi Educators is interactive. No static images. Tap any topic, then tap each concept to reveal NCERT accurate details with exam relevant depth.</p>
-              <div style={{padding:14,background:"#f0fdf4",borderRadius:10,border:"1px solid #dcfce7"}}>
-                <div style={{fontSize:12,fontWeight:600,color:SUBJECT.bio,marginBottom:4}}>From Cell to Krebs Cycle</div>
-                <div style={{fontSize:12,color:"#6b7280",lineHeight:1.5}}>Animal Cell, DNA Structure, Mitosis, Photosynthesis, Human Heart, Neuron, Flower Anatomy, Digestive System, Human Eye, Krebs Cycle</div>
+          <div className="bio-grid">
+            <Reveal>
+              <div className="bio-sticky">
+                <div style={{fontSize:11,fontWeight:700,color:SUBJECT.bio,letterSpacing:1.5,marginBottom:12}}>INTERACTIVE BIOLOGY</div>
+                <h2 className="section-h2-m" style={{fontFamily:"'DM Serif Display',serif",marginBottom:16}}>15 topics. Tap to explore.</h2>
+                <p style={{color:"#6b7280",fontSize:15,lineHeight:1.7,marginBottom:20}}>Every diagram on Desi Educators is interactive. No static images. Tap any topic, then tap each concept to reveal NCERT accurate details with exam relevant depth.</p>
+                <div style={{padding:14,background:"#f0fdf4",borderRadius:10,border:"1px solid #dcfce7"}}>
+                  <div style={{fontSize:12,fontWeight:600,color:SUBJECT.bio,marginBottom:4}}>From Cell to Ecosystem</div>
+                  <div style={{fontSize:12,color:"#6b7280",lineHeight:1.5}}>Animal Cell, DNA, Mitosis, Photosynthesis, Heart, Neuron, Flower, Digestion, Eye, Krebs, Nephron, Respiratory, Synapse, Mendelian Genetics, Ecosystem</div>
+                </div>
               </div>
-            </div>
-            <InteractiveBioShowcase />
+            </Reveal>
+            <Reveal delay={0.1}>
+              <InteractiveBioShowcase />
+            </Reveal>
           </div>
         </div>
       </section>
 
       {/* DNA HELIX */}
       <section style={{padding:"80px 24px",background:"#fafaf9"}}>
-        <div style={{maxWidth:1200,margin:"0 auto",display:"grid",gridTemplateColumns:"1fr 1fr",gap:60,alignItems:"center"}}>
-          <DNAHelix />
-          <div>
-            <div style={{fontSize:11,fontWeight:700,color:BRAND.red,letterSpacing:1.5,marginBottom:12}}>CHARGAFF'S RULES</div>
-            <h2 style={{fontFamily:"'DM Serif Display',serif",fontSize:36,marginBottom:16}}>Hover the base pairs</h2>
-            <p style={{color:"#6b7280",fontSize:15,lineHeight:1.7}}>A pairs with T (2 hydrogen bonds). G pairs with C (3 hydrogen bonds). The ratio [A+G]/[T+C] always equals 1. DNA is 2nm wide with a pitch of 3.4nm per complete turn.</p>
-            <div style={{marginTop:20,padding:12,background:"#fff",borderRadius:10,border:`1.5px solid ${BRAND.red}22`,display:"inline-flex",alignItems:"center",gap:8}}>
-              <span style={{color:BRAND.red}}>{Icons.check}</span>
-              <span style={{fontSize:13,fontWeight:600,color:"#374151"}}>NCERT Chapter 6 verified</span>
+        <div className="dna-grid" style={{maxWidth:1200,margin:"0 auto"}}>
+          <Reveal direction="left">
+            <DNAHelix />
+          </Reveal>
+          <Reveal delay={0.1} direction="right">
+            <div>
+              <div style={{fontSize:11,fontWeight:700,color:BRAND.red,letterSpacing:1.5,marginBottom:12}}>CHARGAFF'S RULES</div>
+              <h2 className="section-h2-m" style={{fontFamily:"'DM Serif Display',serif",marginBottom:16}}>Hover the base pairs</h2>
+              <p style={{color:"#6b7280",fontSize:15,lineHeight:1.7}}>A pairs with T (2 hydrogen bonds). G pairs with C (3 hydrogen bonds). The ratio [A+G]/[T+C] always equals 1. DNA is 2nm wide with a pitch of 3.4nm per complete turn.</p>
+              <div style={{marginTop:20,padding:12,background:"#fff",borderRadius:10,border:`1.5px solid ${BRAND.red}22`,display:"inline-flex",alignItems:"center",gap:8}}>
+                <span style={{color:BRAND.red}}>{Icons.check}</span>
+                <span style={{fontSize:13,fontWeight:600,color:"#374151"}}>NCERT Chapter 6 verified</span>
+              </div>
             </div>
-          </div>
+          </Reveal>
         </div>
       </section>
 
       {/* QUIZ */}
       <section id="quizzes" style={{padding:"80px 24px",background:"#fff"}}>
-        <div style={{maxWidth:1200,margin:"0 auto",display:"grid",gridTemplateColumns:"1fr 1fr",gap:60,alignItems:"start"}}>
-          <div>
-            <div style={{fontSize:11,fontWeight:700,color:BRAND.red,letterSpacing:1.5,marginBottom:12}}>ACTIVE RECALL</div>
-            <h2 style={{fontFamily:"'DM Serif Display',serif",fontSize:36,marginBottom:16}}>Test yourself <span style={{color:BRAND.red}}>now</span></h2>
-            <p style={{color:"#6b7280",fontSize:15,lineHeight:1.7,marginBottom:24}}>3 quick questions. Earn 10 XP per correct answer. Build long term memory by retrieving, not rereading.</p>
-            <div style={{display:"flex",alignItems:"center",gap:16}}>
-              {[["30","MCQs"],["3","Quizzes"],["10","XP each"]].map(([n,l])=>(<div key={l} style={{textAlign:"center"}}><div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:24,fontWeight:700,color:BRAND.red}}>{n}</div><div style={{fontSize:10,color:"#9ca3af",fontWeight:600}}>{l}</div></div>))}
+        <div className="quiz-grid" style={{maxWidth:1200,margin:"0 auto"}}>
+          <Reveal>
+            <div>
+              <div style={{fontSize:11,fontWeight:700,color:BRAND.red,letterSpacing:1.5,marginBottom:12}}>ACTIVE RECALL</div>
+              <h2 className="section-h2-m" style={{fontFamily:"'DM Serif Display',serif",marginBottom:16}}>Test yourself <span style={{color:BRAND.red}}>now</span></h2>
+              <p style={{color:"#6b7280",fontSize:15,lineHeight:1.7,marginBottom:24}}>3 quick questions. Earn 10 XP per correct answer. Build long term memory by retrieving, not rereading.</p>
+              <div style={{display:"flex",alignItems:"center",gap:16}}>
+                {[["100","Quizzes"],["1000+","MCQs"],["10","XP each"]].map(([n,l])=>(<div key={l} style={{textAlign:"center"}}><div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:24,fontWeight:700,color:BRAND.red}}>{n}</div><div style={{fontSize:10,color:"#9ca3af",fontWeight:600}}>{l}</div></div>))}
+              </div>
             </div>
-          </div>
-          <div style={{background:"#fff",borderRadius:20,padding:28,border:"1px solid #e5e5e4",boxShadow:"0 4px 20px rgba(0,0,0,0.04)"}}><QuizWidget /></div>
+          </Reveal>
+          <Reveal delay={0.1}>
+            <div style={{background:"#fff",borderRadius:20,padding:28,border:"1px solid #e5e5e4",boxShadow:"0 4px 20px rgba(0,0,0,0.04)"}}><QuizWidget /></div>
+          </Reveal>
         </div>
       </section>
 
       {/* LEADERBOARD */}
       <section style={{padding:"80px 24px",background:"#fafaf9"}}>
         <div style={{maxWidth:600,margin:"0 auto"}}>
-          <div style={{textAlign:"center",marginBottom:32}}>
-            <div style={{color:BRAND.red,marginBottom:8,display:"flex",justifyContent:"center"}}>{Icons.trophy}</div>
-            <h2 style={{fontFamily:"'DM Serif Display',serif",fontSize:36}}>Leaderboard</h2>
-            <p style={{color:"#9ca3af",fontSize:14,marginTop:8}}>Top performers this week</p>
-          </div>
-          <div style={{background:"#fff",borderRadius:16,border:"1px solid #e5e5e4",overflow:"hidden"}}>
-            {leaders.map((l,i)=>(
-              <div key={i} style={{display:"flex",alignItems:"center",padding:"14px 20px",borderBottom:i<leaders.length-1?"1px solid #f3f4f6":"none",gap:12}}>
-                <span style={{fontFamily:"'JetBrains Mono',monospace",fontWeight:700,fontSize:14,color:i<3?BRAND.red:"#9ca3af",width:24}}>#{i+1}</span>
-                <StudentAvatar seed={l.seed} size={28}/>
-                <span style={{flex:1,fontWeight:600,fontSize:14}}>{l.name}</span>
-                <span style={{fontFamily:"'JetBrains Mono',monospace",fontWeight:700,fontSize:14,color:SUBJECT.bio}}>{l.xp.toLocaleString()} XP</span>
-              </div>
-            ))}
-          </div>
+          <Reveal>
+            <div style={{textAlign:"center",marginBottom:32}}>
+              <div style={{color:BRAND.red,marginBottom:8,display:"flex",justifyContent:"center"}}>{Icons.trophy}</div>
+              <h2 className="section-h2-m" style={{fontFamily:"'DM Serif Display',serif"}}>Leaderboard</h2>
+              <p style={{color:"#9ca3af",fontSize:14,marginTop:8}}>Top performers this week</p>
+            </div>
+          </Reveal>
+          <Reveal delay={0.1}>
+            <div style={{background:"#fff",borderRadius:16,border:"1px solid #e5e5e4",overflow:"hidden"}}>
+              {leaders.map((l,i)=>(
+                <div key={i} style={{display:"flex",alignItems:"center",padding:"14px 20px",borderBottom:i<leaders.length-1?"1px solid #f3f4f6":"none",gap:12,transition:"all 0.2s",cursor:"default"}}
+                  onMouseEnter={e=>{(e.currentTarget as HTMLElement).style.background="#fef2f2"}}
+                  onMouseLeave={e=>{(e.currentTarget as HTMLElement).style.background="#fff"}}>
+                  <span style={{fontFamily:"'JetBrains Mono',monospace",fontWeight:700,fontSize:14,color:i<3?BRAND.red:"#9ca3af",width:24}}>#{i+1}</span>
+                  <StudentAvatar seed={l.seed} size={28}/>
+                  <span style={{flex:1,fontWeight:600,fontSize:14}}>{l.name}</span>
+                  <span style={{fontFamily:"'JetBrains Mono',monospace",fontWeight:700,fontSize:14,color:SUBJECT.bio}}>{l.xp.toLocaleString()} XP</span>
+                </div>
+              ))}
+            </div>
+          </Reveal>
         </div>
       </section>
 
       {/* EPISODES */}
       <section id="podcast" style={{padding:"80px 24px",background:"#fff"}}>
         <div style={{maxWidth:1200,margin:"0 auto"}}>
-          <div style={{textAlign:"center",marginBottom:40}}>
-            <div style={{color:BRAND.red,marginBottom:8,display:"flex",justifyContent:"center"}}>{Icons.headphones}</div>
-            <h2 style={{fontFamily:"'DM Serif Display',serif",fontSize:36}}>Summit Neuro Podcast</h2>
-            <p style={{color:"#9ca3af",fontSize:14,marginTop:8}}>Audio lessons by Priya Ma'am. Learn Biology by listening.</p>
-          </div>
-          <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:16}}>
+          <Reveal>
+            <div style={{textAlign:"center",marginBottom:40}}>
+              <div style={{color:BRAND.red,marginBottom:8,display:"flex",justifyContent:"center"}}>{Icons.headphones}</div>
+              <h2 className="section-h2-m" style={{fontFamily:"'DM Serif Display',serif"}}>Summit Neuro Podcast</h2>
+              <p style={{color:"#9ca3af",fontSize:14,marginTop:8}}>Audio lessons by Priya Ma'am. Learn Biology by listening.</p>
+            </div>
+          </Reveal>
+          <div className="episodes-grid">
             {episodes.map((ep,i)=>(
-              <div key={i} style={{background:"#fafaf9",borderRadius:14,padding:20,border:"1px solid #e5e5e4",cursor:"pointer",transition:"all 0.2s"}}
-                onMouseEnter={e=>{e.currentTarget.style.borderColor=BRAND.red;e.currentTarget.style.boxShadow=`0 4px 16px ${BRAND.red}11`}}
-                onMouseLeave={e=>{e.currentTarget.style.borderColor="#e5e5e4";e.currentTarget.style.boxShadow="none"}}>
-                <div style={{display:"flex",justifyContent:"space-between",marginBottom:12}}>
-                  <span style={{fontSize:10,fontWeight:600,color:SUBJECT.bio,background:"#f0fdf4",padding:"2px 8px",borderRadius:99}}>{ep.topic}</span>
-                  <span style={{fontSize:11,color:"#9ca3af"}}>{ep.duration}</span>
-                </div>
-                <h4 style={{fontWeight:700,fontSize:15,marginBottom:8,lineHeight:1.4}}>{ep.title}</h4>
-                <div style={{display:"flex",alignItems:"center",gap:6}}>
-                  <div style={{width:28,height:28,borderRadius:14,background:BRAND.red,display:"flex",alignItems:"center",justifyContent:"center",color:"#fff"}}>{Icons.play}</div>
-                  <span style={{fontSize:12,color:"#9ca3af"}}>{ep.plays} plays</span>
-                </div>
-              </div>
+              <Reveal key={i} delay={i * 0.06}>
+                <a href="/episodes" className="episode-card" style={{background:"#fafaf9",borderRadius:14,padding:20,border:"1px solid #e5e5e4",cursor:"pointer",textDecoration:"none",color:"inherit",display:"block"}}>
+                  <div style={{display:"flex",justifyContent:"space-between",marginBottom:12}}>
+                    <span style={{fontSize:10,fontWeight:600,color:SUBJECT.bio,background:"#f0fdf4",padding:"2px 8px",borderRadius:99}}>{ep.topic}</span>
+                    <span style={{fontSize:11,color:"#9ca3af"}}>{ep.duration}</span>
+                  </div>
+                  <h4 style={{fontWeight:700,fontSize:15,marginBottom:8,lineHeight:1.4}}>{ep.title}</h4>
+                  <div style={{display:"flex",alignItems:"center",gap:6}}>
+                    <div style={{width:28,height:28,borderRadius:14,background:BRAND.red,display:"flex",alignItems:"center",justifyContent:"center",color:"#fff"}}>{Icons.play}</div>
+                    <span style={{fontSize:12,color:"#9ca3af"}}>{ep.plays} plays</span>
+                  </div>
+                </a>
+              </Reveal>
             ))}
           </div>
         </div>
@@ -512,92 +774,104 @@ export default function DesiEducatorsHome() {
       {/* SUMMIT NEURO EDUCATIONAL RESEARCH */}
       <section id="research" style={{padding:"80px 24px",background:"#fafaf9"}}>
         <div style={{maxWidth:1000,margin:"0 auto"}}>
-          <div style={{textAlign:"center",marginBottom:48}}>
-            <div style={{display:"inline-flex",alignItems:"center",gap:6,padding:"6px 14px",background:"#fff",borderRadius:99,marginBottom:20,border:"1px solid #e5e5e4"}}>
-              <div style={{color:BRAND.red}}>{Icons.globe}</div>
-              <span style={{fontSize:12,fontWeight:600,color:"#374151"}}>Summit Neuro Educational Research</span>
+          <Reveal>
+            <div style={{textAlign:"center",marginBottom:48}}>
+              <div style={{display:"inline-flex",alignItems:"center",gap:6,padding:"6px 14px",background:"#fff",borderRadius:99,marginBottom:20,border:"1px solid #e5e5e4"}}>
+                <div style={{color:BRAND.red}}>{Icons.globe}</div>
+                <span style={{fontSize:12,fontWeight:600,color:"#374151"}}>Summit Neuro Educational Research</span>
+              </div>
+              <h2 className="section-h2" style={{fontFamily:"'DM Serif Display',serif",marginBottom:16}}>Backed by <span style={{color:BRAND.red}}>real science.</span></h2>
+              <p style={{color:"#6b7280",fontSize:16,lineHeight:1.7,maxWidth:600,margin:"0 auto"}}>Our methodology draws on established European and American pedagogy, published research, and world class science education practice. Not invented. Proven.</p>
             </div>
-            <h2 style={{fontFamily:"'DM Serif Display',serif",fontSize:40,marginBottom:16}}>Backed by <span style={{color:BRAND.red}}>real science.</span></h2>
-            <p style={{color:"#6b7280",fontSize:16,lineHeight:1.7,maxWidth:600,margin:"0 auto"}}>Our methodology draws on established European and American pedagogy, published research, and world class science education practice. Not invented. Proven.</p>
-          </div>
-          <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:20,marginBottom:40}}>
+          </Reveal>
+          <div className="research-grid">
             {[
               { title:"Active Recall", source:"Roediger & Karpicke (2006)", detail:"Testing effect: retrieving information from memory strengthens retention more than restudying. Published in Psychological Science.", color:"#7c3aed" },
               { title:"Spaced Repetition", source:"Ebbinghaus (1885), Cepeda et al. (2006)", detail:"Distributing practice over time produces better long term retention than massing. Meta analysis of 254 studies confirms the spacing effect.", color:SUBJECT.bio },
               { title:"Dual Coding", source:"Paivio (1971), Mayer (2009)", detail:"Combining verbal and visual information creates two memory traces. Multimedia learning principles applied across all our interactive diagrams.", color:SUBJECT.physics },
             ].map((r,i)=>(
-              <div key={i} style={{background:"#fff",borderRadius:16,padding:24,border:"1px solid #e5e5e4"}}>
-                <div style={{width:36,height:4,borderRadius:2,background:r.color,marginBottom:16}}/>
-                <h3 style={{fontWeight:700,fontSize:16,marginBottom:4}}>{r.title}</h3>
-                <div style={{fontSize:11,fontWeight:600,color:r.color,marginBottom:10}}>{r.source}</div>
-                <p style={{fontSize:13,lineHeight:1.6,color:"#6b7280"}}>{r.detail}</p>
-              </div>
+              <Reveal key={i} delay={i * 0.1}>
+                <div style={{background:"#fff",borderRadius:16,padding:24,border:"1px solid #e5e5e4",height:"100%"}}>
+                  <div style={{width:36,height:4,borderRadius:2,background:r.color,marginBottom:16}}/>
+                  <h3 style={{fontWeight:700,fontSize:16,marginBottom:4}}>{r.title}</h3>
+                  <div style={{fontSize:11,fontWeight:600,color:r.color,marginBottom:10}}>{r.source}</div>
+                  <p style={{fontSize:13,lineHeight:1.6,color:"#6b7280"}}>{r.detail}</p>
+                </div>
+              </Reveal>
             ))}
           </div>
-          <div style={{background:"#fff",borderRadius:14,border:"1px solid #e5e5e4",padding:"24px 32px",display:"flex",justifyContent:"space-between",alignItems:"center",flexWrap:"wrap",gap:20}}>
-            {[
-              {label:"White Paper",value:"Published on SSRN, Academia.edu, Zenodo"},
-              {label:"Methodology",value:"European & American pedagogy frameworks"},
-              {label:"RTI Queries Filed",value:"22"},
-            ].map((c,i)=>(
-              <div key={i} style={{textAlign:"center",flex:1,minWidth:160}}>
-                <div style={{fontSize:13,fontWeight:700,color:"#111",marginBottom:2}}>{c.value}</div>
-                <div style={{fontSize:11,color:"#9ca3af",fontWeight:500}}>{c.label}</div>
-              </div>
-            ))}
-          </div>
+          <Reveal>
+            <div style={{background:"#fff",borderRadius:14,border:"1px solid #e5e5e4",padding:"24px 32px",display:"flex",justifyContent:"space-between",alignItems:"center",flexWrap:"wrap",gap:20}}>
+              {[
+                {label:"White Paper",value:"Published on SSRN, Academia.edu, Zenodo"},
+                {label:"Methodology",value:"European & American pedagogy frameworks"},
+                {label:"RTI Queries Filed",value:"22"},
+              ].map((c,i)=>(
+                <div key={i} style={{textAlign:"center",flex:1,minWidth:160}}>
+                  <div style={{fontSize:13,fontWeight:700,color:"#111",marginBottom:2}}>{c.value}</div>
+                  <div style={{fontSize:11,color:"#9ca3af",fontWeight:500}}>{c.label}</div>
+                </div>
+              ))}
+            </div>
+          </Reveal>
         </div>
       </section>
 
       {/* PRIYA AI */}
       <section id="priya-ai" style={{background:"#111",padding:"80px 24px",position:"relative",overflow:"hidden"}}>
         <div style={{position:"absolute",inset:0,opacity:0.03,backgroundImage:"linear-gradient(#fff 1px,transparent 1px),linear-gradient(90deg,#fff 1px,transparent 1px)",backgroundSize:"40px 40px"}}/>
-        <div style={{maxWidth:700,margin:"0 auto",textAlign:"center",position:"relative",zIndex:1}}>
-          <div style={{display:"inline-flex",alignItems:"center",gap:6,padding:"6px 14px",background:"rgba(196,30,30,0.15)",borderRadius:99,marginBottom:20}}>
-            <div style={{color:BRAND.red}}>{Icons.robot}</div>
-            <span style={{fontSize:12,fontWeight:600,color:BRAND.red}}>AI Tutor</span>
+        <Reveal>
+          <div style={{maxWidth:700,margin:"0 auto",textAlign:"center",position:"relative",zIndex:1}}>
+            <div style={{display:"inline-flex",alignItems:"center",gap:6,padding:"6px 14px",background:"rgba(196,30,30,0.15)",borderRadius:99,marginBottom:20}}>
+              <div style={{color:BRAND.red}}>{Icons.robot}</div>
+              <span style={{fontSize:12,fontWeight:600,color:BRAND.red}}>AI Tutor</span>
+            </div>
+            <h2 className="section-h2-lg" style={{fontFamily:"'DM Serif Display',serif",color:"#fff",marginBottom:16}}>Meet <span style={{color:BRAND.red}}>Priya AI</span></h2>
+            <p style={{color:"#9ca3af",fontSize:16,lineHeight:1.7,marginBottom:32,maxWidth:520,margin:"0 auto 32px"}}>Trained on Priya Ma'am's teaching methodology. Ask any NEET Biology question. Get answers in Hindi. Available 24/7 on Telegram.</p>
+            <div className="priya-ai-buttons">
+              <a href="/priya-ai" className="cta-btn" style={{padding:"14px 28px",background:BRAND.red,color:"#fff",border:"none",borderRadius:10,fontWeight:600,fontSize:15,cursor:"pointer",boxShadow:`0 4px 20px ${BRAND.red}44`,textDecoration:"none",display:"inline-block"}}>Try Priya AI Free</a>
+              <a href="https://t.me/priya_ai_neet_bot" target="_blank" rel="noopener noreferrer" style={{padding:"14px 28px",background:"transparent",color:"#fff",border:"1.5px solid #333",borderRadius:10,fontWeight:600,fontSize:15,cursor:"pointer",textDecoration:"none",display:"inline-block",transition:"all 0.2s"}}>Open on Telegram</a>
+            </div>
           </div>
-          <h2 style={{fontFamily:"'DM Serif Display',serif",fontSize:44,color:"#fff",marginBottom:16}}>Meet <span style={{color:BRAND.red}}>Priya AI</span></h2>
-          <p style={{color:"#9ca3af",fontSize:16,lineHeight:1.7,marginBottom:32,maxWidth:520,margin:"0 auto 32px"}}>Trained on Priya Ma'am's teaching methodology. Ask any NEET Biology question. Get answers in Hindi. Available 24/7 on Telegram.</p>
-          <div style={{display:"flex",gap:12,justifyContent:"center"}}>
-            <button style={{padding:"14px 28px",background:BRAND.red,color:"#fff",border:"none",borderRadius:10,fontWeight:600,fontSize:15,cursor:"pointer",boxShadow:`0 4px 20px ${BRAND.red}44`}}>Try Priya AI Free</button>
-            <button style={{padding:"14px 28px",background:"transparent",color:"#fff",border:"1.5px solid #333",borderRadius:10,fontWeight:600,fontSize:15,cursor:"pointer"}}>View on Telegram</button>
-          </div>
-        </div>
+        </Reveal>
       </section>
 
       {/* NCERT */}
       <section style={{padding:"80px 24px",background:"#fafaf9"}}>
         <div style={{maxWidth:800,margin:"0 auto",textAlign:"center"}}>
-          <div style={{display:"inline-flex",alignItems:"center",gap:6,padding:"6px 14px",background:"#f0fdf4",borderRadius:99,marginBottom:20}}>
-            <span style={{color:SUBJECT.bio}}>{Icons.check}</span>
-            <span style={{fontSize:12,fontWeight:600,color:SUBJECT.bio}}>NCERT Verified</span>
-          </div>
-          <h2 style={{fontFamily:"'DM Serif Display',serif",fontSize:36,marginBottom:16}}>We found errors in NCERT. <span style={{color:BRAND.red}}>We filed RTI.</span></h2>
-          <p style={{color:"#6b7280",fontSize:15,lineHeight:1.7,maxWidth:600,margin:"0 auto 28px"}}>The NCERT Biology textbook states aerobic respiration yields 38 ATP. Modern biochemistry (Berg et al., Lehninger) puts the actual figure at 30 to 32 ATP. We filed 22 RTI queries to NCERT. Response awaited.</p>
-          <div style={{display:"inline-flex",gap:24,padding:"16px 28px",background:"#fff",borderRadius:14,border:"1px solid #e5e5e4"}}>
-            {[{num:"6+",label:"Errors found"},{num:"22",label:"RTI queries filed"},{num:"0",label:"False claims"}].map(s=>(
-              <div key={s.label} style={{textAlign:"center"}}>
-                <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:22,fontWeight:700,color:BRAND.red}}>{s.num}</div>
-                <div style={{fontSize:11,color:"#9ca3af",fontWeight:500}}>{s.label}</div>
-              </div>
-            ))}
-          </div>
+          <Reveal>
+            <div style={{display:"inline-flex",alignItems:"center",gap:6,padding:"6px 14px",background:"#f0fdf4",borderRadius:99,marginBottom:20}}>
+              <span style={{color:SUBJECT.bio}}>{Icons.check}</span>
+              <span style={{fontSize:12,fontWeight:600,color:SUBJECT.bio}}>NCERT Verified</span>
+            </div>
+            <h2 className="section-h2-m" style={{fontFamily:"'DM Serif Display',serif",marginBottom:16}}>We found errors in NCERT. <span style={{color:BRAND.red}}>We filed RTI.</span></h2>
+            <p style={{color:"#6b7280",fontSize:15,lineHeight:1.7,maxWidth:600,margin:"0 auto 28px"}}>The NCERT Biology textbook states aerobic respiration yields 38 ATP. Modern biochemistry (Berg et al., Lehninger) puts the actual figure at 30 to 32 ATP. We filed 22 RTI queries to NCERT. Response awaited.</p>
+            <div className="ncert-stats" style={{background:"#fff",borderRadius:14,border:"1px solid #e5e5e4"}}>
+              {[{num:"6+",label:"Errors found"},{num:"22",label:"RTI queries filed"},{num:"0",label:"False claims"}].map(s=>(
+                <div key={s.label} style={{textAlign:"center"}}>
+                  <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:22,fontWeight:700,color:BRAND.red}}>{s.num}</div>
+                  <div style={{fontSize:11,color:"#9ca3af",fontWeight:500}}>{s.label}</div>
+                </div>
+              ))}
+            </div>
+          </Reveal>
         </div>
       </section>
 
       {/* FINAL CTA */}
       <section style={{padding:"80px 24px",background:"#fff"}}>
-        <div style={{maxWidth:600,margin:"0 auto",textAlign:"center"}}>
-          <h2 style={{fontFamily:"'DM Serif Display',serif",fontSize:44,marginBottom:16}}>Your NEET rank starts <span style={{color:BRAND.red}}>here.</span></h2>
-          <p style={{color:"#6b7280",fontSize:16,lineHeight:1.7,marginBottom:32}}>Free to start. No credit card. Join 2,400+ students preparing with Priya Ma'am.</p>
-          <button style={{padding:"16px 40px",background:BRAND.red,color:"#fff",border:"none",borderRadius:12,fontWeight:700,fontSize:17,cursor:"pointer",boxShadow:`0 6px 24px ${BRAND.red}33`}}>Start Learning Free</button>
-        </div>
+        <Reveal direction="scale">
+          <div style={{maxWidth:600,margin:"0 auto",textAlign:"center"}}>
+            <h2 className="section-h2-lg" style={{fontFamily:"'DM Serif Display',serif",marginBottom:16}}>Your NEET rank starts <span style={{color:BRAND.red}}>here.</span></h2>
+            <p style={{color:"#6b7280",fontSize:16,lineHeight:1.7,marginBottom:32}}>Free to start. No credit card. Join 2,400+ students preparing with Priya Ma'am.</p>
+            <a href="/signup" className="cta-btn" style={{padding:"16px 40px",background:BRAND.red,color:"#fff",border:"none",borderRadius:12,fontWeight:700,fontSize:17,cursor:"pointer",boxShadow:`0 6px 24px ${BRAND.red}33`,textDecoration:"none",display:"inline-block",animation:"glowPulse 3s ease-in-out infinite"}}>Start Learning Free</a>
+          </div>
+        </Reveal>
       </section>
 
       {/* FOOTER */}
       <footer style={{background:"#111",padding:"40px 24px",borderTop:"1px solid #222"}}>
-        <div style={{maxWidth:1200,margin:"0 auto",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+        <div className="footer-inner" style={{maxWidth:1200,margin:"0 auto"}}>
           <div>
             <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:8}}>
               <div style={{width:24,height:24,background:BRAND.red,borderRadius:6,display:"flex",alignItems:"center",justifyContent:"center"}}><span style={{color:"#fff",fontWeight:700,fontSize:12,fontFamily:"'DM Serif Display',serif"}}>D</span></div>
@@ -605,7 +879,13 @@ export default function DesiEducatorsHome() {
             </div>
             <p style={{fontSize:12,color:"#6b7280"}}>Biology with Priya Ma'am. Built for NEET. A Summit Neuro Educational Research initiative.</p>
           </div>
-          <div style={{display:"flex",gap:24}}>{["Privacy","Terms","Research","Contact"].map(l=>(<a key={l} href="#" style={{fontSize:13,color:"#6b7280",textDecoration:"none"}}>{l}</a>))}</div>
+          <div className="footer-links">
+            {[{label:"Privacy",href:"/privacy-policy"},{label:"Terms",href:"/terms"},{label:"Refunds",href:"/refund-policy"},{label:"Contact",href:"/contact"}].map(l=>(
+              <a key={l.label} href={l.href} style={{fontSize:12,color:"#6b7280",textDecoration:"none",letterSpacing:1,textTransform:"uppercase",fontFamily:"'DM Sans',sans-serif",transition:"color 0.2s"}}
+                onMouseEnter={e=>{(e.target as HTMLElement).style.color="#fff"}}
+                onMouseLeave={e=>{(e.target as HTMLElement).style.color="#6b7280"}}>{l.label}</a>
+            ))}
+          </div>
         </div>
       </footer>
     </div>
