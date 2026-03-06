@@ -47,14 +47,13 @@ export default function EpisodeList({
         return;
       }
 
-      // Map audio_url to youtube_video_id
       const mapped: Episode[] = (data || []).map((ep) => ({
         id: ep.id,
         title: ep.title,
         description: ep.description,
         subject: ep.subject,
         chapter_id: ep.chapter_id,
-        youtube_video_id: ep.audio_url, // audio_url stores the YouTube video ID
+        youtube_video_id: ep.audio_url,
         duration_seconds: ep.duration_seconds,
         is_free: ep.is_free,
         order_index: ep.order_index,
@@ -83,7 +82,7 @@ export default function EpisodeList({
 
   if (loading) {
     return (
-      <div style={{ padding: '20px', textAlign: 'center', color: '#9ca3af' }}>
+      <div style={{ padding: '20px', textAlign: 'center', color: 'var(--text-muted)' }}>
         Loading episodes...
       </div>
     );
@@ -91,7 +90,7 @@ export default function EpisodeList({
 
   if (episodes.length === 0) {
     return (
-      <div style={{ padding: '20px', textAlign: 'center', color: '#9ca3af' }}>
+      <div style={{ padding: '20px', textAlign: 'center', color: 'var(--text-muted)' }}>
         No episodes available yet. Coming soon!
       </div>
     );
@@ -108,13 +107,13 @@ export default function EpisodeList({
             marginBottom: '16px',
           }}
         >
-          <Headphones size={20} style={{ color: '#6366f1' }} />
+          <Headphones size={20} style={{ color: '#c41e1e' }} />
           <h2
             style={{
               margin: 0,
               fontSize: '18px',
               fontWeight: 700,
-              color: '#e2e8f0',
+              color: 'var(--text-primary)',
             }}
           >
             Summit Neuro Episodes
@@ -136,8 +135,8 @@ export default function EpisodeList({
                 alignItems: 'center',
                 gap: '12px',
                 padding: '12px 16px',
-                backgroundColor: isActive ? '#1e1b4b' : '#111827',
-                border: isActive ? '1px solid #6366f1' : '1px solid #1f2937',
+                backgroundColor: isActive ? '#fef2f2' : 'var(--bg-card)',
+                border: isActive ? '1px solid #c41e1e' : '1px solid var(--border)',
                 borderRadius: '10px',
                 cursor: 'pointer',
                 textAlign: 'left',
@@ -145,13 +144,12 @@ export default function EpisodeList({
                 transition: 'all 0.2s ease',
               }}
             >
-              {/* Episode number / play icon */}
               <div
                 style={{
                   width: '36px',
                   height: '36px',
                   borderRadius: '50%',
-                  backgroundColor: isActive ? '#6366f1' : '#1f2937',
+                  backgroundColor: isActive ? '#c41e1e' : '#f3f4f6',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
@@ -159,28 +157,27 @@ export default function EpisodeList({
                 }}
               >
                 {!episode.is_free ? (
-                  <Lock size={14} style={{ color: '#9ca3af' }} />
+                  <Lock size={14} style={{ color: 'var(--text-muted)' }} />
                 ) : isCurrentlyPlaying ? (
-                  <Pause size={14} style={{ color: '#fff' }} />
+                  <Pause size={14} style={{ color: isActive ? '#fff' : 'var(--text-body)' }} />
                 ) : (
                   <Play
                     size={14}
                     style={{
-                      color: isActive ? '#fff' : '#9ca3af',
+                      color: isActive ? '#fff' : 'var(--text-muted)',
                       marginLeft: '2px',
                     }}
                   />
                 )}
               </div>
 
-              {/* Episode info */}
               <div style={{ flex: 1, minWidth: 0 }}>
                 <p
                   style={{
                     margin: 0,
                     fontSize: '14px',
                     fontWeight: 600,
-                    color: isActive ? '#c7d2fe' : '#e2e8f0',
+                    color: isActive ? '#c41e1e' : 'var(--text-primary)',
                     whiteSpace: 'nowrap',
                     overflow: 'hidden',
                     textOverflow: 'ellipsis',
@@ -193,7 +190,7 @@ export default function EpisodeList({
                     style={{
                       margin: '2px 0 0',
                       fontSize: '12px',
-                      color: '#6b7280',
+                      color: 'var(--text-muted)',
                       whiteSpace: 'nowrap',
                       overflow: 'hidden',
                       textOverflow: 'ellipsis',
@@ -204,11 +201,10 @@ export default function EpisodeList({
                 )}
               </div>
 
-              {/* Duration */}
               <span
                 style={{
                   fontSize: '12px',
-                  color: '#6b7280',
+                  color: 'var(--text-muted)',
                   flexShrink: 0,
                 }}
               >
