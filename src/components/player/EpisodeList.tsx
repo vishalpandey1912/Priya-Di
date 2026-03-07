@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { supabase } from '@/lib/supabase';
 import { useEpisodePlayer, Episode } from '@/context/EpisodePlayerContext';
 import { Play, Pause, Lock, Headphones } from 'lucide-react';
 
@@ -26,40 +25,45 @@ export default function EpisodeList({
   useEffect(() => {
     async function fetchEpisodes() {
       setLoading(true);
-      let query = supabase
-        .from('audio_episodes')
-        .select('id, title, description, subject, chapter_id, audio_url, duration_seconds, is_free, play_count, order_index')
-        .order('order_index', { ascending: true })
-        .limit(limit);
+      try {
+        // Use server-side API route to bypass India Supabase block
+        const res = await fetch('/api/episodes/public');
+        if (!res.ok) {
+          console.error('Failed to fetch episodes:', res.status);
+          setLoading(false);
+          return;
+        }
+        const data = await res.json();
+        let episodeList = data.episodes || [];
 
-      if (subject) {
-        query = query.eq('subject', subject);
+        // Client-side filtering (API returns all episodes)
+        if (subject) {
+          episodeList = episodeList.filter((ep: any) => ep.subject === subject);
+        }
+        if (chapterId) {
+          episodeList = episodeList.filter((ep: any) => ep.chapter_id === chapterId);
+        }
+
+        // Sort by order_index and limit
+        episodeList.sort((a: any, b: any) => (a.order_index || 0) - (b.order_index || 0));
+        episodeList = episodeList.slice(0, limit);
+
+        const mapped: Episode[] = episodeList.map((ep: any) => ({
+          id: ep.id,
+          title: ep.title,
+          description: ep.description,
+          subject: ep.subject,
+          chapter_id: ep.chapter_id,
+          youtube_video_id: ep.audio_url,
+          duration_seconds: ep.duration_seconds,
+          is_free: ep.is_free ?? true,
+          order_index: ep.order_index,
+        }));
+
+        setEpisodes(mapped);
+      } catch (err) {
+        console.error('Failed to fetch episodes:', err);
       }
-      if (chapterId) {
-        query = query.eq('chapter_id', chapterId);
-      }
-
-      const { data, error } = await query;
-
-      if (error) {
-        console.error('Failed to fetch episodes:', error);
-        setLoading(false);
-        return;
-      }
-
-      const mapped: Episode[] = (data || []).map((ep) => ({
-        id: ep.id,
-        title: ep.title,
-        description: ep.description,
-        subject: ep.subject,
-        chapter_id: ep.chapter_id,
-        youtube_video_id: ep.audio_url,
-        duration_seconds: ep.duration_seconds,
-        is_free: ep.is_free,
-        order_index: ep.order_index,
-      }));
-
-      setEpisodes(mapped);
       setLoading(false);
     }
 
