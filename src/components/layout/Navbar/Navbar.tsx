@@ -23,7 +23,7 @@ export const Navbar = () => {
   const navLinks = [
     { name: 'Lectures', href: '/neet' },
     { name: 'Episodes', href: '/episodes' },
-    { name: 'Research', href: '/#ncert' },
+    { name: 'Pricing', href: '/pricing' },
     { name: 'Priya AI', href: '/priya-ai' },
   ];
 
@@ -51,7 +51,7 @@ export const Navbar = () => {
 
           {user ? (
             <div className={styles.userGroup}>
-              <Link href="/profile" className={styles.userLink}>
+              <Link href="/dashboard" className={styles.userLink}>
                 <UserCircle size={18} />
                 <span>{user.name}</span>
               </Link>
@@ -85,7 +85,7 @@ export const Navbar = () => {
           <div className={styles.mobileActions}>
             {user ? (
               <>
-                <Link href="/profile" onClick={() => setIsMenuOpen(false)} className={styles.mobileLink}>Profile</Link>
+                <Link href="/dashboard" onClick={() => setIsMenuOpen(false)} className={styles.mobileLink}>Dashboard</Link>
                 <button onClick={() => { logout(); setIsMenuOpen(false); }} className={styles.mobileLink}>Log Out</button>
               </>
             ) : (
