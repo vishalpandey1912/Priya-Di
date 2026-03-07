@@ -313,7 +313,7 @@ const InteractiveBioShowcase = () => {
       <div style={{display:"flex",flexWrap:"wrap",gap:6,marginBottom:24}}>
         {bioExamples.map((b, i) => (
           <button key={b.id} onClick={() => { setActiveTab(i); setActiveItem(null); }}
-            style={{padding:"6px 14px",borderRadius:99,border:"none",cursor:"pointer",fontSize:12,fontWeight:600,fontFamily:"'DM Sans',sans-serif",background:activeTab===i?b.color:"#f3f4f6",color:activeTab===i?"#fff":"#6b7280",transition:"all 0.2s cubic-bezier(.4,0,.2,1)",transform:activeTab===i?"scale(1.05)":"scale(1)"}}>
+            style={{padding:"6px 14px",borderRadius:99,border:"none",cursor:"pointer",fontSize:12,fontWeight:600,fontFamily:"'Karla',sans-serif",background:activeTab===i?b.color:"#f3f4f6",color:activeTab===i?"#fff":"#6b7280",transition:"all 0.2s cubic-bezier(.4,0,.2,1)",transform:activeTab===i?"scale(1.05)":"scale(1)"}}>
             {b.title}
           </button>
         ))}
@@ -321,7 +321,7 @@ const InteractiveBioShowcase = () => {
       <div style={{background:"#fff",borderRadius:16,border:`2px solid ${ex.color}22`,overflow:"hidden",transition:"border-color 0.3s"}}>
         <div style={{padding:"16px 20px",borderBottom:`1px solid ${ex.color}15`,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
           <div>
-            <span style={{fontFamily:"'DM Serif Display',serif",fontSize:22,color:"#111"}}>{ex.title}</span>
+            <span style={{fontFamily:"'Cormorant Garamond',serif",fontSize:22,color:"#111"}}>{ex.title}</span>
             <span style={{marginLeft:10,fontSize:11,fontWeight:600,color:ex.color,background:`${ex.color}11`,padding:"2px 8px",borderRadius:99}}>{ex.chapter}</span>
           </div>
           <span style={{fontSize:11,color:"#9ca3af",fontWeight:500}}>Tap to explore</span>
@@ -362,7 +362,7 @@ const QuizWidget = () => {
   const next=()=>{if(qi<quizQs.length-1){setQi(qi+1);setSel(null);setShow(false)}else setDone(true)};
   if(done)return(
     <div style={{textAlign:"center",padding:40}}>
-      <div style={{fontSize:48,fontFamily:"'DM Serif Display',serif",color:BRAND.red,animation:"scaleIn 0.4s cubic-bezier(.4,0,.2,1)"}}>{xp} XP</div>
+      <div style={{fontSize:48,fontFamily:"'Cormorant Garamond',serif",color:BRAND.red,animation:"scaleIn 0.4s cubic-bezier(.4,0,.2,1)"}}>{xp} XP</div>
       <div style={{color:"#6b7280",fontSize:14,marginTop:8}}>Quiz complete.</div>
       <div style={{display:"flex",gap:12,justifyContent:"center",marginTop:16}}>
         <button onClick={()=>{setQi(0);setSel(null);setShow(false);setDone(false);setXp(0)}} style={{padding:"8px 20px",background:BRAND.red,color:"#fff",border:"none",borderRadius:8,cursor:"pointer",fontWeight:600,fontSize:14}}>Retry</button>
@@ -441,9 +441,9 @@ export default function DesiEducatorsHome() {
   }, []);
 
   return (
-    <div style={{fontFamily:"'DM Sans',sans-serif",color:"#111",background:"#fafaf9",minHeight:"100vh",overflowX:"hidden"}}>
+    <div style={{fontFamily:"'Karla',sans-serif",color:"#111",background:"#fafaf9",minHeight:"100vh",overflowX:"hidden"}}>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Serif+Display&family=JetBrains+Mono:wght@500;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700&display=swap');
         *{margin:0;padding:0;box-sizing:border-box}html{scroll-behavior:smooth}body{overflow-x:hidden}
         @keyframes floatParticle{0%{transform:translateY(0) rotate(0deg)}100%{transform:translateY(-30px) rotate(8deg)}}
         @keyframes slideDown{from{opacity:0;max-height:0;margin-top:0}to{opacity:1;max-height:200px;margin-top:8px}}
@@ -504,7 +504,7 @@ export default function DesiEducatorsHome() {
               <div style={{width:6,height:6,borderRadius:3,background:SUBJECT.bio,animation:"glowPulse 2s infinite"}}/>
               <span style={{fontSize:12,fontWeight:600,color:SUBJECT.bio}}>NEET 2026 Prep Live</span>
             </div>
-            <h1 className="hero-title" style={{fontFamily:"'DM Serif Display',serif",lineHeight:1.05,marginBottom:24}}>Recall. Retain. <span style={{color:BRAND.red}}>Rank.</span></h1>
+            <h1 className="hero-title" style={{fontFamily:"'Cormorant Garamond',serif",lineHeight:1.05,marginBottom:24}}>Recall. Retain. <span style={{color:BRAND.red}}>Rank.</span></h1>
             <p style={{fontSize:17,lineHeight:1.7,color:"#6b7280",maxWidth:440,marginBottom:28}}>Biology with Priya Ma'am. NCERT accurate audio lessons, active recall quizzes, and an AI tutor that never sleeps. Built for NEET.</p>
             <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:28}}>
               <div style={{display:"flex"}}>{[1,3,5,7,9].map((s,i)=>(<div key={s} style={{marginLeft:i===0?0:-8,border:"2px solid #fff",borderRadius:99}}><StudentAvatar seed={s} size={28}/></div>))}</div>
@@ -587,7 +587,7 @@ export default function DesiEducatorsHome() {
       <section style={{maxWidth:1200,margin:"0 auto",padding:"60px 24px 80px"}}>
         <Reveal>
           <div style={{textAlign:"center",marginBottom:48}}>
-            <h2 className="section-h2" style={{fontFamily:"'DM Serif Display',serif",marginBottom:12}}>How it <span style={{color:BRAND.red}}>works</span></h2>
+            <h2 className="section-h2" style={{fontFamily:"'Cormorant Garamond',serif",marginBottom:12}}>How it <span style={{color:BRAND.red}}>works</span></h2>
             <p style={{color:"#9ca3af",fontSize:15,maxWidth:480,margin:"0 auto"}}>Every feature is designed for one outcome: your NEET rank.</p>
           </div>
         </Reveal>
@@ -611,7 +611,7 @@ export default function DesiEducatorsHome() {
             <Reveal>
               <div className="bio-sticky">
                 <div style={{fontSize:11,fontWeight:700,color:SUBJECT.bio,letterSpacing:1.5,marginBottom:12}}>INTERACTIVE BIOLOGY</div>
-                <h2 className="section-h2-m" style={{fontFamily:"'DM Serif Display',serif",marginBottom:16}}>15 topics. Tap to explore.</h2>
+                <h2 className="section-h2-m" style={{fontFamily:"'Cormorant Garamond',serif",marginBottom:16}}>15 topics. Tap to explore.</h2>
                 <p style={{color:"#6b7280",fontSize:15,lineHeight:1.7,marginBottom:20}}>Every diagram on Desi Educators is interactive. No static images. Tap any topic, then tap each concept to reveal NCERT accurate details with exam relevant depth.</p>
                 <div style={{padding:14,background:"#f0fdf4",borderRadius:10,border:"1px solid #dcfce7"}}>
                   <div style={{fontSize:12,fontWeight:600,color:SUBJECT.bio,marginBottom:4}}>From Cell to Ecosystem</div>
@@ -635,7 +635,7 @@ export default function DesiEducatorsHome() {
           <Reveal delay={0.1} direction="right">
             <div>
               <div style={{fontSize:11,fontWeight:700,color:BRAND.red,letterSpacing:1.5,marginBottom:12}}>CHARGAFF'S RULES</div>
-              <h2 className="section-h2-m" style={{fontFamily:"'DM Serif Display',serif",marginBottom:16}}>Hover the base pairs</h2>
+              <h2 className="section-h2-m" style={{fontFamily:"'Cormorant Garamond',serif",marginBottom:16}}>Hover the base pairs</h2>
               <p style={{color:"#6b7280",fontSize:15,lineHeight:1.7}}>A pairs with T (2 hydrogen bonds). G pairs with C (3 hydrogen bonds). The ratio [A+G]/[T+C] always equals 1. DNA is 2nm wide with a pitch of 3.4nm per complete turn.</p>
               <div style={{marginTop:20,padding:12,background:"#fff",borderRadius:10,border:`1.5px solid ${BRAND.red}22`,display:"inline-flex",alignItems:"center",gap:8}}>
                 <span style={{color:BRAND.red}}>{Icons.check}</span>
@@ -652,7 +652,7 @@ export default function DesiEducatorsHome() {
           <Reveal>
             <div>
               <div style={{fontSize:11,fontWeight:700,color:BRAND.red,letterSpacing:1.5,marginBottom:12}}>ACTIVE RECALL</div>
-              <h2 className="section-h2-m" style={{fontFamily:"'DM Serif Display',serif",marginBottom:16}}>Test yourself <span style={{color:BRAND.red}}>now</span></h2>
+              <h2 className="section-h2-m" style={{fontFamily:"'Cormorant Garamond',serif",marginBottom:16}}>Test yourself <span style={{color:BRAND.red}}>now</span></h2>
               <p style={{color:"#6b7280",fontSize:15,lineHeight:1.7,marginBottom:24}}>3 quick questions. Earn 10 XP per correct answer. Build long term memory by retrieving, not rereading.</p>
               <div style={{display:"flex",alignItems:"center",gap:16}}>
                 {[["100","Quizzes"],["1000+","MCQs"],["10","XP each"]].map(([n,l])=>(<div key={l} style={{textAlign:"center"}}><div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:24,fontWeight:700,color:BRAND.red}}>{n}</div><div style={{fontSize:10,color:"#9ca3af",fontWeight:600}}>{l}</div></div>))}
@@ -671,7 +671,7 @@ export default function DesiEducatorsHome() {
           <Reveal>
             <div style={{textAlign:"center",marginBottom:32}}>
               <div style={{color:BRAND.red,marginBottom:8,display:"flex",justifyContent:"center"}}>{Icons.trophy}</div>
-              <h2 className="section-h2-m" style={{fontFamily:"'DM Serif Display',serif"}}>Leaderboard</h2>
+              <h2 className="section-h2-m" style={{fontFamily:"'Cormorant Garamond',serif"}}>Leaderboard</h2>
               <p style={{color:"#9ca3af",fontSize:14,marginTop:8}}>Top performers this week</p>
             </div>
           </Reveal>
@@ -698,7 +698,7 @@ export default function DesiEducatorsHome() {
           <Reveal>
             <div style={{textAlign:"center",marginBottom:40}}>
               <div style={{color:BRAND.red,marginBottom:8,display:"flex",justifyContent:"center"}}>{Icons.headphones}</div>
-              <h2 className="section-h2-m" style={{fontFamily:"'DM Serif Display',serif"}}>Summit Neuro Podcast</h2>
+              <h2 className="section-h2-m" style={{fontFamily:"'Cormorant Garamond',serif"}}>Summit Neuro Podcast</h2>
               <p style={{color:"#9ca3af",fontSize:14,marginTop:8}}>Audio lessons by Priya Ma'am. Learn Biology by listening.</p>
             </div>
           </Reveal>
@@ -731,7 +731,7 @@ export default function DesiEducatorsHome() {
                 <div style={{color:BRAND.red}}>{Icons.globe}</div>
                 <span style={{fontSize:12,fontWeight:600,color:"#374151"}}>Summit Neuro Educational Research</span>
               </div>
-              <h2 className="section-h2" style={{fontFamily:"'DM Serif Display',serif",marginBottom:16}}>Backed by <span style={{color:BRAND.red}}>real science.</span></h2>
+              <h2 className="section-h2" style={{fontFamily:"'Cormorant Garamond',serif",marginBottom:16}}>Backed by <span style={{color:BRAND.red}}>real science.</span></h2>
               <p style={{color:"#6b7280",fontSize:16,lineHeight:1.7,maxWidth:600,margin:"0 auto"}}>Our methodology draws on established European and American pedagogy, published research, and world class science education practice. Not invented. Proven.</p>
             </div>
           </Reveal>
@@ -777,7 +777,7 @@ export default function DesiEducatorsHome() {
               <div style={{color:BRAND.red}}>{Icons.robot}</div>
               <span style={{fontSize:12,fontWeight:600,color:BRAND.red}}>AI Tutor</span>
             </div>
-            <h2 className="section-h2-lg" style={{fontFamily:"'DM Serif Display',serif",color:"#fff",marginBottom:16}}>Meet <span style={{color:BRAND.red}}>Priya AI</span></h2>
+            <h2 className="section-h2-lg" style={{fontFamily:"'Cormorant Garamond',serif",color:"#fff",marginBottom:16}}>Meet <span style={{color:BRAND.red}}>Priya AI</span></h2>
             <p style={{color:"#9ca3af",fontSize:16,lineHeight:1.7,marginBottom:32,maxWidth:520,margin:"0 auto 32px"}}>Trained on Priya Ma'am's teaching methodology. Ask any NEET Biology question. Get answers in Hindi. Available 24/7 on Telegram.</p>
             <div className="priya-ai-buttons">
               <a href="/priya-ai" className="cta-btn" style={{padding:"14px 28px",background:BRAND.red,color:"#fff",border:"none",borderRadius:10,fontWeight:600,fontSize:15,cursor:"pointer",boxShadow:`0 4px 20px ${BRAND.red}44`,textDecoration:"none",display:"inline-block"}}>Try Priya AI Free</a>
@@ -795,7 +795,7 @@ export default function DesiEducatorsHome() {
               <span style={{color:SUBJECT.bio}}>{Icons.check}</span>
               <span style={{fontSize:12,fontWeight:600,color:SUBJECT.bio}}>NCERT Verified</span>
             </div>
-            <h2 className="section-h2-m" style={{fontFamily:"'DM Serif Display',serif",marginBottom:16}}>We found errors in NCERT. <span style={{color:BRAND.red}}>We filed RTI.</span></h2>
+            <h2 className="section-h2-m" style={{fontFamily:"'Cormorant Garamond',serif",marginBottom:16}}>We found errors in NCERT. <span style={{color:BRAND.red}}>We filed RTI.</span></h2>
             <p style={{color:"#6b7280",fontSize:15,lineHeight:1.7,maxWidth:600,margin:"0 auto 28px"}}>The NCERT Biology textbook states aerobic respiration yields 38 ATP. Modern biochemistry (Berg et al., Lehninger) puts the actual figure at 30 to 32 ATP. We filed 22 RTI queries to NCERT. Response awaited.</p>
             <div className="ncert-stats" style={{background:"#fff",borderRadius:14,border:"1px solid #e5e5e4"}}>
               {[{num:"6+",label:"Errors found"},{num:"22",label:"RTI queries filed"},{num:"0",label:"False claims"}].map(s=>(
@@ -813,7 +813,7 @@ export default function DesiEducatorsHome() {
       <section style={{padding:"80px 24px",background:"#fff"}}>
         <Reveal direction="scale">
           <div style={{maxWidth:600,margin:"0 auto",textAlign:"center"}}>
-            <h2 className="section-h2-lg" style={{fontFamily:"'DM Serif Display',serif",marginBottom:16}}>Your NEET rank starts <span style={{color:BRAND.red}}>here.</span></h2>
+            <h2 className="section-h2-lg" style={{fontFamily:"'Cormorant Garamond',serif",marginBottom:16}}>Your NEET rank starts <span style={{color:BRAND.red}}>here.</span></h2>
             <p style={{color:"#6b7280",fontSize:16,lineHeight:1.7,marginBottom:32}}>Free to start. No credit card. Join 2,400+ students preparing with Priya Ma'am.</p>
             <a href="/signup" className="cta-btn" style={{padding:"16px 40px",background:BRAND.red,color:"#fff",border:"none",borderRadius:12,fontWeight:700,fontSize:17,cursor:"pointer",boxShadow:`0 6px 24px ${BRAND.red}33`,textDecoration:"none",display:"inline-block",animation:"glowPulse 3s ease-in-out infinite"}}>Start Learning Free</a>
           </div>
