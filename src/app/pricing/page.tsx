@@ -185,7 +185,7 @@ export default function PricingPage() {
 
         {/* Bottom Note */}
         <div className={styles.bottomNote}>
-          <p>Questions? Write to <a href="mailto:support@desieducators.com">support@desieducators.com</a></p>
+          <p>Questions? Write to <a href="mailto:desieducators@outlook.com">desieducators@outlook.com</a></p>
           <p className={styles.finePrint}>Coupon code PP99 available at checkout. Payments secured by Razorpay.</p>
         </div>
       </div>

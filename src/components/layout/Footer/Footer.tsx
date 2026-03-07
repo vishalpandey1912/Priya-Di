@@ -11,8 +11,8 @@ export const Footer = () => (
         <div>
           <div className={styles.brand}>Desi Educators</div>
           <p className={styles.tagline}>NEET Preparation. Taught correctly.</p>
-          <a href="mailto:support@desieducators.com" className={styles.email}>
-            support@desieducators.com
+          <a href="mailto:desieducators@outlook.com" className={styles.email}>
+            desieducators@outlook.com
           </a>
         </div>
 
