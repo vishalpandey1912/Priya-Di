@@ -26,6 +26,7 @@ export const Footer = () => (
 
         <div>
           <div className={styles.colTitle}>Research</div>
+          <Link href="/about" className={styles.colLink}>About Us</Link>
           <Link href="/#ncert" className={styles.colLink}>NCERT Corrections</Link>
           <a href="https://doi.org/10.5281/zenodo.18619351" target="_blank" rel="noopener noreferrer" className={styles.colLink}>White Paper</a>
           <Link href="/pricing" className={styles.colLink}>Pricing</Link>
@@ -36,6 +37,14 @@ export const Footer = () => (
           <a href="https://instagram.com/desieducators" target="_blank" rel="noopener noreferrer" className={styles.colLink}>Instagram</a>
           <a href="https://youtube.com/@desieducators" target="_blank" rel="noopener noreferrer" className={styles.colLink}>YouTube</a>
           <a href="https://t.me/priyaaibot" target="_blank" rel="noopener noreferrer" className={styles.colLink}>Telegram</a>
+          <Link href="/contact" className={styles.colLink}>Contact</Link>
+        </div>
+
+        <div>
+          <div className={styles.colTitle}>Legal</div>
+          <Link href="/terms" className={styles.colLink}>Terms of Service</Link>
+          <Link href="/privacy-policy" className={styles.colLink}>Privacy Policy</Link>
+          <Link href="/refund-policy" className={styles.colLink}>Refund Policy</Link>
         </div>
       </div>
 
