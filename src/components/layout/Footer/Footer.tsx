@@ -34,7 +34,7 @@ export const Footer = () => (
 
         <div>
           <div className={styles.colTitle}>Connect</div>
-          <a href="https://instagram.com/desieducators" target="_blank" rel="noopener noreferrer" className={styles.colLink}>Instagram</a>
+          <a href="https://instagram.com/desi_educators_" target="_blank" rel="noopener noreferrer" className={styles.colLink}>Instagram</a>
           <a href="https://youtube.com/@desieducators" target="_blank" rel="noopener noreferrer" className={styles.colLink}>YouTube</a>
           <a href="https://t.me/priyaaibot" target="_blank" rel="noopener noreferrer" className={styles.colLink}>Telegram</a>
           <Link href="/contact" className={styles.colLink}>Contact</Link>
