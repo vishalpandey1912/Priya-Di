@@ -37,15 +37,15 @@ export default function PriyaAIPage() {
   };
 
   return (
-    <div style={{fontFamily:"'DM Sans',sans-serif",minHeight:"100vh",background:"#fafaf9",display:"flex",flexDirection:"column"}}>
-      <style>{`@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Serif+Display&display=swap');*{margin:0;padding:0;box-sizing:border-box}`}</style>
+    <div style={{fontFamily:"'Karla',sans-serif",minHeight:"100vh",background:"#fafaf9",display:"flex",flexDirection:"column"}}>
+      
 
       {/* HEADER */}
       <header style={{background:"rgba(250,250,249,0.92)",backdropFilter:"blur(12px)",borderBottom:"1px solid #e5e5e4",padding:"12px 24px",display:"flex",alignItems:"center",justifyContent:"space-between"}}>
         <div style={{display:"flex",alignItems:"center",gap:12}}>
           <a href="/" style={{display:"flex",alignItems:"center",gap:8,textDecoration:"none"}}>
             <div style={{width:32,height:32,background:BRAND.red,borderRadius:8,display:"flex",alignItems:"center",justifyContent:"center"}}>
-              <span style={{color:"#fff",fontWeight:700,fontSize:16,fontFamily:"'DM Serif Display',serif"}}>D</span>
+              <span style={{color:"#fff",fontWeight:700,fontSize:16,fontFamily:"'Cormorant Garamond',serif"}}>D</span>
             </div>
           </a>
           <div style={{width:1,height:24,background:"#e5e5e4"}}/>
@@ -110,7 +110,7 @@ export default function PriyaAIPage() {
             onChange={e=>setInput(e.target.value)}
             onKeyDown={e=>e.key==="Enter"&&sendMessage()}
             placeholder="Ask any NEET Biology question..."
-            style={{flex:1,padding:"12px 16px",border:"1.5px solid #e5e5e4",borderRadius:10,fontSize:14,outline:"none",fontFamily:"'DM Sans',sans-serif",background:"#fff"}}
+            style={{flex:1,padding:"12px 16px",border:"1.5px solid #e5e5e4",borderRadius:10,fontSize:14,outline:"none",fontFamily:"'Karla',sans-serif",background:"#fff"}}
           />
           <button onClick={sendMessage} disabled={loading||!input.trim()}
             style={{padding:"12px 24px",background:BRAND.red,color:"#fff",border:"none",borderRadius:10,fontWeight:600,fontSize:14,cursor:"pointer",opacity:loading||!input.trim()?0.5:1}}>
