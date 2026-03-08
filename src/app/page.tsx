@@ -781,7 +781,7 @@ export default function DesiEducatorsHome() {
             <p style={{color:"#9ca3af",fontSize:16,lineHeight:1.7,marginBottom:32,maxWidth:520,margin:"0 auto 32px"}}>Trained on Priya Ma'am's teaching methodology. Ask any NEET Biology question. Get answers in Hindi. Available 24/7 on Telegram.</p>
             <div className="priya-ai-buttons">
               <a href="/priya-ai" className="cta-btn" style={{padding:"14px 28px",background:BRAND.red,color:"#fff",border:"none",borderRadius:10,fontWeight:600,fontSize:15,cursor:"pointer",boxShadow:`0 4px 20px ${BRAND.red}44`,textDecoration:"none",display:"inline-block"}}>Try Priya AI Free</a>
-              <a href="https://t.me/priya_ai_neet_bot" target="_blank" rel="noopener noreferrer" style={{padding:"14px 28px",background:"transparent",color:"#fff",border:"1.5px solid #333",borderRadius:10,fontWeight:600,fontSize:15,cursor:"pointer",textDecoration:"none",display:"inline-block",transition:"all 0.2s"}}>Open on Telegram</a>
+              <a href="https://t.me/ProfPriyaPandeybot" target="_blank" rel="noopener noreferrer" style={{padding:"14px 28px",background:"transparent",color:"#fff",border:"1.5px solid #333",borderRadius:10,fontWeight:600,fontSize:15,cursor:"pointer",textDecoration:"none",display:"inline-block",transition:"all 0.2s"}}>Open on Telegram</a>
             </div>
           </div>
         </Reveal>
