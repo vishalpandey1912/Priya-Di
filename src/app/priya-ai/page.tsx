@@ -54,7 +54,7 @@ export default function PriyaAIPage() {
             <div style={{fontSize:11,color:"#16a34a",fontWeight:500}}>Online</div>
           </div>
         </div>
-        <a href="https://t.me/priya_ai_neet_bot" target="_blank" rel="noopener noreferrer"
+        <a href="https://t.me/ProfPriyaPandeybot" target="_blank" rel="noopener noreferrer"
           style={{padding:"6px 16px",background:"#fff",border:"1px solid #e5e5e4",borderRadius:8,fontSize:12,fontWeight:600,color:"#374151",textDecoration:"none"}}>
           Open in Telegram
         </a>
