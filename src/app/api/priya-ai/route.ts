@@ -25,7 +25,7 @@ export async function POST(request: Request) {
     if (!apiKey) {
       console.error("GEMINI_API_KEY is not set in environment variables");
       return NextResponse.json(
-        { reply: "Priya AI is being set up. Please try on Telegram: t.me/priya_ai_neet_bot" },
+        { reply: "Priya AI is being set up. Please try on Telegram: t.me/ProfPriyaPandeybot" },
         { status: 503 }
       );
     }
@@ -92,7 +92,7 @@ export async function POST(request: Request) {
     console.error("All Gemini models failed. Last error:", lastError);
     return NextResponse.json(
       {
-        reply: "Priya AI temporarily unavailable. Please try on Telegram: t.me/priya_ai_neet_bot",
+        reply: "Priya AI temporarily unavailable. Please try on Telegram: t.me/ProfPriyaPandeybot",
         debug: process.env.NODE_ENV === "development" ? lastError : undefined,
       },
       { status: 502 }
@@ -100,7 +100,7 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error("Priya AI route error:", error);
     return NextResponse.json(
-      { reply: "Kuch error aa gaya. Please try again ya Telegram pe pucho: t.me/priya_ai_neet_bot" },
+      { reply: "Kuch error aa gaya. Please try again ya Telegram pe pucho: t.me/ProfPriyaPandeybot" },
       { status: 500 }
     );
   }
