@@ -505,10 +505,10 @@ export default function DesiEducatorsHome() {
               <span style={{fontSize:12,fontWeight:600,color:SUBJECT.bio}}>NEET 2026 Prep Live</span>
             </div>
             <h1 className="hero-title" style={{fontFamily:"'Cormorant Garamond',serif",lineHeight:1.05,marginBottom:24}}>Recall. Retain. <span style={{color:BRAND.red}}>Rank.</span></h1>
-            <p style={{fontSize:17,lineHeight:1.7,color:"#6b7280",maxWidth:440,marginBottom:28}}>Biology with Priya Ma'am. NCERT accurate audio lessons, active recall quizzes, and an AI tutor that never sleeps. Built for NEET.</p>
+            <p style={{fontSize:17,lineHeight:1.7,color:"#6b7280",maxWidth:440,marginBottom:28}}>Biology with Priya Ma'am. 3,700+ NEET MCQs, NCERT accurate audio lessons, and an AI tutor that never sleeps. Built for NEET 2026.</p>
             <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:28}}>
               <div style={{display:"flex"}}>{[1,3,5,7,9].map((s,i)=>(<div key={s} style={{marginLeft:i===0?0:-8,border:"2px solid #fff",borderRadius:99}}><StudentAvatar seed={s} size={28}/></div>))}</div>
-              <span style={{fontSize:13,color:"#9ca3af"}}><strong style={{color:"#374151"}}>2,400+</strong> students already learning</span>
+              <span style={{fontSize:13,color:"#9ca3af"}}><strong style={{color:"#374151"}}>24,000+</strong> engagements on Priya AI</span>
             </div>
             <div style={{marginBottom:28}}>
               <div style={{fontSize:11,fontWeight:600,color:"#9ca3af",letterSpacing:1.5,marginBottom:8}}>NEET 2026 COUNTDOWN</div>
@@ -544,7 +544,7 @@ export default function DesiEducatorsHome() {
         <div style={{display:"inline-flex",animation:"marquee 30s linear infinite"}}>
           {[...Array(2)].map((_, rep) => (
             <div key={rep} style={{display:"inline-flex",gap:40,paddingRight:40}}>
-              {["NCERT Aligned","Active Recall","Spaced Repetition","22 RTI Filed","30-32 ATP (Corrected)","AI Tutor","100 Quizzes","Audio Lessons","XP System","Free to Start"].map(t=>(
+              {["NCERT Aligned","Active Recall","Spaced Repetition","22 RTI Filed","30-32 ATP (Corrected)","AI Tutor","130+ Quizzes","3,700+ MCQs","Audio Lessons","XP System","Free to Start"].map(t=>(
                 <span key={t+rep} style={{fontSize:12,fontWeight:600,color:"rgba(255,255,255,0.5)",letterSpacing:2,textTransform:"uppercase"}}>{t}</span>
               ))}
             </div>
@@ -555,7 +555,7 @@ export default function DesiEducatorsHome() {
       {/* SUBJECT STRIP */}
       <div style={{background:"#fff",borderTop:"1px solid #e5e5e4",borderBottom:"1px solid #e5e5e4"}}>
         <div className="subject-strip" style={{maxWidth:1200,margin:"0 auto",padding:"20px 24px"}}>
-          {[{label:"Biology",color:SUBJECT.bio,icon:"dna",count:"16 chapters"},{label:"Physics",color:SUBJECT.physics,icon:"bolt",count:"Coming soon"},{label:"Chemistry",color:SUBJECT.chemistry,icon:"flask",count:"Coming soon"}].map(s=>(
+          {[{label:"Biology",color:SUBJECT.bio,icon:"dna",count:"32 chapters · Class 11 + 12"},{label:"Physics",color:SUBJECT.physics,icon:"bolt",count:"Coming soon"},{label:"Chemistry",color:SUBJECT.chemistry,icon:"flask",count:"Coming soon"}].map(s=>(
             <div key={s.label} style={{display:"flex",alignItems:"center",gap:10}}>
               <div style={{color:s.color}}>{Icons[s.icon as keyof typeof Icons]}</div>
               <div><div style={{fontWeight:600,fontSize:14,color:s.color}}>{s.label}</div><div style={{fontSize:11,color:"#9ca3af"}}>{s.count}</div></div>
@@ -569,10 +569,10 @@ export default function DesiEducatorsHome() {
         <section style={{maxWidth:1000,margin:"40px auto",padding:"0 24px"}}>
           <div style={{background:"#fff",borderRadius:16,border:"1px solid #e5e5e4",padding:"28px 40px",display:"flex",justifyContent:"space-around",flexWrap:"wrap",gap:20}}>
             {[
-              {num:100,suffix:"+",label:"Quizzes",color:BRAND.red},
-              {num:1000,suffix:"+",label:"MCQs",color:SUBJECT.bio},
+              {num:130,suffix:"+",label:"Quizzes",color:BRAND.red},
+              {num:3700,suffix:"+",label:"MCQs",color:SUBJECT.bio},
               {num:22,suffix:"",label:"RTI Filed",color:SUBJECT.physics},
-              {num:2400,suffix:"+",label:"Students",color:"#7c3aed"},
+              {num:24000,suffix:"+",label:"Engagements",color:"#7c3aed"},
             ].map(s=>(
               <div key={s.label} style={{textAlign:"center",flex:1,minWidth:100}}>
                 <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:28,fontWeight:700,color:s.color}}><AnimatedCounter end={s.num} suffix={s.suffix}/></div>
@@ -655,7 +655,7 @@ export default function DesiEducatorsHome() {
               <h2 className="section-h2-m" style={{fontFamily:"'Cormorant Garamond',serif",marginBottom:16}}>Test yourself <span style={{color:BRAND.red}}>now</span></h2>
               <p style={{color:"#6b7280",fontSize:15,lineHeight:1.7,marginBottom:24}}>3 quick questions. Earn 10 XP per correct answer. Build long term memory by retrieving, not rereading.</p>
               <div style={{display:"flex",alignItems:"center",gap:16}}>
-                {[["100","Quizzes"],["1000+","MCQs"],["10","XP each"]].map(([n,l])=>(<div key={l} style={{textAlign:"center"}}><div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:24,fontWeight:700,color:BRAND.red}}>{n}</div><div style={{fontSize:10,color:"#9ca3af",fontWeight:600}}>{l}</div></div>))}
+                {[["130+","Quizzes"],["3,700+","MCQs"],["10","XP each"]].map(([n,l])=>(<div key={l} style={{textAlign:"center"}}><div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:24,fontWeight:700,color:BRAND.red}}>{n}</div><div style={{fontSize:10,color:"#9ca3af",fontWeight:600}}>{l}</div></div>))}
               </div>
             </div>
           </Reveal>
@@ -796,9 +796,9 @@ export default function DesiEducatorsHome() {
               <span style={{fontSize:12,fontWeight:600,color:SUBJECT.bio}}>NCERT Verified</span>
             </div>
             <h2 className="section-h2-m" style={{fontFamily:"'Cormorant Garamond',serif",marginBottom:16}}>We found errors in NCERT. <span style={{color:BRAND.red}}>We filed RTI.</span></h2>
-            <p style={{color:"#6b7280",fontSize:15,lineHeight:1.7,maxWidth:600,margin:"0 auto 28px"}}>The NCERT Biology textbook states aerobic respiration yields 38 ATP. Modern biochemistry (Berg et al., Lehninger) puts the actual figure at 30 to 32 ATP. We filed 22 RTI queries to NCERT. Response awaited.</p>
+            <p style={{color:"#6b7280",fontSize:15,lineHeight:1.7,maxWidth:600,margin:"0 auto 28px"}}>The NCERT Biology textbook stated aerobic respiration yields 38 ATP. Modern biochemistry (Berg et al., Lehninger) puts the actual figure at 30 to 32 ATP. We filed 22 RTI queries to NCERT. Result: NCERT has confirmed they will correct this in the next reprint. We won.</p>
             <div className="ncert-stats" style={{background:"#fff",borderRadius:14,border:"1px solid #e5e5e4"}}>
-              {[{num:"6+",label:"Errors found"},{num:"22",label:"RTI queries filed"},{num:"0",label:"False claims"}].map(s=>(
+              {[{num:"6+",label:"Errors found"},{num:"22",label:"RTI queries filed"},{num:"1",label:"NCERT correction won"}].map(s=>(
                 <div key={s.label} style={{textAlign:"center"}}>
                   <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:22,fontWeight:700,color:BRAND.red}}>{s.num}</div>
                   <div style={{fontSize:11,color:"#9ca3af",fontWeight:500}}>{s.label}</div>
@@ -814,7 +814,7 @@ export default function DesiEducatorsHome() {
         <Reveal direction="scale">
           <div style={{maxWidth:600,margin:"0 auto",textAlign:"center"}}>
             <h2 className="section-h2-lg" style={{fontFamily:"'Cormorant Garamond',serif",marginBottom:16}}>Your NEET rank starts <span style={{color:BRAND.red}}>here.</span></h2>
-            <p style={{color:"#6b7280",fontSize:16,lineHeight:1.7,marginBottom:32}}>Free to start. No credit card. Join 2,400+ students preparing with Priya Ma'am.</p>
+            <p style={{color:"#6b7280",fontSize:16,lineHeight:1.7,marginBottom:32}}>Free to start. No credit card. NEET 2026 cohort: 3,700+ MCQs, gamified quizzes, AI tutor.</p>
             <a href="/signup" className="cta-btn" style={{padding:"16px 40px",background:BRAND.red,color:"#fff",border:"none",borderRadius:12,fontWeight:700,fontSize:17,cursor:"pointer",boxShadow:`0 6px 24px ${BRAND.red}33`,textDecoration:"none",display:"inline-block",animation:"glowPulse 3s ease-in-out infinite"}}>Start Learning Free</a>
           </div>
         </Reveal>
