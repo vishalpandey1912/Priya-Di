@@ -122,30 +122,66 @@ export default function QuizPage({ params }: { params: Promise<{ quizId: string 
     const handleSubmit = async () => {
         let calculatedScore = 0;
         let correctCount = 0;
+        const totalAnswered = Object.keys(selectedAnswers).length;
 
         questions.forEach(q => {
             if (selectedAnswers[q.id] === q.correct_option) {
                 calculatedScore += q.marks;
                 correctCount++;
             } else if (selectedAnswers[q.id] !== undefined) {
-                calculatedScore -= 1; // Negative marking? Assumed standard
+                calculatedScore -= 1; // NEET-style: +4/-1 per question
             }
         });
+
+        const wrongCount = totalAnswered - correctCount;
+        const totalMarks = questions.length * 4;
+        const percentage = totalMarks > 0 ? (calculatedScore / totalMarks) * 100 : 0;
 
         setScore(calculatedScore);
         setIsSubmitted(true);
 
-        // Save Attempt
+        // Save Attempt with CORRECT column names
         if (user && quiz) {
-            await supabase.from('quiz_attempts').insert({
-                user_id: user.id,
-                quiz_id: quiz.id,
-                score: calculatedScore,
-                total_marks: questions.length * 4,
-                correct_answers: correctCount,
-                wrong_answers: Object.keys(selectedAnswers).length - correctCount,
-                unanswered: questions.length - Object.keys(selectedAnswers).length
-            });
+            const { data: attempt, error: attemptError } = await supabase
+                .from('quiz_attempts')
+                .insert({
+                    user_id: user.id,
+                    quiz_id: quiz.id,
+                    score: calculatedScore,
+                    total_marks: totalMarks,
+                    correct_count: correctCount,
+                    wrong_count: wrongCount,
+                    percentage: percentage,
+                    answers: selectedAnswers,
+                    completed_at: new Date().toISOString()
+                })
+                .select('id')
+                .single();
+
+            if (attemptError) {
+                console.error('Error saving attempt:', attemptError);
+            }
+
+            // Award XP for correct answers (10 XP each per quiz_correct value)
+            if (correctCount > 0) {
+                try {
+                    await fetch('/api/gamification/award-xp', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            source: 'quiz_correct',
+                            custom_xp: correctCount * 10
+                        })
+                    });
+                } catch (xpErr) {
+                    console.error('XP award failed:', xpErr);
+                }
+            }
+
+            // Redirect to result page
+            if (attempt?.id) {
+                router.push(`/quiz/result/${attempt.id}`);
+            }
         }
     };
 

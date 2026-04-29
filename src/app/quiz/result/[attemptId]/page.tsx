@@ -98,6 +98,77 @@ export default function QuizResultPage({ params }: { params: Promise<{ attemptId
                 </div>
             </Card>
 
+            {/* PRIYA AI CROSS-PROMOTION CTA */}
+            <div style={{
+                background: 'linear-gradient(135deg, #c41e1e 0%, #8b0000 100%)',
+                borderRadius: '16px',
+                padding: '24px',
+                marginBottom: '20px',
+                color: '#fff',
+                boxShadow: '0 4px 20px rgba(196, 30, 30, 0.3)'
+            }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flexWrap: 'wrap', justifyContent: 'space-between' }}>
+                    <div style={{ flex: '1', minWidth: '240px' }}>
+                        <div style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '1.5px', opacity: 0.85, marginBottom: '8px' }}>STUCK ON A QUESTION?</div>
+                        <div style={{ fontSize: '20px', fontWeight: 700, marginBottom: '6px', fontFamily: "'Cormorant Garamond', serif", lineHeight: 1.2 }}>
+                            Ask Priya AI on Telegram. <span style={{ opacity: 0.85 }}>FREE.</span>
+                        </div>
+                        <div style={{ fontSize: '13px', opacity: 0.9, lineHeight: 1.5 }}>
+                            Trained on Priya Ma'am's methodology. 24,000+ engagements. Instant answers in Hindi or English.
+                        </div>
+                    </div>
+                    <a
+                        href="https://t.me/ProfPriyaPandeybot"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={{
+                            padding: '12px 24px',
+                            background: '#fff',
+                            color: '#c41e1e',
+                            borderRadius: '10px',
+                            fontWeight: 700,
+                            fontSize: '14px',
+                            textDecoration: 'none',
+                            display: 'inline-block',
+                            whiteSpace: 'nowrap'
+                        }}
+                    >
+                        Open Telegram →
+                    </a>
+                </div>
+            </div>
+
+            {/* TESTIMONIAL REQUEST */}
+            <div style={{
+                background: '#f0fdf4',
+                border: '1px solid #bbf7d0',
+                borderRadius: '12px',
+                padding: '16px 20px',
+                marginBottom: '24px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '12px',
+                flexWrap: 'wrap',
+                justifyContent: 'space-between'
+            }}>
+                <div style={{ flex: 1, minWidth: '200px' }}>
+                    <div style={{ fontSize: '14px', fontWeight: 600, color: '#15803d', marginBottom: '2px' }}>Loved this quiz?</div>
+                    <div style={{ fontSize: '13px', color: '#166534' }}>Share a 30 second testimonial. Helps other NEET aspirants find us.</div>
+                </div>
+                <Link href="/testimonial" style={{
+                    padding: '8px 16px',
+                    background: '#16a34a',
+                    color: '#fff',
+                    borderRadius: '8px',
+                    fontWeight: 600,
+                    fontSize: '13px',
+                    textDecoration: 'none',
+                    whiteSpace: 'nowrap'
+                }}>
+                    Share Testimonial
+                </Link>
+            </div>
+
             <h3 style={{ textAlign: 'left', marginBottom: '16px' }}>Detailed Analysis</h3>
 
             {questions.map((q, index) => {
