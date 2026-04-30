@@ -7,7 +7,7 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { WatermarkOverlay } from '@/components/ui/WatermarkOverlay/WatermarkOverlay';
 import { LeadCaptureGate } from '@/components/quiz/LeadCaptureGate';
-import { Mascot, mascotMessages } from '@/components/quiz/Mascot';
+import { Mystic, mysticMessages } from '@/components/quiz/Mystic';
 import styles from './quiz.module.css';
 
 interface Question {
@@ -58,9 +58,9 @@ export default function QuizPage({ params }: { params: Promise<{ quizId: string 
     const [runningScore, setRunningScore] = useState(0);
     const [timeLeft, setTimeLeft] = useState(0);
 
-    // Mascot reaction
-    const [mascotState, setMascotState] = useState<'idle' | 'happy' | 'sad' | 'fire'>('idle');
-    const [mascotMessage, setMascotMessage] = useState<string | null>(null);
+    // Mystic reaction
+    const [mysticState, setMysticState] = useState<'idle' | 'happy' | 'sad' | 'fire'>('idle');
+    const [mysticMessage, setMysticMessage] = useState<string | null>(null);
     const [scoreBump, setScoreBump] = useState(false);
 
     const [leadCaptured, setLeadCaptured] = useState<boolean | null>(null);
@@ -146,33 +146,33 @@ export default function QuizPage({ params }: { params: Promise<{ quizId: string 
 
         // Trigger mascot reaction
         if (newStreak >= 3) {
-            setMascotState('fire');
-            const msgs = mascotMessages.fire;
-            setMascotMessage(msgs[Math.floor(Math.random() * msgs.length)]);
+            setMysticState('fire');
+            const msgs = mysticMessages.fire;
+            setMysticMessage(msgs[Math.floor(Math.random() * msgs.length)]);
         } else if (isCorrect) {
-            setMascotState('happy');
-            const msgs = mascotMessages.correct;
-            setMascotMessage(msgs[Math.floor(Math.random() * msgs.length)]);
+            setMysticState('happy');
+            const msgs = mysticMessages.correct;
+            setMysticMessage(msgs[Math.floor(Math.random() * msgs.length)]);
         } else {
-            setMascotState('sad');
-            const msgs = mascotMessages.wrong;
-            setMascotMessage(msgs[Math.floor(Math.random() * msgs.length)]);
+            setMysticState('sad');
+            const msgs = mysticMessages.wrong;
+            setMysticMessage(msgs[Math.floor(Math.random() * msgs.length)]);
         }
 
         // Reset mascot to idle after message timeout
         setTimeout(() => {
-            setMascotMessage(null);
+            setMysticMessage(null);
         }, 2200);
         setTimeout(() => {
-            setMascotState('idle');
+            setMysticState('idle');
         }, 2400);
     };
 
     const handleContinue = () => {
         if (!currentQ) return;
         // Snap mascot back to idle on advance
-        setMascotState('idle');
-        setMascotMessage(null);
+        setMysticState('idle');
+        setMysticMessage(null);
         if (activeIndex < questions.length - 1) {
             setActiveIndex(i => i + 1);
         } else {
@@ -434,17 +434,17 @@ export default function QuizPage({ params }: { params: Promise<{ quizId: string 
                 )}
             </div>
 
-            {/* Bagheera the mascot — fixed bottom-left */}
+            {/* Mystic — fixed bottom-left */}
             <div className={`${styles.mascot} ${
-                mascotState === 'happy' ? styles.mascotHappy :
-                mascotState === 'sad' ? styles.mascotSad :
-                mascotState === 'fire' ? styles.mascotFire : ''
+                mysticState === 'happy' ? styles.mascotHappy :
+                mysticState === 'sad' ? styles.mascotSad :
+                mysticState === 'fire' ? styles.mascotFire : ''
             }`}>
-                <Mascot state={mascotState} />
+                <Mystic state={mysticState} />
             </div>
-            {mascotMessage && (
+            {mysticMessage && (
                 <div className={styles.mascotSpeech}>
-                    {mascotMessage}
+                    {mysticMessage}
                 </div>
             )}
 
