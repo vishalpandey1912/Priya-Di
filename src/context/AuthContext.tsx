@@ -221,6 +221,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     };
 
     const signup = async (name: string, email: string, password: string, phone?: string) => {
+        // 1. Sign up with Supabase Auth
         const { data, error } = await supabase.auth.signUp({
             email,
             password,
@@ -232,30 +233,58 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             console.error("Signup error:", error);
             return { success: false, error: error.message };
         }
-        if (data.user) {
-            // New User: Generate ID
-            const newDeviceId = crypto.randomUUID();
-            localStorage.setItem('device_session_id', newDeviceId);
-
-            // Create Profile in Public Table with Session ID
-            const { error: profileError } = await supabase
-                .from('profiles')
-                .insert([
-                    {
-                        id: data.user.id,
-                        name: name,
-                        email: email,
-                        phone: phone,
-                        role: 'student', // Default role
-                        created_at: new Date().toISOString(),
-                        current_session_id: newDeviceId
-                    }
-                ]);
-
-            if (profileError) {
-                console.error("Error creating profile:", profileError);
-            }
+        if (!data.user) {
+            return { success: false, error: 'Signup failed — no user returned.' };
         }
+
+        // 2. Auto-confirm email via server route (bypasses email confirmation friction).
+        //    Email confirmation is disabled on platform — NEET deadline driven decision.
+        try {
+            await fetch('/api/auth/auto-confirm', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email })
+            });
+        } catch (autoConfirmErr) {
+            console.warn('Auto-confirm failed, continuing anyway:', autoConfirmErr);
+        }
+
+        // 3. Sign in with password to create a real session in the browser SDK.
+        //    Without this, signUp without an active session leaves us in a no-session limbo.
+        const { error: signInError } = await supabase.auth.signInWithPassword({
+            email,
+            password
+        });
+        if (signInError) {
+            console.error("Auto sign-in after signup failed:", signInError);
+            // Continue anyway — user can manually login
+        }
+
+        // 4. Create the profile row (idempotent — upsert in case row already exists).
+        const newDeviceId = crypto.randomUUID();
+        if (typeof window !== 'undefined') {
+            localStorage.setItem('device_session_id', newDeviceId);
+        }
+
+        const { error: profileError } = await supabase
+            .from('profiles')
+            .upsert([
+                {
+                    id: data.user.id,
+                    name: name,
+                    full_name: name,
+                    email: email,
+                    phone: phone || null,
+                    role: 'student',
+                    created_at: new Date().toISOString(),
+                    current_session_id: newDeviceId
+                }
+            ], { onConflict: 'id' });
+
+        if (profileError) {
+            console.error("Error creating profile:", profileError);
+        }
+
         return { success: true, error: null };
     };
 

@@ -29,7 +29,8 @@ export default function SignupPage() {
         try {
             const { success, error: signupError } = await signup(name, email, password, phone);
             if (success) {
-                router.push('/verify');
+                // Skip /verify — email is auto-confirmed server-side. Send straight to chapters.
+                router.push('/neet');
             } else {
                 setError(signupError || 'Email already exists. Please login.');
             }
