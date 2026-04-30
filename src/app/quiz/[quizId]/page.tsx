@@ -465,16 +465,18 @@ export default function QuizPage({ params }: { params: Promise<{ quizId: string 
                                 </div>
                             </div>
                         </div>
-                        {!currentAnswer.isCorrect && (
-                            <div className={styles.feedbackExplanation}>
-                                <strong>Correct answer:</strong> {String.fromCharCode(65 + currentQ.correct_option)}. {currentQ.options[currentQ.correct_option]}
-                            </div>
-                        )}
-                        {currentQ.explanation && (
-                            <div className={styles.feedbackExplanation}>
-                                {currentQ.explanation}
-                            </div>
-                        )}
+                        {/* Always show the correct answer — both for correct (confirmation) and wrong (correction) */}
+                        <div className={styles.feedbackExplanation}>
+                            <strong>{currentAnswer.isCorrect ? 'Answer:' : 'Correct answer:'}</strong>{' '}
+                            {String.fromCharCode(65 + currentQ.correct_option)}. {currentQ.options[currentQ.correct_option]}
+                        </div>
+                        {/* Show the NCERT explanation if available — fallback to a generic line if missing */}
+                        <div className={styles.feedbackExplanation}>
+                            <strong>Why:</strong>{' '}
+                            {currentQ.explanation && currentQ.explanation.trim().length > 0
+                                ? currentQ.explanation
+                                : `Refer to the relevant NCERT section. The correct option is ${String.fromCharCode(65 + currentQ.correct_option)}.`}
+                        </div>
                         <button onClick={handleContinue} className={styles.feedbackBtn}>
                             {activeIndex === questions.length - 1 ? 'See Results →' : 'Continue →'}
                         </button>
