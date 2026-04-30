@@ -249,12 +249,49 @@ export default function QuizPage({ params }: { params: Promise<{ quizId: string 
                     <h2 className="text-3xl font-bold mb-2">Quiz Submitted!</h2>
                     <p className="text-gray-600 mb-6">Your Score: <span className="text-blue-600 font-bold">{score}</span> / {questions.length * 4}</p>
 
-                    <div className="flex justify-center gap-4">
-                        <Link href="/dashboard">
-                            <Button variant="outline">Back to Dashboard</Button>
+                    {!user && (
+                        <div style={{
+                            background: 'linear-gradient(135deg, #c41e1e 0%, #8b0000 100%)',
+                            borderRadius: '12px',
+                            padding: '20px',
+                            marginBottom: '24px',
+                            color: '#fff',
+                            textAlign: 'left'
+                        }}>
+                            <div style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '1.5px', opacity: 0.85, marginBottom: '6px' }}>SAVE YOUR PROGRESS</div>
+                            <div style={{ fontSize: '17px', fontWeight: 700, marginBottom: '6px', fontFamily: "'Cormorant Garamond', serif", lineHeight: 1.3 }}>
+                                Sign up free to track your XP, build a streak, and unlock the leaderboard.
+                            </div>
+                            <div style={{ fontSize: '13px', opacity: 0.9, marginBottom: '12px', lineHeight: 1.5 }}>
+                                You scored {score}/{questions.length * 4}. With an account, this would have earned you {questions.filter(q => selectedAnswers[q.id] === q.correct_option).length * 10} XP.
+                            </div>
+                            <Link href={`/signup?next=/quiz/${quizId}`} style={{
+                                display: 'inline-block',
+                                padding: '10px 20px',
+                                background: '#fff',
+                                color: '#c41e1e',
+                                borderRadius: '8px',
+                                fontWeight: 700,
+                                fontSize: '14px',
+                                textDecoration: 'none'
+                            }}>
+                                Sign Up Free →
+                            </Link>
+                        </div>
+                    )}
+
+                    <div className="flex justify-center gap-4 flex-wrap">
+                        <Link href="/neet">
+                            <Button variant="outline">More Quizzes</Button>
                         </Link>
                         <Button onClick={() => window.location.reload()}>Retake Quiz</Button>
                     </div>
+
+                    {!user && (
+                        <p style={{ marginTop: '20px', fontSize: '13px', color: '#6b7280' }}>
+                            Stuck on questions? <a href="https://t.me/ProfPriyaPandeybot" target="_blank" rel="noopener noreferrer" style={{ color: '#c41e1e', fontWeight: 600 }}>Ask Priya AI on Telegram (free)</a>
+                        </p>
+                    )}
                 </Card>
             ) : (
                 <Card className="p-6">

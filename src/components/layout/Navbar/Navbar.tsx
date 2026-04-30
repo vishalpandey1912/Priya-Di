@@ -63,7 +63,7 @@ export const Navbar = () => {
           ) : (
             <div className={styles.authGroup}>
               <Link href="/login" className={styles.loginLink}>Log In</Link>
-              <Link href="/signup">
+              <Link href="/neet">
                 <button className={styles.startBtn}>Start Learning</button>
               </Link>
             </div>
@@ -91,7 +91,7 @@ export const Navbar = () => {
             ) : (
               <>
                 <Link href="/login" onClick={() => setIsMenuOpen(false)} className={styles.mobileLink}>Log In</Link>
-                <Link href="/signup" onClick={() => setIsMenuOpen(false)}>
+                <Link href="/neet" onClick={() => setIsMenuOpen(false)}>
                   <button className={styles.startBtn}>Start Learning</button>
                 </Link>
               </>

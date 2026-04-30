@@ -250,14 +250,18 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         }
 
         // 3. Sign in with password to create a real session in the browser SDK.
-        //    Without this, signUp without an active session leaves us in a no-session limbo.
-        const { error: signInError } = await supabase.auth.signInWithPassword({
-            email,
-            password
-        });
+        //    Retry once if first attempt fails — the auto-confirm has a race window.
+        let signInError = null;
+        for (let attempt = 0; attempt < 3; attempt++) {
+            const result = await supabase.auth.signInWithPassword({ email, password });
+            if (!result.error) { signInError = null; break; }
+            signInError = result.error;
+            // Wait briefly for confirmation propagation
+            await new Promise(resolve => setTimeout(resolve, 600));
+        }
         if (signInError) {
-            console.error("Auto sign-in after signup failed:", signInError);
-            // Continue anyway — user can manually login
+            console.error("Auto sign-in after signup failed (3 attempts):", signInError);
+            return { success: false, error: 'Account created but auto-login failed. Please log in.' };
         }
 
         // 4. Create the profile row (idempotent — upsert in case row already exists).

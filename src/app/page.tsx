@@ -515,7 +515,7 @@ export default function DesiEducatorsHome() {
               <Countdown />
             </div>
             <div style={{display:"flex",gap:12}}>
-              <a href="/signup" className="cta-btn" style={{padding:"14px 28px",background:BRAND.red,color:"#fff",border:"none",borderRadius:10,fontWeight:600,fontSize:15,cursor:"pointer",boxShadow:`0 4px 14px ${BRAND.red}33`,textDecoration:"none",display:"inline-block"}}>Start Learning Free</a>
+              <a href="/neet" className="cta-btn" style={{padding:"14px 28px",background:BRAND.red,color:"#fff",border:"none",borderRadius:10,fontWeight:600,fontSize:15,cursor:"pointer",boxShadow:`0 4px 14px ${BRAND.red}33`,textDecoration:"none",display:"inline-block"}}>Try a Free Quiz</a>
               <a href="/episodes" style={{padding:"14px 28px",background:"#fff",color:"#374151",border:"1.5px solid #d1d5db",borderRadius:10,fontWeight:600,fontSize:15,cursor:"pointer",display:"flex",alignItems:"center",gap:8,textDecoration:"none",transition:"all 0.2s"}}>
                 <span style={{color:BRAND.red}}>{Icons.play}</span> Listen Free
               </a>
@@ -815,7 +815,7 @@ export default function DesiEducatorsHome() {
           <div style={{maxWidth:600,margin:"0 auto",textAlign:"center"}}>
             <h2 className="section-h2-lg" style={{fontFamily:"'Cormorant Garamond',serif",marginBottom:16}}>Your NEET rank starts <span style={{color:BRAND.red}}>here.</span></h2>
             <p style={{color:"#6b7280",fontSize:16,lineHeight:1.7,marginBottom:32}}>Free to start. No credit card. NEET 2026 cohort: 3,700+ MCQs, gamified quizzes, AI tutor.</p>
-            <a href="/signup" className="cta-btn" style={{padding:"16px 40px",background:BRAND.red,color:"#fff",border:"none",borderRadius:12,fontWeight:700,fontSize:17,cursor:"pointer",boxShadow:`0 6px 24px ${BRAND.red}33`,textDecoration:"none",display:"inline-block",animation:"glowPulse 3s ease-in-out infinite"}}>Start Learning Free</a>
+            <a href="/neet" className="cta-btn" style={{padding:"16px 40px",background:BRAND.red,color:"#fff",border:"none",borderRadius:12,fontWeight:700,fontSize:17,cursor:"pointer",boxShadow:`0 6px 24px ${BRAND.red}33`,textDecoration:"none",display:"inline-block",animation:"glowPulse 3s ease-in-out infinite"}}>Try a Free Quiz</a>
           </div>
         </Reveal>
       </section>
