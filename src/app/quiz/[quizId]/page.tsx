@@ -62,51 +62,57 @@ export default function QuizPage({ params }: { params: Promise<{ quizId: string 
         }
     }, [user]);
 
+    // Quiz fetches only AFTER auth state is known AND lead is captured (or user is logged in).
     useEffect(() => {
-        if (!authLoading && !user) {
-            router.push(`/login?next=/quiz/${quizId}`);
-        }
-    }, [user, authLoading, router, quizId]);
-
-    useEffect(() => {
-        if (user) {
-            fetchQuiz();
-        }
-    }, [quizId, user]);
+        if (authLoading) return;
+        if (leadCaptured === null) return;
+        if (!leadCaptured) return;
+        fetchQuiz();
+    }, [quizId, authLoading, leadCaptured]);
 
     const fetchQuiz = async () => {
         try {
-            // Secure Server Fetch
-            const response = await fetch(`/api/quiz/${quizId}/start`, {
-                method: 'POST',
-            });
+            // Direct Supabase query — works for anonymous and logged-in users.
+            // All current quizzes are price=0 (free).
+            const { data: quizData, error: quizErr } = await supabase
+                .from('quizzes')
+                .select('id, title, duration_minutes, topic_id, price')
+                .eq('id', quizId)
+                .single();
 
-            if (response.status === 403) {
-                // Payment Required - fetch just quiz metadata locally to show payment card
-                const { data: quizData } = await supabase
-                    .from('quizzes')
-                    .select('*')
-                    .eq('id', quizId)
-                    .single();
-                if (quizData) setQuiz(quizData);
+            if (quizErr || !quizData) {
+                console.error('Failed to fetch quiz:', quizErr);
+                setLoading(false);
+                return;
+            }
+
+            // Non-free quizzes for anonymous users → show payment card
+            if ((quizData.price ?? 0) > 0 && !user) {
+                setQuiz(quizData);
                 setHasAccess(false);
                 setLoading(false);
                 return;
             }
 
-            if (!response.ok) {
-                console.error('Failed to start quiz');
+            const { data: questionsData, error: qErr } = await supabase
+                .from('quiz_questions')
+                .select('id, question_text, options, correct_option, marks')
+                .eq('quiz_id', quizId);
+
+            if (qErr || !questionsData) {
+                console.error('Failed to fetch questions:', qErr);
                 setLoading(false);
                 return;
             }
 
-            const data = await response.json();
-            setQuiz(data.quiz);
-            setQuestions(data.questions);
-            setHasAccess(true);
-            setTimeLeft(data.quiz.duration_minutes * 60);
-            setLoading(false);
+            // Shuffle for fairness across attempts
+            const shuffled = [...questionsData].sort(() => Math.random() - 0.5);
 
+            setQuiz(quizData);
+            setQuestions(shuffled);
+            setHasAccess(true);
+            setTimeLeft((quizData.duration_minutes || 30) * 60);
+            setLoading(false);
         } catch (error) {
             console.error('Error fetching quiz:', error);
             setLoading(false);
