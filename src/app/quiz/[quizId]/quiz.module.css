@@ -575,3 +575,245 @@
 @keyframes spin {
     to { transform: rotate(360deg); }
 }
+
+/* ─── INSTANT FEEDBACK (Duolingo) ─── */
+
+/* When the user has selected an answer (locked state) */
+.optionLocked {
+    cursor: default;
+    pointer-events: none;
+}
+
+.optionCorrect {
+    background: #f0fdf4;
+    border-color: #16a34a;
+    box-shadow: 0 4px 0 #14532d;
+    animation: correctPulse 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.optionCorrect .optionLetter {
+    background: #16a34a;
+    color: #fff;
+}
+
+.optionWrong {
+    background: #fef2f2;
+    border-color: #c41e1e;
+    box-shadow: 0 4px 0 #8b0000;
+    animation: wrongShake 0.45s ease-in-out;
+}
+.optionWrong .optionLetter {
+    background: #c41e1e;
+    color: #fff;
+}
+
+.optionCorrectReveal {
+    background: #f0fdf4;
+    border-color: #16a34a;
+    box-shadow: 0 4px 0 #14532d;
+    animation: revealCorrect 0.45s 0.2s both ease-out;
+}
+.optionCorrectReveal .optionLetter {
+    background: #16a34a;
+    color: #fff;
+}
+
+.optionDimmed {
+    opacity: 0.5;
+}
+
+.optionCheckmark,
+.optionCross {
+    margin-left: auto;
+    flex-shrink: 0;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-weight: 800;
+    font-size: 16px;
+    animation: iconPop 0.3s 0.15s both cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.optionCheckmark { background: #16a34a; }
+.optionCross { background: #c41e1e; }
+
+@keyframes iconPop {
+    from { transform: scale(0); }
+    to { transform: scale(1); }
+}
+
+@keyframes correctPulse {
+    0% { transform: scale(1); }
+    40% { transform: scale(1.03); }
+    100% { transform: scale(1); }
+}
+
+@keyframes wrongShake {
+    0%, 100% { transform: translateX(0); }
+    15% { transform: translateX(-7px); }
+    30% { transform: translateX(7px); }
+    45% { transform: translateX(-5px); }
+    60% { transform: translateX(5px); }
+    75% { transform: translateX(-2px); }
+}
+
+@keyframes revealCorrect {
+    from { background: #fff; border-color: #e5e5e4; }
+    to { background: #f0fdf4; border-color: #16a34a; }
+}
+
+/* ─── FEEDBACK PANEL (sticky bottom) ─── */
+.feedbackPanel {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 50;
+    padding: 20px 16px 28px;
+    border-top-left-radius: 24px;
+    border-top-right-radius: 24px;
+    box-shadow: 0 -8px 30px rgba(0, 0, 0, 0.1);
+    animation: slideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    max-height: 50vh;
+    overflow-y: auto;
+}
+
+@keyframes slideUp {
+    from { transform: translateY(100%); }
+    to { transform: translateY(0); }
+}
+
+.feedbackCorrect {
+    background: linear-gradient(180deg, #d1fae5 0%, #a7f3d0 100%);
+    color: #065f46;
+}
+.feedbackWrong {
+    background: linear-gradient(180deg, #fee2e2 0%, #fecaca 100%);
+    color: #7f1d1d;
+}
+
+.feedbackInner {
+    max-width: 720px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.feedbackHeader {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.feedbackBadge {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: 22px;
+    font-weight: 800;
+    color: #fff;
+    animation: iconPop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.feedbackCorrect .feedbackBadge { background: #16a34a; }
+.feedbackWrong .feedbackBadge { background: #c41e1e; }
+
+.feedbackTitle {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 26px;
+    font-weight: 600;
+    line-height: 1;
+}
+
+.feedbackSubtitle {
+    font-size: 13px;
+    font-weight: 600;
+    opacity: 0.75;
+    letter-spacing: 0.5px;
+    margin-top: 2px;
+    text-transform: uppercase;
+}
+
+.feedbackExplanation {
+    font-family: 'Karla', sans-serif;
+    font-size: 14px;
+    line-height: 1.55;
+    background: rgba(255, 255, 255, 0.5);
+    border-radius: 10px;
+    padding: 12px 14px;
+}
+
+.feedbackExplanation strong {
+    font-weight: 700;
+}
+
+.feedbackBtn {
+    width: 100%;
+    padding: 16px 20px;
+    border-radius: 14px;
+    border: none;
+    font-family: 'Karla', sans-serif;
+    font-weight: 800;
+    font-size: 14px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    cursor: pointer;
+    color: #fff;
+    transition: transform 0.08s;
+    margin-top: 4px;
+}
+
+.feedbackCorrect .feedbackBtn {
+    background: #16a34a;
+    box-shadow: 0 4px 0 #14532d;
+}
+.feedbackCorrect .feedbackBtn:active {
+    transform: translateY(2px);
+    box-shadow: 0 2px 0 #14532d;
+}
+.feedbackWrong .feedbackBtn {
+    background: #c41e1e;
+    box-shadow: 0 4px 0 #8b0000;
+}
+.feedbackWrong .feedbackBtn:active {
+    transform: translateY(2px);
+    box-shadow: 0 2px 0 #8b0000;
+}
+
+/* Body padding when feedback panel is up so content isn't hidden */
+.containerWithFeedback {
+    padding-bottom: 280px;
+}
+
+/* ─── STREAK COUNTER (top right) ─── */
+.streakBadge {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 6px 10px;
+    background: #fff7ed;
+    border: 2px solid #fb923c;
+    border-radius: 999px;
+    color: #c2410c;
+    font-family: 'Karla', sans-serif;
+    font-weight: 800;
+    font-size: 12px;
+    box-shadow: 0 2px 0 #c2410c;
+    animation: streakPop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.streakFlame {
+    font-size: 14px;
+    line-height: 1;
+}
+
+@keyframes streakPop {
+    from { transform: scale(0.6); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}

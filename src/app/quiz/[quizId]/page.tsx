@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, use, useMemo } from 'react';
+import React, { useState, useEffect, use } from 'react';
 import { supabase } from '@/lib/supabase';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -15,6 +15,7 @@ interface Question {
     options: string[];
     correct_option: number;
     marks: number;
+    explanation?: string;
 }
 
 interface Quiz {
@@ -25,11 +26,16 @@ interface Quiz {
     price?: number;
 }
 
+interface AnswerRecord {
+    selected: number;
+    isCorrect: boolean;
+}
+
 const subjectFromTitle = (title?: string): string => {
     if (!title) return 'NEET';
     const t = title.toLowerCase();
-    if (t.includes('physic') || t.includes('mechan') || t.includes('optic') || t.includes('electric') || t.includes('atom') || t.includes('nucle')) return 'Physics';
-    if (t.includes('chem') || t.includes('bond') || t.includes('equilib') || t.includes('coord') || t.includes('aldeh') || t.includes('hydrocar')) return 'Chemistry';
+    if (t.includes('physic') || t.includes('mechan') || t.includes('optic') || t.includes('electric') || t.includes('atom') || t.includes('nucle') || t.includes('motion') || t.includes('energy')) return 'Physics';
+    if (t.includes('chem') || t.includes('bond') || t.includes('equilib') || t.includes('coord') || t.includes('aldeh') || t.includes('hydrocar') || t.includes('block')) return 'Chemistry';
     return 'Biology';
 };
 
@@ -43,9 +49,10 @@ export default function QuizPage({ params }: { params: Promise<{ quizId: string 
     const [loading, setLoading] = useState(true);
     const [hasAccess, setHasAccess] = useState(false);
 
-    const [activeQuestionIndex, setActiveQuestionIndex] = useState(0);
-    const [selectedAnswers, setSelectedAnswers] = useState<Record<string, number>>({});
-    const [isSubmitted, setIsSubmitted] = useState(false);
+    const [activeIndex, setActiveIndex] = useState(0);
+    const [answers, setAnswers] = useState<Record<string, AnswerRecord>>({});
+    const [streak, setStreak] = useState(0);
+    const [isFinished, setIsFinished] = useState(false);
     const [score, setScore] = useState(0);
     const [timeLeft, setTimeLeft] = useState(0);
 
@@ -62,9 +69,7 @@ export default function QuizPage({ params }: { params: Promise<{ quizId: string 
     }, [user]);
 
     useEffect(() => {
-        if (authLoading) return;
-        if (leadCaptured === null) return;
-        if (!leadCaptured) return;
+        if (authLoading || leadCaptured === null || !leadCaptured) return;
         fetchQuiz();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [quizId, authLoading, leadCaptured]);
@@ -77,29 +82,17 @@ export default function QuizPage({ params }: { params: Promise<{ quizId: string 
                 .eq('id', quizId)
                 .single();
 
-            if (quizErr || !quizData) {
-                console.error('Failed to fetch quiz:', quizErr);
-                setLoading(false);
-                return;
-            }
-
+            if (quizErr || !quizData) { setLoading(false); return; }
             if ((quizData.price ?? 0) > 0 && !user) {
-                setQuiz(quizData);
-                setHasAccess(false);
-                setLoading(false);
-                return;
+                setQuiz(quizData); setHasAccess(false); setLoading(false); return;
             }
 
-            const { data: questionsData, error: qErr } = await supabase
+            const { data: questionsData } = await supabase
                 .from('quiz_questions')
-                .select('id, question_text, options, correct_option, marks')
+                .select('id, question_text, options, correct_option, marks, explanation')
                 .eq('quiz_id', quizId);
 
-            if (qErr || !questionsData || questionsData.length === 0) {
-                console.error('Failed to fetch questions:', qErr);
-                setLoading(false);
-                return;
-            }
+            if (!questionsData || questionsData.length === 0) { setLoading(false); return; }
 
             const shuffled = [...questionsData].sort(() => Math.random() - 0.5);
             setQuiz(quizData);
@@ -107,66 +100,82 @@ export default function QuizPage({ params }: { params: Promise<{ quizId: string 
             setHasAccess(true);
             setTimeLeft((quizData.duration_minutes || 30) * 60);
             setLoading(false);
-        } catch (error) {
-            console.error('Error fetching quiz:', error);
-            setLoading(false);
+        } catch (e) {
+            console.error(e); setLoading(false);
         }
     };
 
-    // Timer
+    // Timer (only runs while quiz is in progress)
     useEffect(() => {
-        if (!loading && hasAccess && !isSubmitted && timeLeft > 0) {
+        if (!loading && hasAccess && !isFinished && timeLeft > 0) {
             const t = setInterval(() => {
                 setTimeLeft(prev => {
-                    if (prev <= 1) { handleSubmit(); return 0; }
+                    if (prev <= 1) { handleFinish(); return 0; }
                     return prev - 1;
                 });
             }, 1000);
             return () => clearInterval(t);
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [loading, hasAccess, isSubmitted, timeLeft]);
+    }, [loading, hasAccess, isFinished, timeLeft]);
 
-    const handleOptionSelect = (questionId: string, optionIndex: number) => {
-        if (isSubmitted) return;
-        setSelectedAnswers(prev => ({ ...prev, [questionId]: optionIndex }));
+    const currentQ = questions[activeIndex];
+    const currentAnswer = currentQ ? answers[currentQ.id] : undefined;
+    const hasAnswered = !!currentAnswer;
+
+    const handlePick = (idx: number) => {
+        if (!currentQ || hasAnswered) return;
+        const isCorrect = idx === currentQ.correct_option;
+        setAnswers(prev => ({ ...prev, [currentQ.id]: { selected: idx, isCorrect } }));
+        setStreak(prev => isCorrect ? prev + 1 : 0);
     };
 
-    const handleSubmit = async () => {
-        if (isSubmitted) return;
+    const handleContinue = () => {
+        if (!currentQ) return;
+        if (activeIndex < questions.length - 1) {
+            setActiveIndex(i => i + 1);
+        } else {
+            handleFinish();
+        }
+    };
+
+    const handleFinish = async () => {
+        if (isFinished) return;
 
         let calculatedScore = 0;
         let correctCount = 0;
-        const totalAnswered = Object.keys(selectedAnswers).length;
+        let wrongCount = 0;
+        const totalAnswered = Object.keys(answers).length;
 
         questions.forEach(q => {
-            if (selectedAnswers[q.id] === q.correct_option) {
+            const a = answers[q.id];
+            if (!a) return;
+            if (a.isCorrect) {
                 calculatedScore += q.marks;
                 correctCount++;
-            } else if (selectedAnswers[q.id] !== undefined) {
+            } else {
                 calculatedScore -= 1;
+                wrongCount++;
             }
         });
 
-        const wrongCount = totalAnswered - correctCount;
         const totalMarks = questions.length * 4;
         const percentage = totalMarks > 0 ? (calculatedScore / totalMarks) * 100 : 0;
 
         setScore(calculatedScore);
-        setIsSubmitted(true);
+        setIsFinished(true);
 
         if (user && quiz) {
+            const selectedAnswersForDB: Record<string, number> = {};
+            Object.entries(answers).forEach(([qid, a]) => { selectedAnswersForDB[qid] = a.selected; });
+
             const { data: attempt } = await supabase
                 .from('quiz_attempts')
                 .insert({
-                    user_id: user.id,
-                    quiz_id: quiz.id,
-                    score: calculatedScore,
-                    total_marks: totalMarks,
-                    correct_count: correctCount,
-                    wrong_count: wrongCount,
-                    percentage,
-                    answers: selectedAnswers,
+                    user_id: user.id, quiz_id: quiz.id,
+                    score: calculatedScore, total_marks: totalMarks,
+                    correct_count: correctCount, wrong_count: wrongCount,
+                    percentage, answers: selectedAnswersForDB,
                     completed_at: new Date().toISOString()
                 })
                 .select('id')
@@ -182,9 +191,7 @@ export default function QuizPage({ params }: { params: Promise<{ quizId: string 
                 } catch {}
             }
 
-            if (attempt?.id) {
-                router.push(`/quiz/result/${attempt.id}`);
-            }
+            if (attempt?.id) router.push(`/quiz/result/${attempt.id}`);
         }
     };
 
@@ -196,55 +203,30 @@ export default function QuizPage({ params }: { params: Promise<{ quizId: string 
 
     // ─── Render gates ───
     if (leadCaptured === null) {
-        return (
-            <div className={styles.shell}>
-                <div className={styles.loading}>
-                    <div className={styles.loadingSpinner} />
-                    Loading…
-                </div>
-            </div>
-        );
+        return <div className={styles.shell}><div className={styles.loading}><div className={styles.loadingSpinner} />Loading…</div></div>;
     }
     if (!leadCaptured) {
-        return (
-            <div className={styles.shell}>
-                <LeadCaptureGate quizId={quizId} onSuccess={() => setLeadCaptured(true)} />
-            </div>
-        );
+        return <div className={styles.shell}><LeadCaptureGate quizId={quizId} onSuccess={() => setLeadCaptured(true)} /></div>;
     }
     if (loading) {
-        return (
-            <div className={styles.shell}>
-                <div className={styles.loading}>
-                    <div className={styles.loadingSpinner} />
-                    Preparing your quiz…
-                </div>
-            </div>
-        );
+        return <div className={styles.shell}><div className={styles.loading}><div className={styles.loadingSpinner} />Preparing your quiz…</div></div>;
     }
     if (!quiz || questions.length === 0) {
-        return (
-            <div className={styles.shell}>
-                <div className={styles.loading}>Quiz not found or empty.</div>
-            </div>
-        );
+        return <div className={styles.shell}><div className={styles.loading}>Quiz not found or empty.</div></div>;
     }
 
-    const currentQ = questions[activeQuestionIndex];
-    const selected = selectedAnswers[currentQ.id];
     const totalMarks = questions.length * 4;
-    const correctCount = isSubmitted ? questions.filter(q => selectedAnswers[q.id] === q.correct_option).length : 0;
-    const wrongCount = isSubmitted ? Object.keys(selectedAnswers).length - correctCount : 0;
-    const skipCount = isSubmitted ? questions.length - Object.keys(selectedAnswers).length : 0;
-    const percentage = isSubmitted ? Math.max(0, (score / totalMarks) * 100) : 0;
+    const correctCount = Object.values(answers).filter(a => a.isCorrect).length;
+    const wrongCount = Object.values(answers).filter(a => !a.isCorrect).length;
+    const skipCount = questions.length - correctCount - wrongCount;
+    const percentage = isFinished ? Math.max(0, (score / totalMarks) * 100) : 0;
     const xpEarned = correctCount * 10;
     const subject = subjectFromTitle(quiz.title);
-    const timerLow = !isSubmitted && timeLeft > 0 && timeLeft < 60;
-    const progressPercent = ((activeQuestionIndex + 1) / questions.length) * 100;
+    const timerLow = !isFinished && timeLeft > 0 && timeLeft < 60;
+    const progressPercent = ((activeIndex + (hasAnswered ? 1 : 0)) / questions.length) * 100;
 
-    // Result screen
-    if (isSubmitted) {
-        // Confetti palette
+    // ─── RESULT SCREEN ───
+    if (isFinished) {
         const confColors = ['#c41e1e', '#16a34a', '#fbbf24', '#3b82f6', '#a855f7'];
         const confBits = Array.from({ length: 36 }).map((_, i) => ({
             color: confColors[i % confColors.length],
@@ -252,8 +234,6 @@ export default function QuizPage({ params }: { params: Promise<{ quizId: string 
             delay: Math.random() * 0.4,
             duration: 1.8 + Math.random() * 1.2,
         }));
-
-        // Score circle math
         const radius = 70;
         const circumference = 2 * Math.PI * radius;
         const offset = circumference - (Math.max(0, percentage) / 100) * circumference;
@@ -265,16 +245,7 @@ export default function QuizPage({ params }: { params: Promise<{ quizId: string 
                         {percentage >= 50 && (
                             <div className={styles.celebrate}>
                                 {confBits.map((b, i) => (
-                                    <span
-                                        key={i}
-                                        className={styles.confettiBit}
-                                        style={{
-                                            left: `${b.left}%`,
-                                            background: b.color,
-                                            animationDelay: `${b.delay}s`,
-                                            animationDuration: `${b.duration}s`,
-                                        }}
-                                    />
+                                    <span key={i} className={styles.confettiBit} style={{ left: `${b.left}%`, background: b.color, animationDelay: `${b.delay}s`, animationDuration: `${b.duration}s` }} />
                                 ))}
                             </div>
                         )}
@@ -287,14 +258,7 @@ export default function QuizPage({ params }: { params: Promise<{ quizId: string 
                         <div className={styles.scoreCircle}>
                             <svg className={styles.scoreCircleSvg} viewBox="0 0 160 160">
                                 <circle className={styles.scoreCircleBg} cx="80" cy="80" r={radius} />
-                                <circle
-                                    className={styles.scoreCircleFill}
-                                    cx="80"
-                                    cy="80"
-                                    r={radius}
-                                    strokeDasharray={circumference}
-                                    strokeDashoffset={offset}
-                                />
+                                <circle className={styles.scoreCircleFill} cx="80" cy="80" r={radius} strokeDasharray={circumference} strokeDashoffset={offset} />
                             </svg>
                             <div className={styles.scoreNumber}>
                                 <strong>{score}</strong>
@@ -321,30 +285,17 @@ export default function QuizPage({ params }: { params: Promise<{ quizId: string 
                             <div className={styles.xpCta}>
                                 <div className={styles.xpBadge}>SAVE YOUR PROGRESS</div>
                                 <div className={styles.xpHeading}>You would have earned {xpEarned} XP.</div>
-                                <div className={styles.xpSub}>
-                                    Sign up free to track XP, build a streak, and climb the weekly leaderboard.
-                                </div>
-                                <Link href={`/signup?next=/quiz/${quizId}`} className={styles.xpCtaBtn}>
-                                    Sign Up Free
-                                </Link>
+                                <div className={styles.xpSub}>Sign up free to track XP, build a streak, and climb the weekly leaderboard.</div>
+                                <Link href={`/signup?next=/quiz/${quizId}`} className={styles.xpCtaBtn}>Sign Up Free</Link>
                             </div>
                         )}
 
                         <div className={styles.resultActions}>
-                            <Link href="/neet" className={`${styles.navBtn} ${styles.navBtnPrev}`} style={{ flex: 1, textAlign: 'center', textDecoration: 'none', display: 'inline-block' }}>
-                                More Quizzes
-                            </Link>
-                            <button onClick={() => window.location.reload()} className={`${styles.navBtn} ${styles.navBtnNext}`}>
-                                Retake
-                            </button>
+                            <Link href="/neet" className={`${styles.navBtn} ${styles.navBtnPrev}`} style={{ flex: 1, textAlign: 'center', textDecoration: 'none', display: 'inline-block' }}>More Quizzes</Link>
+                            <button onClick={() => window.location.reload()} className={`${styles.navBtn} ${styles.navBtnNext}`}>Retake</button>
                         </div>
 
-                        <a
-                            href="https://t.me/ProfPriyaPandeybot"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className={styles.priyaLink}
-                        >
+                        <a href="https://t.me/ProfPriyaPandeybot" target="_blank" rel="noopener noreferrer" className={styles.priyaLink}>
                             Stuck? Ask Priya AI on Telegram →
                         </a>
                     </div>
@@ -353,82 +304,116 @@ export default function QuizPage({ params }: { params: Promise<{ quizId: string 
         );
     }
 
-    // Quiz screen
+    // ─── QUIZ SCREEN ───
     return (
         <div className={styles.shell}>
-            {user && (
-                <WatermarkOverlay text={user.email || 'User'} subtext={user.id?.slice(0, 8)} />
-            )}
-            <div className={styles.container}>
+            {user && <WatermarkOverlay text={user.email || 'User'} subtext={user.id?.slice(0, 8)} />}
+            <div className={`${styles.container} ${hasAnswered ? styles.containerWithFeedback : ''}`}>
                 {/* Top bar */}
                 <div className={styles.topBar}>
                     <button onClick={() => router.push('/neet')} className={styles.exitBtn} aria-label="Exit">×</button>
                     <div className={styles.progressTrack}>
                         <div className={styles.progressFill} style={{ width: `${progressPercent}%` }} />
                     </div>
-                    <div className={`${styles.timer} ${timerLow ? styles.timerWarning : ''}`}>
-                        {formatTime(timeLeft)}
-                    </div>
+                    <div className={`${styles.timer} ${timerLow ? styles.timerWarning : ''}`}>{formatTime(timeLeft)}</div>
                 </div>
 
-                {/* Question card */}
                 <div className={styles.qHeader}>
-                    <div className={styles.qNum}>Q {activeQuestionIndex + 1} of {questions.length}</div>
-                    <div className={styles.subjectBadge}>{subject}</div>
+                    <div className={styles.qNum}>Q {activeIndex + 1} of {questions.length}</div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        {streak >= 2 && (
+                            <div className={styles.streakBadge} key={streak}>
+                                <span className={styles.streakFlame}>🔥</span>
+                                {streak} streak
+                            </div>
+                        )}
+                        <div className={styles.subjectBadge}>{subject}</div>
+                    </div>
                 </div>
 
                 <div className={styles.questionCard} key={currentQ.id}>
                     <div className={styles.questionText}>{currentQ.question_text}</div>
 
                     <div className={styles.options}>
-                        {currentQ.options.map((option, idx) => (
-                            <button
-                                key={idx}
-                                onClick={() => handleOptionSelect(currentQ.id, idx)}
-                                className={`${styles.option} ${selected === idx ? styles.optionSelected : ''}`}
-                            >
-                                <div className={styles.optionLetter}>{String.fromCharCode(65 + idx)}</div>
-                                <div className={styles.optionText}>{option}</div>
-                            </button>
-                        ))}
+                        {currentQ.options.map((option, idx) => {
+                            let cls = styles.option;
+                            if (hasAnswered) {
+                                cls += ` ${styles.optionLocked}`;
+                                if (currentAnswer.selected === idx) {
+                                    cls += currentAnswer.isCorrect ? ` ${styles.optionCorrect}` : ` ${styles.optionWrong}`;
+                                } else if (idx === currentQ.correct_option) {
+                                    cls += ` ${styles.optionCorrectReveal}`;
+                                } else {
+                                    cls += ` ${styles.optionDimmed}`;
+                                }
+                            }
+                            return (
+                                <button key={idx} onClick={() => handlePick(idx)} className={cls}>
+                                    <div className={styles.optionLetter}>{String.fromCharCode(65 + idx)}</div>
+                                    <div className={styles.optionText}>{option}</div>
+                                    {hasAnswered && currentAnswer.selected === idx && currentAnswer.isCorrect && (
+                                        <div className={styles.optionCheckmark}>✓</div>
+                                    )}
+                                    {hasAnswered && currentAnswer.selected === idx && !currentAnswer.isCorrect && (
+                                        <div className={styles.optionCross}>✕</div>
+                                    )}
+                                    {hasAnswered && idx === currentQ.correct_option && currentAnswer.selected !== idx && (
+                                        <div className={styles.optionCheckmark}>✓</div>
+                                    )}
+                                </button>
+                            );
+                        })}
                     </div>
                 </div>
 
-                {/* Nav row */}
-                <div className={styles.navRow}>
-                    <button
-                        onClick={() => setActiveQuestionIndex(i => Math.max(0, i - 1))}
-                        disabled={activeQuestionIndex === 0}
-                        className={`${styles.navBtn} ${styles.navBtnPrev}`}
-                    >
-                        Previous
-                    </button>
-                    {activeQuestionIndex === questions.length - 1 ? (
-                        <button onClick={handleSubmit} className={`${styles.navBtn} ${styles.navBtnSubmit}`}>
-                            Submit
-                        </button>
-                    ) : (
-                        <button
-                            onClick={() => setActiveQuestionIndex(i => Math.min(questions.length - 1, i + 1))}
-                            className={`${styles.navBtn} ${styles.navBtnNext}`}
-                        >
-                            Next →
-                        </button>
-                    )}
-                </div>
-
-                {/* Dots progress (compact for ≤24 questions; hide for more) */}
+                {/* Dots progress (compact) */}
                 {questions.length <= 24 && (
                     <div className={styles.dots}>
-                        {questions.map((q, i) => (
-                            <div
-                                key={q.id}
-                                className={`${styles.dot} ${i === activeQuestionIndex ? styles.dotActive : (selectedAnswers[q.id] !== undefined ? styles.dotAnswered : '')}`}
-                            />
-                        ))}
+                        {questions.map((q, i) => {
+                            const ans = answers[q.id];
+                            return (
+                                <div
+                                    key={q.id}
+                                    className={`${styles.dot} ${i === activeIndex ? styles.dotActive : (ans ? styles.dotAnswered : '')}`}
+                                    style={ans && !ans.isCorrect ? { background: 'rgba(196, 30, 30, 0.7)' } : ans?.isCorrect ? { background: 'rgba(22, 163, 74, 0.7)' } : undefined}
+                                />
+                            );
+                        })}
                     </div>
                 )}
             </div>
+
+            {/* Bottom feedback panel — slides up when an answer is locked */}
+            {hasAnswered && (
+                <div className={`${styles.feedbackPanel} ${currentAnswer.isCorrect ? styles.feedbackCorrect : styles.feedbackWrong}`}>
+                    <div className={styles.feedbackInner}>
+                        <div className={styles.feedbackHeader}>
+                            <div className={styles.feedbackBadge}>{currentAnswer.isCorrect ? '✓' : '✕'}</div>
+                            <div>
+                                <div className={styles.feedbackSubtitle}>
+                                    {currentAnswer.isCorrect ? '+4 marks' : '−1 mark'}
+                                </div>
+                                <div className={styles.feedbackTitle}>
+                                    {currentAnswer.isCorrect ? 'Correct!' : 'Not quite.'}
+                                </div>
+                            </div>
+                        </div>
+                        {!currentAnswer.isCorrect && (
+                            <div className={styles.feedbackExplanation}>
+                                <strong>Correct answer:</strong> {String.fromCharCode(65 + currentQ.correct_option)}. {currentQ.options[currentQ.correct_option]}
+                            </div>
+                        )}
+                        {currentQ.explanation && (
+                            <div className={styles.feedbackExplanation}>
+                                {currentQ.explanation}
+                            </div>
+                        )}
+                        <button onClick={handleContinue} className={styles.feedbackBtn}>
+                            {activeIndex === questions.length - 1 ? 'See Results →' : 'Continue →'}
+                        </button>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
