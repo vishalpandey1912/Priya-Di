@@ -8,16 +8,16 @@ import { useContent } from '@/context/ContentContext';
 import styles from './ExamTabs.module.css';
 
 const tabs = [
+    { id: 'tests', label: 'Quizzes', icon: <HelpCircle size={18} /> },
     { id: 'notes', label: 'Notes', icon: <FileText size={18} /> },
     { id: 'videos', label: 'Videos', icon: <PlayCircle size={18} /> },
-    { id: 'tests', label: 'Mock Tests', icon: <PenTool size={18} /> },
-    { id: 'doubts', label: 'Doubts', icon: <HelpCircle size={18} /> },
+    { id: 'doubts', label: 'Doubts', icon: <PenTool size={18} /> },
 ];
 
 export const ExamTabs = () => {
-    const [activeTab, setActiveTab] = useState('notes');
+    const [activeTab, setActiveTab] = useState('tests');
 
-    const { chapters, quizzes } = useContent();
+    const { chapters, quizzes, subjects } = useContent();
 
     // Get recent 3 chapters with materials
     const recentNotes = chapters
@@ -138,31 +138,105 @@ export const ExamTabs = () => {
                 )}
                 {activeTab === 'tests' && (
                     <div className={styles.grid}>
-                        <h3>Available Mock Tests</h3>
-                        {quizzes && quizzes.length > 0 ? (
-                            quizzes.map(quiz => (
-                                <Link
-                                    key={quiz.id}
-                                    href={`/quiz/${quiz.id}`}
-                                    className={styles.listItem}
-                                >
-                                    <div className={styles.iconBox}>
-                                        <HelpCircle size={24} />
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                            <h3>Free Quizzes <span style={{ fontSize: '0.85rem', fontWeight: 500, color: '#64748b', marginLeft: '8px' }}>({quizzes?.length || 0} available)</span></h3>
+                        </div>
+
+                        {quizzes && quizzes.length > 0 ? (() => {
+                            // Group quizzes by chapter for clarity
+                            const subjectMap = new Map<string, string>((subjects || []).map((s: any) => [s.id, (s.title || s.name || s.id)]));
+
+                            // Build topic→chapter lookup from nested chapters.topics
+                            const topicToChapter = new Map<string, { chapterId: string; chapterTitle: string; subjectId: string }>();
+                            for (const ch of chapters || []) {
+                                for (const t of (ch.topics || [])) {
+                                    topicToChapter.set(t.id, {
+                                        chapterId: ch.id,
+                                        chapterTitle: ch.title || ch.id,
+                                        subjectId: ch.subjectId
+                                    });
+                                }
+                            }
+
+                            // Build groups: subject → chapter → list of quizzes
+                            const grouped: Record<string, Record<string, { chapterTitle: string; subjectId: string; quizzes: any[] }>> = {};
+                            for (const q of quizzes) {
+                                const topicInfo = topicToChapter.get(q.topic_id);
+                                if (!topicInfo) continue;
+                                const subjectName = subjectMap.get(topicInfo.subjectId) || 'Other';
+                                if (!grouped[subjectName]) grouped[subjectName] = {};
+                                if (!grouped[subjectName][topicInfo.chapterId]) {
+                                    grouped[subjectName][topicInfo.chapterId] = {
+                                        chapterTitle: topicInfo.chapterTitle,
+                                        subjectId: topicInfo.subjectId,
+                                        quizzes: []
+                                    };
+                                }
+                                grouped[subjectName][topicInfo.chapterId].quizzes.push(q);
+                            }
+
+                            const subjectOrder = Object.keys(grouped).sort((a, b) => {
+                                // Biology first, then Chemistry, then Physics
+                                const order = (s: string) => s.toLowerCase().includes('bio') ? 0 : s.toLowerCase().includes('chem') ? 1 : s.toLowerCase().includes('phys') ? 2 : 3;
+                                return order(a) - order(b);
+                            });
+
+                            return subjectOrder.map((subjectName) => (
+                                <div key={subjectName} style={{ marginBottom: '24px' }}>
+                                    <div style={{
+                                        fontSize: '0.7rem',
+                                        fontWeight: 700,
+                                        letterSpacing: '1.2px',
+                                        textTransform: 'uppercase',
+                                        color: '#dc2626',
+                                        marginBottom: '8px',
+                                        paddingBottom: '6px',
+                                        borderBottom: '1px solid #fee2e2'
+                                    }}>
+                                        {subjectName}
                                     </div>
-                                    <div className={styles.content}>
-                                        <div className={styles.title}>{quiz.title || 'Untitled Quiz'}</div>
-                                        <div className={styles.subtitle}>Test your knowledge</div>
-                                    </div>
-                                    <div className={styles.actionIcon}>
-                                        <ChevronRight size={20} />
-                                    </div>
-                                </Link>
-                            ))
-                        ) : (
+                                    {Object.entries(grouped[subjectName]).map(([chapterId, group]) => (
+                                        <div key={chapterId} style={{ marginBottom: '12px' }}>
+                                            <div style={{
+                                                fontSize: '0.85rem',
+                                                fontWeight: 600,
+                                                color: '#475569',
+                                                marginBottom: '6px',
+                                                marginLeft: '4px'
+                                            }}>
+                                                {group.chapterTitle}
+                                                <span style={{ fontWeight: 400, color: '#94a3b8', marginLeft: '6px' }}>
+                                                    ({group.quizzes.length})
+                                                </span>
+                                            </div>
+                                            {group.quizzes.map((quiz: any) => (
+                                                <Link
+                                                    key={quiz.id}
+                                                    href={`/quiz/${quiz.id}`}
+                                                    className={styles.listItem}
+                                                >
+                                                    <div className={styles.iconBox}>
+                                                        <HelpCircle size={20} />
+                                                    </div>
+                                                    <div className={styles.content}>
+                                                        <div className={styles.title}>{quiz.title || 'Untitled Quiz'}</div>
+                                                        <div className={styles.subtitle}>
+                                                            {quiz.duration_minutes ? `${quiz.duration_minutes} min` : 'Free'} · Free for all
+                                                        </div>
+                                                    </div>
+                                                    <div className={styles.actionIcon}>
+                                                        <ChevronRight size={20} />
+                                                    </div>
+                                                </Link>
+                                            ))}
+                                        </div>
+                                    ))}
+                                </div>
+                            ));
+                        })() : (
                             <div style={{ textAlign: 'center', padding: '40px 20px', color: '#64748b' }}>
                                 <PenTool size={48} style={{ opacity: 0.2, margin: '0 auto 16px' }} />
-                                <p style={{ fontWeight: 500 }}>No mock tests active</p>
-                                <p style={{ fontSize: '0.875rem' }}>Tests will appear here before exams.</p>
+                                <p style={{ fontWeight: 500 }}>Loading quizzes...</p>
                             </div>
                         )}
                     </div>
