@@ -1,21 +1,19 @@
 'use client';
 
-import React, { useState, useEffect, use } from 'react';
+import React, { useState, useEffect, use, useMemo } from 'react';
 import { supabase } from '@/lib/supabase';
-import { Button, Card } from '@/components/ui';
-import { ArrowLeft, CheckCircle, XCircle, Timer, AlertCircle } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
-import { PaymentModal } from '@/components/ui/PaymentModal/PaymentModal';
 import { WatermarkOverlay } from '@/components/ui/WatermarkOverlay/WatermarkOverlay';
 import { LeadCaptureGate } from '@/components/quiz/LeadCaptureGate';
+import styles from './quiz.module.css';
 
 interface Question {
     id: string;
     question_text: string;
-    options: string[]; // Array of 4 options
-    correct_option: number; // 0-3
+    options: string[];
+    correct_option: number;
     marks: number;
 }
 
@@ -27,6 +25,14 @@ interface Quiz {
     price?: number;
 }
 
+const subjectFromTitle = (title?: string): string => {
+    if (!title) return 'NEET';
+    const t = title.toLowerCase();
+    if (t.includes('physic') || t.includes('mechan') || t.includes('optic') || t.includes('electric') || t.includes('atom') || t.includes('nucle')) return 'Physics';
+    if (t.includes('chem') || t.includes('bond') || t.includes('equilib') || t.includes('coord') || t.includes('aldeh') || t.includes('hydrocar')) return 'Chemistry';
+    return 'Biology';
+};
+
 export default function QuizPage({ params }: { params: Promise<{ quizId: string }> }) {
     const { quizId } = use(params);
     const router = useRouter();
@@ -36,24 +42,17 @@ export default function QuizPage({ params }: { params: Promise<{ quizId: string 
     const [questions, setQuestions] = useState<Question[]>([]);
     const [loading, setLoading] = useState(true);
     const [hasAccess, setHasAccess] = useState(false);
-    const [showPaymentModal, setShowPaymentModal] = useState(false);
 
-    // Quiz State
     const [activeQuestionIndex, setActiveQuestionIndex] = useState(0);
     const [selectedAnswers, setSelectedAnswers] = useState<Record<string, number>>({});
     const [isSubmitted, setIsSubmitted] = useState(false);
     const [score, setScore] = useState(0);
     const [timeLeft, setTimeLeft] = useState(0);
 
-    // Lead capture gate state — anonymous users must enter name/email/phone before quiz loads.
-    // We check localStorage on mount to skip if already captured. Logged-in users auto-pass.
     const [leadCaptured, setLeadCaptured] = useState<boolean | null>(null);
 
     useEffect(() => {
-        if (user) {
-            setLeadCaptured(true); // Logged-in users skip the gate
-            return;
-        }
+        if (user) { setLeadCaptured(true); return; }
         try {
             const stored = localStorage.getItem('de_lead_captured');
             setLeadCaptured(!!stored);
@@ -62,18 +61,16 @@ export default function QuizPage({ params }: { params: Promise<{ quizId: string 
         }
     }, [user]);
 
-    // Quiz fetches only AFTER auth state is known AND lead is captured (or user is logged in).
     useEffect(() => {
         if (authLoading) return;
         if (leadCaptured === null) return;
         if (!leadCaptured) return;
         fetchQuiz();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [quizId, authLoading, leadCaptured]);
 
     const fetchQuiz = async () => {
         try {
-            // Direct Supabase query — works for anonymous and logged-in users.
-            // All current quizzes are price=0 (free).
             const { data: quizData, error: quizErr } = await supabase
                 .from('quizzes')
                 .select('id, title, duration_minutes, topic_id, price')
@@ -86,7 +83,6 @@ export default function QuizPage({ params }: { params: Promise<{ quizId: string 
                 return;
             }
 
-            // Non-free quizzes for anonymous users → show payment card
             if ((quizData.price ?? 0) > 0 && !user) {
                 setQuiz(quizData);
                 setHasAccess(false);
@@ -99,15 +95,13 @@ export default function QuizPage({ params }: { params: Promise<{ quizId: string 
                 .select('id, question_text, options, correct_option, marks')
                 .eq('quiz_id', quizId);
 
-            if (qErr || !questionsData) {
+            if (qErr || !questionsData || questionsData.length === 0) {
                 console.error('Failed to fetch questions:', qErr);
                 setLoading(false);
                 return;
             }
 
-            // Shuffle for fairness across attempts
             const shuffled = [...questionsData].sort(() => Math.random() - 0.5);
-
             setQuiz(quizData);
             setQuestions(shuffled);
             setHasAccess(true);
@@ -119,31 +113,28 @@ export default function QuizPage({ params }: { params: Promise<{ quizId: string 
         }
     };
 
-    // Timer Effect
+    // Timer
     useEffect(() => {
         if (!loading && hasAccess && !isSubmitted && timeLeft > 0) {
-            const timer = setInterval(() => {
+            const t = setInterval(() => {
                 setTimeLeft(prev => {
-                    if (prev <= 1) {
-                        handleSubmit();
-                        return 0;
-                    }
+                    if (prev <= 1) { handleSubmit(); return 0; }
                     return prev - 1;
                 });
             }, 1000);
-            return () => clearInterval(timer);
+            return () => clearInterval(t);
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [loading, hasAccess, isSubmitted, timeLeft]);
 
     const handleOptionSelect = (questionId: string, optionIndex: number) => {
         if (isSubmitted) return;
-        setSelectedAnswers(prev => ({
-            ...prev,
-            [questionId]: optionIndex
-        }));
+        setSelectedAnswers(prev => ({ ...prev, [questionId]: optionIndex }));
     };
 
     const handleSubmit = async () => {
+        if (isSubmitted) return;
+
         let calculatedScore = 0;
         let correctCount = 0;
         const totalAnswered = Object.keys(selectedAnswers).length;
@@ -153,7 +144,7 @@ export default function QuizPage({ params }: { params: Promise<{ quizId: string 
                 calculatedScore += q.marks;
                 correctCount++;
             } else if (selectedAnswers[q.id] !== undefined) {
-                calculatedScore -= 1; // NEET-style: +4/-1 per question
+                calculatedScore -= 1;
             }
         });
 
@@ -164,9 +155,8 @@ export default function QuizPage({ params }: { params: Promise<{ quizId: string 
         setScore(calculatedScore);
         setIsSubmitted(true);
 
-        // Save Attempt with CORRECT column names
         if (user && quiz) {
-            const { data: attempt, error: attemptError } = await supabase
+            const { data: attempt } = await supabase
                 .from('quiz_attempts')
                 .insert({
                     user_id: user.id,
@@ -175,319 +165,270 @@ export default function QuizPage({ params }: { params: Promise<{ quizId: string 
                     total_marks: totalMarks,
                     correct_count: correctCount,
                     wrong_count: wrongCount,
-                    percentage: percentage,
+                    percentage,
                     answers: selectedAnswers,
                     completed_at: new Date().toISOString()
                 })
                 .select('id')
                 .single();
 
-            if (attemptError) {
-                console.error('Error saving attempt:', attemptError);
-            }
-
-            // Award XP for correct answers (10 XP each per quiz_correct value)
             if (correctCount > 0) {
                 try {
                     await fetch('/api/gamification/award-xp', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            source: 'quiz_correct',
-                            custom_xp: correctCount * 10
-                        })
+                        body: JSON.stringify({ source: 'quiz_correct', custom_xp: correctCount * 10 })
                     });
-                } catch (xpErr) {
-                    console.error('XP award failed:', xpErr);
-                }
+                } catch {}
             }
 
-            // Redirect to result page
             if (attempt?.id) {
                 router.push(`/quiz/result/${attempt.id}`);
             }
         }
     };
 
-    const formatTime = (seconds: number) => {
-        const mins = Math.floor(seconds / 60);
-        const secs = seconds % 60;
-        return `${mins}:${secs.toString().padStart(2, '0')}`;
+    const formatTime = (s: number) => {
+        const m = Math.floor(s / 60);
+        const sec = s % 60;
+        return `${m}:${sec.toString().padStart(2, '0')}`;
     };
 
-    if (loading && leadCaptured) return <div style={{ padding: '48px 20px', textAlign: 'center', color: '#6b7280' }}>Loading quiz...</div>;
-
-    if (!hasAccess && quiz) {
+    // ─── Render gates ───
+    if (leadCaptured === null) {
         return (
-            <div className="p-8 flex flex-col items-center justify-center">
-                <AlertCircle size={48} className="text-red-500 mb-4" />
-                <h2 className="text-2xl font-bold mb-2">Access Restricted</h2>
-                <p className="mb-6 text-gray-600">You need to unlock this quiz to rely attempt it.</p>
-                <Button onClick={() => setShowPaymentModal(true)}>
-                    Unlock for ₹{quiz.price}
-                </Button>
-
-                <PaymentModal
-                    isOpen={showPaymentModal}
-                    onClose={() => setShowPaymentModal(false)}
-                    amount={quiz.price || 0}
-                    planName={quiz.title}
-                    onSuccess={() => {
-                        setShowPaymentModal(false);
-                        fetchQuiz();
-                    }}
-                    items={[{ id: quiz.id, title: quiz.title, type: 'quiz' }]}
-                />
+            <div className={styles.shell}>
+                <div className={styles.loading}>
+                    <div className={styles.loadingSpinner} />
+                    Loading…
+                </div>
             </div>
         );
-    }
-
-    // Lead capture gate — block quiz fetch + render until user provides name/email/phone
-    if (leadCaptured === null) {
-        return <div style={{ padding: '48px 20px', textAlign: 'center', color: '#6b7280' }}>Loading...</div>;
     }
     if (!leadCaptured) {
         return (
-            <LeadCaptureGate
-                quizId={quizId}
-                quizTitle={undefined}
-                onSuccess={() => setLeadCaptured(true)}
-            />
+            <div className={styles.shell}>
+                <LeadCaptureGate quizId={quizId} onSuccess={() => setLeadCaptured(true)} />
+            </div>
+        );
+    }
+    if (loading) {
+        return (
+            <div className={styles.shell}>
+                <div className={styles.loading}>
+                    <div className={styles.loadingSpinner} />
+                    Preparing your quiz…
+                </div>
+            </div>
+        );
+    }
+    if (!quiz || questions.length === 0) {
+        return (
+            <div className={styles.shell}>
+                <div className={styles.loading}>Quiz not found or empty.</div>
+            </div>
         );
     }
 
-    if (!quiz || questions.length === 0) return <div style={{ padding: '48px 20px', textAlign: 'center', color: '#6b7280' }}>Quiz not found or empty.</div>;
+    const currentQ = questions[activeQuestionIndex];
+    const selected = selectedAnswers[currentQ.id];
+    const totalMarks = questions.length * 4;
+    const correctCount = isSubmitted ? questions.filter(q => selectedAnswers[q.id] === q.correct_option).length : 0;
+    const wrongCount = isSubmitted ? Object.keys(selectedAnswers).length - correctCount : 0;
+    const skipCount = isSubmitted ? questions.length - Object.keys(selectedAnswers).length : 0;
+    const percentage = isSubmitted ? Math.max(0, (score / totalMarks) * 100) : 0;
+    const xpEarned = correctCount * 10;
+    const subject = subjectFromTitle(quiz.title);
+    const timerLow = !isSubmitted && timeLeft > 0 && timeLeft < 60;
+    const progressPercent = ((activeQuestionIndex + 1) / questions.length) * 100;
 
-    return (
-        <div style={{ maxWidth: '780px', margin: '0 auto', padding: '20px 16px 40px' }}>
-            {user && hasAccess && !isSubmitted && (
-                <WatermarkOverlay
-                    text={user.email || 'User'}
-                    subtext={user.id?.slice(0, 8)}
-                />
-            )}
+    // Result screen
+    if (isSubmitted) {
+        // Confetti palette
+        const confColors = ['#c41e1e', '#16a34a', '#fbbf24', '#3b82f6', '#a855f7'];
+        const confBits = Array.from({ length: 36 }).map((_, i) => ({
+            color: confColors[i % confColors.length],
+            left: Math.random() * 100,
+            delay: Math.random() * 0.4,
+            duration: 1.8 + Math.random() * 1.2,
+        }));
 
-            {/* Header */}
-            <div style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                marginBottom: '20px',
-                gap: '12px',
-                flexWrap: 'wrap'
-            }}>
-                <div style={{ flex: 1, minWidth: '200px' }}>
-                    <h1 style={{
-                        fontSize: '1.4rem',
-                        fontWeight: 700,
-                        color: '#1a1a1a',
-                        marginBottom: '4px',
-                        fontFamily: "'Cormorant Garamond', serif",
-                        lineHeight: 1.2
-                    }}>{quiz.title}</h1>
-                    <p style={{ color: '#6b7280', fontSize: '13px' }}>
-                        Question {activeQuestionIndex + 1} of {questions.length}
-                    </p>
+        // Score circle math
+        const radius = 70;
+        const circumference = 2 * Math.PI * radius;
+        const offset = circumference - (Math.max(0, percentage) / 100) * circumference;
+
+        return (
+            <div className={styles.shell}>
+                <div className={styles.container}>
+                    <div className={styles.resultCard}>
+                        {percentage >= 50 && (
+                            <div className={styles.celebrate}>
+                                {confBits.map((b, i) => (
+                                    <span
+                                        key={i}
+                                        className={styles.confettiBit}
+                                        style={{
+                                            left: `${b.left}%`,
+                                            background: b.color,
+                                            animationDelay: `${b.delay}s`,
+                                            animationDuration: `${b.duration}s`,
+                                        }}
+                                    />
+                                ))}
+                            </div>
+                        )}
+
+                        <div className={styles.resultBanner}>Quiz Complete</div>
+                        <div className={styles.resultTitle}>
+                            {percentage >= 75 ? 'Outstanding.' : percentage >= 50 ? 'Solid effort.' : percentage >= 25 ? 'Keep going.' : 'Practice makes perfect.'}
+                        </div>
+
+                        <div className={styles.scoreCircle}>
+                            <svg className={styles.scoreCircleSvg} viewBox="0 0 160 160">
+                                <circle className={styles.scoreCircleBg} cx="80" cy="80" r={radius} />
+                                <circle
+                                    className={styles.scoreCircleFill}
+                                    cx="80"
+                                    cy="80"
+                                    r={radius}
+                                    strokeDasharray={circumference}
+                                    strokeDashoffset={offset}
+                                />
+                            </svg>
+                            <div className={styles.scoreNumber}>
+                                <strong>{score}</strong>
+                                <span>of {totalMarks}</span>
+                            </div>
+                        </div>
+
+                        <div className={styles.statRow}>
+                            <div className={`${styles.stat} ${styles.statCorrect}`}>
+                                <div className={styles.statNum}>{correctCount}</div>
+                                <div className={styles.statLabel}>Correct</div>
+                            </div>
+                            <div className={`${styles.stat} ${styles.statWrong}`}>
+                                <div className={styles.statNum}>{wrongCount}</div>
+                                <div className={styles.statLabel}>Wrong</div>
+                            </div>
+                            <div className={styles.stat}>
+                                <div className={styles.statNum}>{skipCount}</div>
+                                <div className={styles.statLabel}>Skipped</div>
+                            </div>
+                        </div>
+
+                        {!user && (
+                            <div className={styles.xpCta}>
+                                <div className={styles.xpBadge}>SAVE YOUR PROGRESS</div>
+                                <div className={styles.xpHeading}>You would have earned {xpEarned} XP.</div>
+                                <div className={styles.xpSub}>
+                                    Sign up free to track XP, build a streak, and climb the weekly leaderboard.
+                                </div>
+                                <Link href={`/signup?next=/quiz/${quizId}`} className={styles.xpCtaBtn}>
+                                    Sign Up Free
+                                </Link>
+                            </div>
+                        )}
+
+                        <div className={styles.resultActions}>
+                            <Link href="/neet" className={`${styles.navBtn} ${styles.navBtnPrev}`} style={{ flex: 1, textAlign: 'center', textDecoration: 'none', display: 'inline-block' }}>
+                                More Quizzes
+                            </Link>
+                            <button onClick={() => window.location.reload()} className={`${styles.navBtn} ${styles.navBtnNext}`}>
+                                Retake
+                            </button>
+                        </div>
+
+                        <a
+                            href="https://t.me/ProfPriyaPandeybot"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className={styles.priyaLink}
+                        >
+                            Stuck? Ask Priya AI on Telegram →
+                        </a>
+                    </div>
                 </div>
-                {!isSubmitted && (
-                    <div style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '6px',
-                        fontSize: '15px',
-                        fontWeight: 700,
-                        color: '#c41e1e',
-                        background: '#fef2f2',
-                        padding: '8px 14px',
-                        borderRadius: '8px',
-                        fontFamily: 'monospace',
-                        whiteSpace: 'nowrap'
-                    }}>
-                        <Timer size={18} />
+            </div>
+        );
+    }
+
+    // Quiz screen
+    return (
+        <div className={styles.shell}>
+            {user && (
+                <WatermarkOverlay text={user.email || 'User'} subtext={user.id?.slice(0, 8)} />
+            )}
+            <div className={styles.container}>
+                {/* Top bar */}
+                <div className={styles.topBar}>
+                    <button onClick={() => router.push('/neet')} className={styles.exitBtn} aria-label="Exit">×</button>
+                    <div className={styles.progressTrack}>
+                        <div className={styles.progressFill} style={{ width: `${progressPercent}%` }} />
+                    </div>
+                    <div className={`${styles.timer} ${timerLow ? styles.timerWarning : ''}`}>
                         {formatTime(timeLeft)}
+                    </div>
+                </div>
+
+                {/* Question card */}
+                <div className={styles.qHeader}>
+                    <div className={styles.qNum}>Q {activeQuestionIndex + 1} of {questions.length}</div>
+                    <div className={styles.subjectBadge}>{subject}</div>
+                </div>
+
+                <div className={styles.questionCard} key={currentQ.id}>
+                    <div className={styles.questionText}>{currentQ.question_text}</div>
+
+                    <div className={styles.options}>
+                        {currentQ.options.map((option, idx) => (
+                            <button
+                                key={idx}
+                                onClick={() => handleOptionSelect(currentQ.id, idx)}
+                                className={`${styles.option} ${selected === idx ? styles.optionSelected : ''}`}
+                            >
+                                <div className={styles.optionLetter}>{String.fromCharCode(65 + idx)}</div>
+                                <div className={styles.optionText}>{option}</div>
+                            </button>
+                        ))}
+                    </div>
+                </div>
+
+                {/* Nav row */}
+                <div className={styles.navRow}>
+                    <button
+                        onClick={() => setActiveQuestionIndex(i => Math.max(0, i - 1))}
+                        disabled={activeQuestionIndex === 0}
+                        className={`${styles.navBtn} ${styles.navBtnPrev}`}
+                    >
+                        Previous
+                    </button>
+                    {activeQuestionIndex === questions.length - 1 ? (
+                        <button onClick={handleSubmit} className={`${styles.navBtn} ${styles.navBtnSubmit}`}>
+                            Submit
+                        </button>
+                    ) : (
+                        <button
+                            onClick={() => setActiveQuestionIndex(i => Math.min(questions.length - 1, i + 1))}
+                            className={`${styles.navBtn} ${styles.navBtnNext}`}
+                        >
+                            Next →
+                        </button>
+                    )}
+                </div>
+
+                {/* Dots progress (compact for ≤24 questions; hide for more) */}
+                {questions.length <= 24 && (
+                    <div className={styles.dots}>
+                        {questions.map((q, i) => (
+                            <div
+                                key={q.id}
+                                className={`${styles.dot} ${i === activeQuestionIndex ? styles.dotActive : (selectedAnswers[q.id] !== undefined ? styles.dotAnswered : '')}`}
+                            />
+                        ))}
                     </div>
                 )}
             </div>
-
-            {isSubmitted ? (
-                <Card style={{ padding: '32px 24px', textAlign: 'center' }}>
-                    <CheckCircle style={{ margin: '0 auto 16px', color: '#16a34a' }} size={56} />
-                    <h2 style={{ fontSize: '1.6rem', fontWeight: 700, marginBottom: '8px', fontFamily: "'Cormorant Garamond', serif" }}>Quiz Submitted</h2>
-                    <p style={{ color: '#4b5563', fontSize: '16px', marginBottom: '24px' }}>
-                        Your Score: <span style={{ color: '#c41e1e', fontWeight: 700, fontSize: '20px' }}>{score}</span> / {questions.length * 4}
-                    </p>
-
-                    {!user && (
-                        <div style={{
-                            background: 'linear-gradient(135deg, #c41e1e 0%, #8b0000 100%)',
-                            borderRadius: '12px',
-                            padding: '20px',
-                            marginBottom: '24px',
-                            color: '#fff',
-                            textAlign: 'left'
-                        }}>
-                            <div style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '1.5px', opacity: 0.85, marginBottom: '6px' }}>SAVE YOUR PROGRESS</div>
-                            <div style={{ fontSize: '17px', fontWeight: 700, marginBottom: '6px', fontFamily: "'Cormorant Garamond', serif", lineHeight: 1.3 }}>
-                                Sign up free to track your XP, build a streak, and unlock the leaderboard.
-                            </div>
-                            <div style={{ fontSize: '13px', opacity: 0.9, marginBottom: '12px', lineHeight: 1.5 }}>
-                                You scored {score}/{questions.length * 4}. With an account, this would have earned you {questions.filter(q => selectedAnswers[q.id] === q.correct_option).length * 10} XP.
-                            </div>
-                            <Link href={`/signup?next=/quiz/${quizId}`} style={{
-                                display: 'inline-block',
-                                padding: '10px 20px',
-                                background: '#fff',
-                                color: '#c41e1e',
-                                borderRadius: '8px',
-                                fontWeight: 700,
-                                fontSize: '14px',
-                                textDecoration: 'none'
-                            }}>
-                                Sign Up Free →
-                            </Link>
-                        </div>
-                    )}
-
-                    <div className="flex justify-center gap-4 flex-wrap">
-                        <Link href="/neet">
-                            <Button variant="outline">More Quizzes</Button>
-                        </Link>
-                        <Button onClick={() => window.location.reload()}>Retake Quiz</Button>
-                    </div>
-
-                    {!user && (
-                        <p style={{ marginTop: '20px', fontSize: '13px', color: '#6b7280' }}>
-                            Stuck on questions? <a href="https://t.me/ProfPriyaPandeybot" target="_blank" rel="noopener noreferrer" style={{ color: '#c41e1e', fontWeight: 600 }}>Ask Priya AI on Telegram (free)</a>
-                        </p>
-                    )}
-                </Card>
-            ) : (
-                <Card style={{ padding: '24px 20px' }}>
-                    <div style={{ marginBottom: '20px' }}>
-                        <h3 style={{
-                            fontSize: '17px',
-                            fontWeight: 600,
-                            marginBottom: '20px',
-                            color: '#1a1a1a',
-                            lineHeight: 1.5
-                        }}>
-                            {activeQuestionIndex + 1}. {questions[activeQuestionIndex].question_text}
-                        </h3>
-
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                            {questions[activeQuestionIndex].options.map((option, idx) => {
-                                const isSelected = selectedAnswers[questions[activeQuestionIndex].id] === idx;
-                                return (
-                                    <div
-                                        key={idx}
-                                        onClick={() => handleOptionSelect(questions[activeQuestionIndex].id, idx)}
-                                        style={{
-                                            padding: '14px 16px',
-                                            border: isSelected ? '2px solid #c41e1e' : '1.5px solid #e5e7eb',
-                                            background: isSelected ? '#fef2f2' : '#fff',
-                                            borderRadius: '10px',
-                                            cursor: 'pointer',
-                                            transition: 'all 0.15s ease',
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            gap: '12px'
-                                        }}
-                                    >
-                                        <div style={{
-                                            flexShrink: 0,
-                                            width: '28px',
-                                            height: '28px',
-                                            borderRadius: '50%',
-                                            border: isSelected ? '2px solid #c41e1e' : '1.5px solid #d1d5db',
-                                            background: isSelected ? '#c41e1e' : '#fff',
-                                            color: isSelected ? '#fff' : '#6b7280',
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            justifyContent: 'center',
-                                            fontWeight: 700,
-                                            fontSize: '13px'
-                                        }}>
-                                            {String.fromCharCode(65 + idx)}
-                                        </div>
-                                        <span style={{
-                                            fontSize: '15px',
-                                            color: '#1a1a1a',
-                                            lineHeight: 1.5,
-                                            flex: 1
-                                        }}>{option}</span>
-                                    </div>
-                                );
-                            })}
-                        </div>
-                    </div>
-
-                    <div style={{
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
-                        marginTop: '24px',
-                        paddingTop: '16px',
-                        borderTop: '1px solid #e5e7eb',
-                        gap: '12px'
-                    }}>
-                        <button
-                            onClick={() => setActiveQuestionIndex(prev => Math.max(0, prev - 1))}
-                            disabled={activeQuestionIndex === 0}
-                            style={{
-                                padding: '10px 20px',
-                                background: '#fff',
-                                color: activeQuestionIndex === 0 ? '#d1d5db' : '#c41e1e',
-                                border: `1.5px solid ${activeQuestionIndex === 0 ? '#e5e7eb' : '#c41e1e'}`,
-                                borderRadius: '8px',
-                                fontWeight: 600,
-                                fontSize: '14px',
-                                cursor: activeQuestionIndex === 0 ? 'not-allowed' : 'pointer',
-                                fontFamily: "'Karla', sans-serif"
-                            }}
-                        >
-                            Previous
-                        </button>
-
-                        {activeQuestionIndex === questions.length - 1 ? (
-                            <button
-                                onClick={handleSubmit}
-                                style={{
-                                    padding: '10px 24px',
-                                    background: '#16a34a',
-                                    color: '#fff',
-                                    border: 'none',
-                                    borderRadius: '8px',
-                                    fontWeight: 700,
-                                    fontSize: '14px',
-                                    cursor: 'pointer',
-                                    boxShadow: '0 2px 8px rgba(22,163,74,0.3)',
-                                    fontFamily: "'Karla', sans-serif"
-                                }}
-                            >
-                                Submit Quiz
-                            </button>
-                        ) : (
-                            <button
-                                onClick={() => setActiveQuestionIndex(prev => Math.min(questions.length - 1, prev + 1))}
-                                style={{
-                                    padding: '10px 24px',
-                                    background: '#c41e1e',
-                                    color: '#fff',
-                                    border: 'none',
-                                    borderRadius: '8px',
-                                    fontWeight: 600,
-                                    fontSize: '14px',
-                                    cursor: 'pointer',
-                                    boxShadow: '0 2px 8px rgba(196,30,30,0.3)',
-                                    fontFamily: "'Karla', sans-serif"
-                                }}
-                            >
-                                Next
-                            </button>
-                        )}
-                    </div>
-                </Card>
-            )}
         </div>
     );
 }
