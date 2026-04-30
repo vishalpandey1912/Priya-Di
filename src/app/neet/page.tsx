@@ -22,8 +22,8 @@ export default function NeetPage() {
                     </div>
                     <div>
                         <small style={{ color: '#64748b', fontSize: '0.85rem', fontWeight: 600, textTransform: 'uppercase' }}>Neet 2026 Date</small>
-                        <p style={{ fontWeight: 800, fontSize: '1.1rem', color: '#1f2937' }}>May 05, 2026</p>
-                        <span style={{ fontSize: '0.75rem', color: '#DC2626', fontWeight: 500 }}>Tentative Schedule</span>
+                        <p style={{ fontWeight: 800, fontSize: '1.1rem', color: '#1f2937' }}>May 03, 2026</p>
+                        <span style={{ fontSize: '0.75rem', color: '#DC2626', fontWeight: 500 }}>Confirmed by NTA</span>
                     </div>
                 </Card>
                 <Card padding="md" style={{ display: 'flex', alignItems: 'center', gap: '16px', borderLeft: '4px solid #10B981' }}>
