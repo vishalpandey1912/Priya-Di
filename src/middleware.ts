@@ -68,8 +68,9 @@ export async function middleware(request: NextRequest) {
     }
 
     // 2. Protected User Routes
-    // Add other protected routes here as the app grows
-    const protectedRoutes = ['/profile', '/quiz'];
+    // /quiz is intentionally PUBLIC — anonymous users can play; logged-in users
+    // get attempts saved + XP awarded. /quiz/result is also public for sharing.
+    const protectedRoutes = ['/profile'];
     const isProtectedRoute = protectedRoutes.some(route => path.startsWith(route));
 
     if (isProtectedRoute && !user) {
