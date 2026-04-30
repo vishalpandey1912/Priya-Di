@@ -8,8 +8,14 @@
     background:
         radial-gradient(ellipse at top, rgba(196, 30, 30, 0.04) 0%, transparent 60%),
         linear-gradient(180deg, #fefdfb 0%, #faf8f5 100%);
-    padding: 0;
+    padding: 80px 0 0;
     position: relative;
+}
+
+@media (max-width: 768px) {
+    .shell {
+        padding-top: 60px;
+    }
 }
 
 .shell::before {
@@ -29,13 +35,37 @@
     z-index: 1;
 }
 
-/* ─── TOP BAR: progress + timer ─── */
+/* ─── TOP BAR: progress + timer + score (sticky just below site navbar) ─── */
 .topBar {
     display: flex;
     align-items: center;
-    gap: 14px;
-    margin-bottom: 28px;
-    padding-top: 8px;
+    gap: 12px;
+    margin: 0 -16px 28px;
+    padding: 14px 16px;
+    position: sticky;
+    top: 76px;
+    background: rgba(254, 253, 251, 0.92);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    z-index: 40;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+    flex-wrap: wrap;
+}
+
+@media (max-width: 768px) {
+    .topBar {
+        top: 56px;
+        gap: 8px;
+        padding: 10px 16px;
+    }
+}
+
+@media (max-width: 480px) {
+    .topBar .scorePill,
+    .topBar .timer {
+        font-size: 12px;
+        padding: 6px 10px;
+    }
 }
 
 .exitBtn {
