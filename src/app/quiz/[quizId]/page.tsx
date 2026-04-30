@@ -215,7 +215,7 @@ export default function QuizPage({ params }: { params: Promise<{ quizId: string 
         return `${mins}:${secs.toString().padStart(2, '0')}`;
     };
 
-    if (loading && leadCaptured) return <div className="p-8 text-center">Loading quiz...</div>;
+    if (loading && leadCaptured) return <div style={{ padding: '48px 20px', textAlign: 'center', color: '#6b7280' }}>Loading quiz...</div>;
 
     if (!hasAccess && quiz) {
         return (
@@ -244,7 +244,7 @@ export default function QuizPage({ params }: { params: Promise<{ quizId: string 
 
     // Lead capture gate — block quiz fetch + render until user provides name/email/phone
     if (leadCaptured === null) {
-        return <div className="p-8 text-center">Loading...</div>;
+        return <div style={{ padding: '48px 20px', textAlign: 'center', color: '#6b7280' }}>Loading...</div>;
     }
     if (!leadCaptured) {
         return (
@@ -256,10 +256,10 @@ export default function QuizPage({ params }: { params: Promise<{ quizId: string 
         );
     }
 
-    if (!quiz || questions.length === 0) return <div className="p-8 text-center">Quiz not found or empty.</div>;
+    if (!quiz || questions.length === 0) return <div style={{ padding: '48px 20px', textAlign: 'center', color: '#6b7280' }}>Quiz not found or empty.</div>;
 
     return (
-        <div style={{ maxWidth: '800px', margin: '0 auto', padding: '20px' }}>
+        <div style={{ maxWidth: '780px', margin: '0 auto', padding: '20px 16px 40px' }}>
             {user && hasAccess && !isSubmitted && (
                 <WatermarkOverlay
                     text={user.email || 'User'}
@@ -268,24 +268,54 @@ export default function QuizPage({ params }: { params: Promise<{ quizId: string 
             )}
 
             {/* Header */}
-            <div className="flex justify-between items-center mb-6">
-                <div>
-                    <h1 className="text-2xl font-bold">{quiz.title}</h1>
-                    <p className="text-gray-500 text-sm">Question {activeQuestionIndex + 1} of {questions.length}</p>
+            <div style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                marginBottom: '20px',
+                gap: '12px',
+                flexWrap: 'wrap'
+            }}>
+                <div style={{ flex: 1, minWidth: '200px' }}>
+                    <h1 style={{
+                        fontSize: '1.4rem',
+                        fontWeight: 700,
+                        color: '#1a1a1a',
+                        marginBottom: '4px',
+                        fontFamily: "'Cormorant Garamond', serif",
+                        lineHeight: 1.2
+                    }}>{quiz.title}</h1>
+                    <p style={{ color: '#6b7280', fontSize: '13px' }}>
+                        Question {activeQuestionIndex + 1} of {questions.length}
+                    </p>
                 </div>
                 {!isSubmitted && (
-                    <div className="flex items-center gap-2 text-xl font-mono font-bold text-blue-600 bg-blue-50 px-4 py-2 rounded-lg">
-                        <Timer size={24} />
+                    <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                        fontSize: '15px',
+                        fontWeight: 700,
+                        color: '#c41e1e',
+                        background: '#fef2f2',
+                        padding: '8px 14px',
+                        borderRadius: '8px',
+                        fontFamily: 'monospace',
+                        whiteSpace: 'nowrap'
+                    }}>
+                        <Timer size={18} />
                         {formatTime(timeLeft)}
                     </div>
                 )}
             </div>
 
             {isSubmitted ? (
-                <Card className="p-8 text-center">
-                    <CheckCircle className="mx-auto text-green-500 mb-4" size={64} />
-                    <h2 className="text-3xl font-bold mb-2">Quiz Submitted!</h2>
-                    <p className="text-gray-600 mb-6">Your Score: <span className="text-blue-600 font-bold">{score}</span> / {questions.length * 4}</p>
+                <Card style={{ padding: '32px 24px', textAlign: 'center' }}>
+                    <CheckCircle style={{ margin: '0 auto 16px', color: '#16a34a' }} size={56} />
+                    <h2 style={{ fontSize: '1.6rem', fontWeight: 700, marginBottom: '8px', fontFamily: "'Cormorant Garamond', serif" }}>Quiz Submitted</h2>
+                    <p style={{ color: '#4b5563', fontSize: '16px', marginBottom: '24px' }}>
+                        Your Score: <span style={{ color: '#c41e1e', fontWeight: 700, fontSize: '20px' }}>{score}</span> / {questions.length * 4}
+                    </p>
 
                     {!user && (
                         <div style={{
@@ -332,58 +362,128 @@ export default function QuizPage({ params }: { params: Promise<{ quizId: string 
                     )}
                 </Card>
             ) : (
-                <Card className="p-6">
-                    <div className="mb-6">
-                        <h3 className="text-lg font-medium mb-4">
+                <Card style={{ padding: '24px 20px' }}>
+                    <div style={{ marginBottom: '20px' }}>
+                        <h3 style={{
+                            fontSize: '17px',
+                            fontWeight: 600,
+                            marginBottom: '20px',
+                            color: '#1a1a1a',
+                            lineHeight: 1.5
+                        }}>
                             {activeQuestionIndex + 1}. {questions[activeQuestionIndex].question_text}
                         </h3>
 
-                        <div className="space-y-3">
-                            {questions[activeQuestionIndex].options.map((option, idx) => (
-                                <div
-                                    key={idx}
-                                    onClick={() => handleOptionSelect(questions[activeQuestionIndex].id, idx)}
-                                    className={`p-4 border rounded-lg cursor-pointer transition-all ${selectedAnswers[questions[activeQuestionIndex].id] === idx
-                                        ? 'border-blue-500 bg-blue-50 ring-1 ring-blue-500'
-                                        : 'border-gray-200 hover:bg-gray-50'
-                                        }`}
-                                >
-                                    <div className="flex items-center gap-3">
-                                        <div className={`w-6 h-6 rounded-full border flex items-center justify-center ${selectedAnswers[questions[activeQuestionIndex].id] === idx
-                                            ? 'border-blue-600 bg-blue-600 text-white'
-                                            : 'border-gray-300'
-                                            }`}>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                            {questions[activeQuestionIndex].options.map((option, idx) => {
+                                const isSelected = selectedAnswers[questions[activeQuestionIndex].id] === idx;
+                                return (
+                                    <div
+                                        key={idx}
+                                        onClick={() => handleOptionSelect(questions[activeQuestionIndex].id, idx)}
+                                        style={{
+                                            padding: '14px 16px',
+                                            border: isSelected ? '2px solid #c41e1e' : '1.5px solid #e5e7eb',
+                                            background: isSelected ? '#fef2f2' : '#fff',
+                                            borderRadius: '10px',
+                                            cursor: 'pointer',
+                                            transition: 'all 0.15s ease',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: '12px'
+                                        }}
+                                    >
+                                        <div style={{
+                                            flexShrink: 0,
+                                            width: '28px',
+                                            height: '28px',
+                                            borderRadius: '50%',
+                                            border: isSelected ? '2px solid #c41e1e' : '1.5px solid #d1d5db',
+                                            background: isSelected ? '#c41e1e' : '#fff',
+                                            color: isSelected ? '#fff' : '#6b7280',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            fontWeight: 700,
+                                            fontSize: '13px'
+                                        }}>
                                             {String.fromCharCode(65 + idx)}
                                         </div>
-                                        <span>{option}</span>
+                                        <span style={{
+                                            fontSize: '15px',
+                                            color: '#1a1a1a',
+                                            lineHeight: 1.5,
+                                            flex: 1
+                                        }}>{option}</span>
                                     </div>
-                                </div>
-                            ))}
+                                );
+                            })}
                         </div>
                     </div>
 
-                    <div className="flex justify-between mt-8 pt-4 border-t">
-                        <Button
-                            variant="outline"
+                    <div style={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        marginTop: '24px',
+                        paddingTop: '16px',
+                        borderTop: '1px solid #e5e7eb',
+                        gap: '12px'
+                    }}>
+                        <button
                             onClick={() => setActiveQuestionIndex(prev => Math.max(0, prev - 1))}
                             disabled={activeQuestionIndex === 0}
+                            style={{
+                                padding: '10px 20px',
+                                background: '#fff',
+                                color: activeQuestionIndex === 0 ? '#d1d5db' : '#c41e1e',
+                                border: `1.5px solid ${activeQuestionIndex === 0 ? '#e5e7eb' : '#c41e1e'}`,
+                                borderRadius: '8px',
+                                fontWeight: 600,
+                                fontSize: '14px',
+                                cursor: activeQuestionIndex === 0 ? 'not-allowed' : 'pointer',
+                                fontFamily: "'Karla', sans-serif"
+                            }}
                         >
                             Previous
-                        </Button>
+                        </button>
 
                         {activeQuestionIndex === questions.length - 1 ? (
-                            <Button
+                            <button
                                 onClick={handleSubmit}
-                                className="bg-green-600 hover:bg-green-700 text-white"
+                                style={{
+                                    padding: '10px 24px',
+                                    background: '#16a34a',
+                                    color: '#fff',
+                                    border: 'none',
+                                    borderRadius: '8px',
+                                    fontWeight: 700,
+                                    fontSize: '14px',
+                                    cursor: 'pointer',
+                                    boxShadow: '0 2px 8px rgba(22,163,74,0.3)',
+                                    fontFamily: "'Karla', sans-serif"
+                                }}
                             >
                                 Submit Quiz
-                            </Button>
+                            </button>
                         ) : (
-                            <Button
+                            <button
                                 onClick={() => setActiveQuestionIndex(prev => Math.min(questions.length - 1, prev + 1))}
+                                style={{
+                                    padding: '10px 24px',
+                                    background: '#c41e1e',
+                                    color: '#fff',
+                                    border: 'none',
+                                    borderRadius: '8px',
+                                    fontWeight: 600,
+                                    fontSize: '14px',
+                                    cursor: 'pointer',
+                                    boxShadow: '0 2px 8px rgba(196,30,30,0.3)',
+                                    fontFamily: "'Karla', sans-serif"
+                                }}
                             >
                                 Next
-                            </Button>
+                            </button>
                         )}
                     </div>
                 </Card>
