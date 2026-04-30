@@ -376,7 +376,8 @@ export default function QuizPage({ params }: { params: Promise<{ quizId: string 
                     </div>
                 </div>
 
-                <div className={styles.questionCard} key={currentQ.id}>
+                <div className={styles.mascotZone}>
+                    <div className={styles.questionCard} key={currentQ.id}>
                     <div className={styles.questionText}>{currentQ.question_text}</div>
 
                     <div className={styles.options}>
@@ -415,6 +416,21 @@ export default function QuizPage({ params }: { params: Promise<{ quizId: string 
                             );
                         })}
                     </div>
+                    </div>
+
+                    {/* Mystic — inline beside question */}
+                    <div className={`${styles.mascot} ${
+                        mysticState === 'happy' ? styles.mascotHappy :
+                        mysticState === 'sad' ? styles.mascotSad :
+                        mysticState === 'fire' ? styles.mascotFire : ''
+                    }`}>
+                        {mysticMessage && (
+                            <div className={styles.mascotSpeech}>
+                                {mysticMessage}
+                            </div>
+                        )}
+                        <Mystic state={mysticState} />
+                    </div>
                 </div>
 
                 {/* Dots progress (compact) */}
@@ -433,20 +449,6 @@ export default function QuizPage({ params }: { params: Promise<{ quizId: string 
                     </div>
                 )}
             </div>
-
-            {/* Mystic — fixed bottom-left */}
-            <div className={`${styles.mascot} ${
-                mysticState === 'happy' ? styles.mascotHappy :
-                mysticState === 'sad' ? styles.mascotSad :
-                mysticState === 'fire' ? styles.mascotFire : ''
-            }`}>
-                <Mystic state={mysticState} />
-            </div>
-            {mysticMessage && (
-                <div className={styles.mascotSpeech}>
-                    {mysticMessage}
-                </div>
-            )}
 
             {/* Bottom feedback panel — slides up when an answer is locked */}
             {hasAnswered && (
