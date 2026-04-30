@@ -817,3 +817,177 @@
     from { transform: scale(0.6); opacity: 0; }
     to { transform: scale(1); opacity: 1; }
 }
+
+/* ─── FLOATING POINTS ANIMATION (next to selected option) ─── */
+.floatingPoints {
+    position: absolute;
+    top: 50%;
+    right: 56px;
+    transform: translateY(-50%);
+    font-family: 'Cormorant Garamond', serif;
+    font-weight: 700;
+    font-size: 28px;
+    pointer-events: none;
+    animation: floatUp 1.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    z-index: 5;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+.floatingPointsCorrect { color: #16a34a; }
+.floatingPointsWrong { color: #c41e1e; }
+
+@keyframes floatUp {
+    0% { opacity: 0; transform: translateY(-50%) scale(0.7); }
+    15% { opacity: 1; transform: translateY(-50%) scale(1.15); }
+    25% { transform: translateY(-50%) scale(1); }
+    100% { opacity: 0; transform: translateY(-180%) scale(0.85); }
+}
+
+.option {
+    position: relative; /* for the floating points absolute child */
+}
+
+/* ─── SCORE PILL (top bar, next to timer) ─── */
+.scorePill {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
+    background: #fff;
+    border: 2px solid #1a1a1a;
+    border-radius: 999px;
+    color: #1a1a1a;
+    font-family: 'Karla', monospace;
+    font-weight: 800;
+    font-size: 14px;
+    box-shadow: 0 2px 0 #1a1a1a;
+    transition: transform 0.15s;
+    white-space: nowrap;
+}
+.scorePillBump {
+    animation: scoreBump 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+@keyframes scoreBump {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.15); }
+    100% { transform: scale(1); }
+}
+.scorePillIcon {
+    font-size: 14px;
+}
+
+/* ─── MASCOT (Bagheera the NEET cat) ─── */
+.mascot {
+    position: fixed;
+    left: 12px;
+    bottom: 12px;
+    width: 76px;
+    height: 76px;
+    z-index: 30;
+    pointer-events: none;
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    animation: mascotIdle 4s ease-in-out infinite;
+}
+
+.mascotHappy {
+    animation: mascotHop 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.mascotSad {
+    animation: mascotSad 0.6s ease-in-out;
+}
+.mascotFire {
+    animation: mascotFire 0.7s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes mascotIdle {
+    0%, 100% { transform: translateY(0) rotate(-2deg); }
+    50% { transform: translateY(-4px) rotate(2deg); }
+}
+@keyframes mascotHop {
+    0% { transform: translateY(0) scale(1); }
+    30% { transform: translateY(-30px) scale(1.1) rotate(-8deg); }
+    60% { transform: translateY(-12px) scale(1.05) rotate(8deg); }
+    100% { transform: translateY(0) scale(1); }
+}
+@keyframes mascotSad {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-6px) rotate(-4deg); }
+    50% { transform: translateX(0) rotate(0); }
+    75% { transform: translateX(6px) rotate(4deg); }
+}
+@keyframes mascotFire {
+    0% { transform: scale(1); }
+    40% { transform: scale(1.2) rotate(-10deg); }
+    70% { transform: scale(1.15) rotate(10deg); }
+    100% { transform: scale(1); }
+}
+
+.mascotSpeech {
+    position: fixed;
+    left: 96px;
+    bottom: 50px;
+    background: #fff;
+    border: 2px solid #1a1a1a;
+    border-radius: 14px;
+    padding: 8px 12px;
+    font-family: 'Karla', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    color: #1a1a1a;
+    box-shadow: 0 3px 0 #1a1a1a;
+    z-index: 30;
+    animation: bubbleIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    pointer-events: none;
+    max-width: 200px;
+}
+.mascotSpeech::before {
+    content: '';
+    position: absolute;
+    left: -8px;
+    bottom: 12px;
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: 6px 8px 6px 0;
+    border-color: transparent #1a1a1a transparent transparent;
+}
+.mascotSpeech::after {
+    content: '';
+    position: absolute;
+    left: -5px;
+    bottom: 14px;
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: 4px 6px 4px 0;
+    border-color: transparent #fff transparent transparent;
+}
+
+@keyframes bubbleIn {
+    from { opacity: 0; transform: scale(0.8) translateY(6px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+@media (max-width: 480px) {
+    .mascot {
+        width: 60px;
+        height: 60px;
+        left: 8px;
+        bottom: 8px;
+    }
+    .mascotSpeech {
+        left: 76px;
+        bottom: 36px;
+        font-size: 12px;
+        padding: 6px 10px;
+        max-width: 170px;
+    }
+}
+
+/* Hide mascot when feedback panel is up on mobile so it doesn't overlap */
+@media (max-width: 600px) {
+    .containerWithFeedback ~ .mascot,
+    .containerWithFeedback ~ .mascotSpeech {
+        display: none;
+    }
+}

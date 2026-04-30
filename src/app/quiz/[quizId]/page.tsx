@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { WatermarkOverlay } from '@/components/ui/WatermarkOverlay/WatermarkOverlay';
 import { LeadCaptureGate } from '@/components/quiz/LeadCaptureGate';
+import { Mascot, mascotMessages } from '@/components/quiz/Mascot';
 import styles from './quiz.module.css';
 
 interface Question {
@@ -54,7 +55,13 @@ export default function QuizPage({ params }: { params: Promise<{ quizId: string 
     const [streak, setStreak] = useState(0);
     const [isFinished, setIsFinished] = useState(false);
     const [score, setScore] = useState(0);
+    const [runningScore, setRunningScore] = useState(0);
     const [timeLeft, setTimeLeft] = useState(0);
+
+    // Mascot reaction
+    const [mascotState, setMascotState] = useState<'idle' | 'happy' | 'sad' | 'fire'>('idle');
+    const [mascotMessage, setMascotMessage] = useState<string | null>(null);
+    const [scoreBump, setScoreBump] = useState(false);
 
     const [leadCaptured, setLeadCaptured] = useState<boolean | null>(null);
 
@@ -126,12 +133,46 @@ export default function QuizPage({ params }: { params: Promise<{ quizId: string 
     const handlePick = (idx: number) => {
         if (!currentQ || hasAnswered) return;
         const isCorrect = idx === currentQ.correct_option;
+        const newStreak = isCorrect ? streak + 1 : 0;
+
         setAnswers(prev => ({ ...prev, [currentQ.id]: { selected: idx, isCorrect } }));
-        setStreak(prev => isCorrect ? prev + 1 : 0);
+        setStreak(newStreak);
+
+        // Update running score (NEET-style +4/-1)
+        const delta = isCorrect ? currentQ.marks : -1;
+        setRunningScore(prev => prev + delta);
+        setScoreBump(true);
+        setTimeout(() => setScoreBump(false), 400);
+
+        // Trigger mascot reaction
+        if (newStreak >= 3) {
+            setMascotState('fire');
+            const msgs = mascotMessages.fire;
+            setMascotMessage(msgs[Math.floor(Math.random() * msgs.length)]);
+        } else if (isCorrect) {
+            setMascotState('happy');
+            const msgs = mascotMessages.correct;
+            setMascotMessage(msgs[Math.floor(Math.random() * msgs.length)]);
+        } else {
+            setMascotState('sad');
+            const msgs = mascotMessages.wrong;
+            setMascotMessage(msgs[Math.floor(Math.random() * msgs.length)]);
+        }
+
+        // Reset mascot to idle after message timeout
+        setTimeout(() => {
+            setMascotMessage(null);
+        }, 2200);
+        setTimeout(() => {
+            setMascotState('idle');
+        }, 2400);
     };
 
     const handleContinue = () => {
         if (!currentQ) return;
+        // Snap mascot back to idle on advance
+        setMascotState('idle');
+        setMascotMessage(null);
         if (activeIndex < questions.length - 1) {
             setActiveIndex(i => i + 1);
         } else {
@@ -315,6 +356,10 @@ export default function QuizPage({ params }: { params: Promise<{ quizId: string 
                     <div className={styles.progressTrack}>
                         <div className={styles.progressFill} style={{ width: `${progressPercent}%` }} />
                     </div>
+                    <div className={`${styles.scorePill} ${scoreBump ? styles.scorePillBump : ''}`}>
+                        <span className={styles.scorePillIcon}>🏆</span>
+                        {runningScore}
+                    </div>
                     <div className={`${styles.timer} ${timerLow ? styles.timerWarning : ''}`}>{formatTime(timeLeft)}</div>
                 </div>
 
@@ -352,10 +397,16 @@ export default function QuizPage({ params }: { params: Promise<{ quizId: string 
                                     <div className={styles.optionLetter}>{String.fromCharCode(65 + idx)}</div>
                                     <div className={styles.optionText}>{option}</div>
                                     {hasAnswered && currentAnswer.selected === idx && currentAnswer.isCorrect && (
-                                        <div className={styles.optionCheckmark}>✓</div>
+                                        <>
+                                            <div className={`${styles.floatingPoints} ${styles.floatingPointsCorrect}`}>+{currentQ.marks}</div>
+                                            <div className={styles.optionCheckmark}>✓</div>
+                                        </>
                                     )}
                                     {hasAnswered && currentAnswer.selected === idx && !currentAnswer.isCorrect && (
-                                        <div className={styles.optionCross}>✕</div>
+                                        <>
+                                            <div className={`${styles.floatingPoints} ${styles.floatingPointsWrong}`}>−1</div>
+                                            <div className={styles.optionCross}>✕</div>
+                                        </>
                                     )}
                                     {hasAnswered && idx === currentQ.correct_option && currentAnswer.selected !== idx && (
                                         <div className={styles.optionCheckmark}>✓</div>
@@ -383,6 +434,20 @@ export default function QuizPage({ params }: { params: Promise<{ quizId: string 
                 )}
             </div>
 
+            {/* Bagheera the mascot — fixed bottom-left */}
+            <div className={`${styles.mascot} ${
+                mascotState === 'happy' ? styles.mascotHappy :
+                mascotState === 'sad' ? styles.mascotSad :
+                mascotState === 'fire' ? styles.mascotFire : ''
+            }`}>
+                <Mascot state={mascotState} />
+            </div>
+            {mascotMessage && (
+                <div className={styles.mascotSpeech}>
+                    {mascotMessage}
+                </div>
+            )}
+
             {/* Bottom feedback panel — slides up when an answer is locked */}
             {hasAnswered && (
                 <div className={`${styles.feedbackPanel} ${currentAnswer.isCorrect ? styles.feedbackCorrect : styles.feedbackWrong}`}>
@@ -390,11 +455,11 @@ export default function QuizPage({ params }: { params: Promise<{ quizId: string 
                         <div className={styles.feedbackHeader}>
                             <div className={styles.feedbackBadge}>{currentAnswer.isCorrect ? '✓' : '✕'}</div>
                             <div>
-                                <div className={styles.feedbackSubtitle}>
-                                    {currentAnswer.isCorrect ? '+4 marks' : '−1 mark'}
-                                </div>
                                 <div className={styles.feedbackTitle}>
                                     {currentAnswer.isCorrect ? 'Correct!' : 'Not quite.'}
+                                </div>
+                                <div className={styles.feedbackSubtitle}>
+                                    {currentAnswer.isCorrect ? `+${currentQ.marks} marks earned` : '−1 mark for wrong answer'}
                                 </div>
                             </div>
                         </div>
