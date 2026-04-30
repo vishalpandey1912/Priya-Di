@@ -9,6 +9,7 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { PaymentModal } from '@/components/ui/PaymentModal/PaymentModal';
 import { WatermarkOverlay } from '@/components/ui/WatermarkOverlay/WatermarkOverlay';
+import { LeadCaptureGate } from '@/components/quiz/LeadCaptureGate';
 
 interface Question {
     id: string;
@@ -43,6 +44,23 @@ export default function QuizPage({ params }: { params: Promise<{ quizId: string 
     const [isSubmitted, setIsSubmitted] = useState(false);
     const [score, setScore] = useState(0);
     const [timeLeft, setTimeLeft] = useState(0);
+
+    // Lead capture gate state — anonymous users must enter name/email/phone before quiz loads.
+    // We check localStorage on mount to skip if already captured. Logged-in users auto-pass.
+    const [leadCaptured, setLeadCaptured] = useState<boolean | null>(null);
+
+    useEffect(() => {
+        if (user) {
+            setLeadCaptured(true); // Logged-in users skip the gate
+            return;
+        }
+        try {
+            const stored = localStorage.getItem('de_lead_captured');
+            setLeadCaptured(!!stored);
+        } catch {
+            setLeadCaptured(false);
+        }
+    }, [user]);
 
     useEffect(() => {
         if (!authLoading && !user) {
@@ -191,7 +209,7 @@ export default function QuizPage({ params }: { params: Promise<{ quizId: string 
         return `${mins}:${secs.toString().padStart(2, '0')}`;
     };
 
-    if (loading) return <div className="p-8 text-center">Loading secure quiz...</div>;
+    if (loading && leadCaptured) return <div className="p-8 text-center">Loading quiz...</div>;
 
     if (!hasAccess && quiz) {
         return (
@@ -215,6 +233,20 @@ export default function QuizPage({ params }: { params: Promise<{ quizId: string 
                     items={[{ id: quiz.id, title: quiz.title, type: 'quiz' }]}
                 />
             </div>
+        );
+    }
+
+    // Lead capture gate — block quiz fetch + render until user provides name/email/phone
+    if (leadCaptured === null) {
+        return <div className="p-8 text-center">Loading...</div>;
+    }
+    if (!leadCaptured) {
+        return (
+            <LeadCaptureGate
+                quizId={quizId}
+                quizTitle={undefined}
+                onSuccess={() => setLeadCaptured(true)}
+            />
         );
     }
 
