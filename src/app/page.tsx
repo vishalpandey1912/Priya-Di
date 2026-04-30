@@ -555,7 +555,7 @@ export default function DesiEducatorsHome() {
       {/* SUBJECT STRIP */}
       <div style={{background:"#fff",borderTop:"1px solid #e5e5e4",borderBottom:"1px solid #e5e5e4"}}>
         <div className="subject-strip" style={{maxWidth:1200,margin:"0 auto",padding:"20px 24px"}}>
-          {[{label:"Biology",color:SUBJECT.bio,icon:"dna",count:"32 chapters · Class 11 + 12"},{label:"Physics",color:SUBJECT.physics,icon:"bolt",count:"Coming soon"},{label:"Chemistry",color:SUBJECT.chemistry,icon:"flask",count:"Coming soon"}].map(s=>(
+          {[{label:"Biology",color:SUBJECT.bio,icon:"dna",count:"32 chapters · Class 11 + 12"},{label:"Physics",color:SUBJECT.physics,icon:"bolt",count:"High-weight chapters live · expanding"},{label:"Chemistry",color:SUBJECT.chemistry,icon:"flask",count:"High-weight chapters live · expanding"}].map(s=>(
             <div key={s.label} style={{display:"flex",alignItems:"center",gap:10}}>
               <div style={{color:s.color}}>{Icons[s.icon as keyof typeof Icons]}</div>
               <div><div style={{fontWeight:600,fontSize:14,color:s.color}}>{s.label}</div><div style={{fontSize:11,color:"#9ca3af"}}>{s.count}</div></div>
