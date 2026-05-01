@@ -7,7 +7,7 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { WatermarkOverlay } from '@/components/ui/WatermarkOverlay/WatermarkOverlay';
 import { LeadCaptureGate } from '@/components/quiz/LeadCaptureGate';
-import { Mystic, mysticMessages } from '@/components/quiz/Mystic';
+import { Mystic, mysticMessages, getMysticReaction } from '@/components/quiz/Mystic';
 import styles from './quiz.module.css';
 
 interface Question {
@@ -59,7 +59,9 @@ export default function QuizPage({ params }: { params: Promise<{ quizId: string 
     const [timeLeft, setTimeLeft] = useState(0);
 
     // Mystic reaction
-    const [mysticState, setMysticState] = useState<'idle' | 'happy' | 'sad' | 'fire'>('idle');
+    const [mysticState, setMysticState] = useState<'idle' | 'happy' | 'sad' | 'fire' | 'thinking' | 'excited' | 'celebrating' | 'cheering'>('idle');
+    const [questionStartTime, setQuestionStartTime] = useState<number>(Date.now());
+    const [mysticThinkingTriggered, setMysticThinkingTriggered] = useState(false);
     const [mysticMessage, setMysticMessage] = useState<string | null>(null);
     const [scoreBump, setScoreBump] = useState(false);
 
@@ -130,49 +132,71 @@ export default function QuizPage({ params }: { params: Promise<{ quizId: string 
     const currentAnswer = currentQ ? answers[currentQ.id] : undefined;
     const hasAnswered = !!currentAnswer;
 
+    // Mystic "thinking" — if user dwells on a question 12+ seconds without answering
+    useEffect(() => {
+        if (hasAnswered || isFinished || mysticThinkingTriggered || mysticState !== 'idle') return;
+        const dwellTimer = setTimeout(() => {
+            setMysticThinkingTriggered(true);
+            const reaction = getMysticReaction({ type: 'thinking', secondsOnQuestion: 12 });
+            setMysticState(reaction.state);
+            setMysticMessage(reaction.message);
+            setTimeout(() => {
+                setMysticState('idle');
+                setMysticMessage(null);
+            }, 4000);
+        }, 12000);
+        return () => clearTimeout(dwellTimer);
+    }, [activeIndex, hasAnswered, isFinished, mysticThinkingTriggered, mysticState]);
+
     const handlePick = (idx: number) => {
         if (!currentQ || hasAnswered) return;
         const isCorrect = idx === currentQ.correct_option;
         const newStreak = isCorrect ? streak + 1 : 0;
+        const answeredCount = Object.keys(answers).length + 1; // including this one
 
         setAnswers(prev => ({ ...prev, [currentQ.id]: { selected: idx, isCorrect } }));
         setStreak(newStreak);
 
-        // Update running score (NEET-style +4/-1)
+        // Score
         const delta = isCorrect ? currentQ.marks : -1;
         setRunningScore(prev => prev + delta);
         setScoreBump(true);
         setTimeout(() => setScoreBump(false), 400);
 
-        // Trigger mascot reaction
-        if (newStreak >= 3) {
-            setMysticState('fire');
-            const msgs = mysticMessages.fire;
-            setMysticMessage(msgs[Math.floor(Math.random() * msgs.length)]);
-        } else if (isCorrect) {
-            setMysticState('happy');
-            const msgs = mysticMessages.correct;
-            setMysticMessage(msgs[Math.floor(Math.random() * msgs.length)]);
-        } else {
-            setMysticState('sad');
-            const msgs = mysticMessages.wrong;
-            setMysticMessage(msgs[Math.floor(Math.random() * msgs.length)]);
-        }
+        // Smart Mystic reaction — milestones override per-answer reactions
+        const isMilestone = (
+            answeredCount === 5 ||
+            answeredCount === 10 ||
+            answeredCount === 20 ||
+            answeredCount === Math.floor(questions.length / 2) ||
+            answeredCount === questions.length - 3
+        );
 
-        // Reset mascot to idle after message timeout
-        setTimeout(() => {
-            setMysticMessage(null);
-        }, 2200);
-        setTimeout(() => {
-            setMysticState('idle');
-        }, 2400);
+        let reaction;
+        if (isMilestone && isCorrect) {
+            reaction = getMysticReaction({ type: 'milestone', count: answeredCount, total: questions.length });
+        } else if (isCorrect) {
+            reaction = getMysticReaction({ type: 'correct', streak: newStreak });
+        } else {
+            reaction = getMysticReaction({ type: 'wrong', streak: newStreak });
+        }
+        setMysticState(reaction.state);
+        setMysticMessage(reaction.message);
+
+        // Reset to idle after a beat (longer for celebrations so users see them)
+        const msgDuration = reaction.state === 'celebrating' ? 3500 : 2200;
+        const stateDuration = reaction.state === 'celebrating' ? 3700 : 2400;
+        setTimeout(() => setMysticMessage(null), msgDuration);
+        setTimeout(() => setMysticState('idle'), stateDuration);
     };
 
     const handleContinue = () => {
         if (!currentQ) return;
-        // Snap mascot back to idle on advance
+        // Snap mascot back to idle on advance, reset thinking timer
         setMysticState('idle');
         setMysticMessage(null);
+        setMysticThinkingTriggered(false);
+        setQuestionStartTime(Date.now());
         if (activeIndex < questions.length - 1) {
             setActiveIndex(i => i + 1);
         } else {
@@ -429,7 +453,7 @@ export default function QuizPage({ params }: { params: Promise<{ quizId: string 
                                 {mysticMessage}
                             </div>
                         )}
-                        <Mystic state={mysticState} />
+                        <Mystic state={mysticState} progress={Object.keys(answers).length} />
                     </div>
                 </div>
 
