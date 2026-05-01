@@ -65,6 +65,7 @@ import { CartProvider } from "@/context/CartContext";
 import { ProductProvider } from "@/context/ProductContext";
 import { EpisodePlayerProvider } from "@/context/EpisodePlayerContext";
 import { MiniPlayer } from "@/components/player";
+import { Analytics } from "@vercel/analytics/react";
 
 export default function RootLayout({
   children,
@@ -90,6 +91,7 @@ export default function RootLayout({
             </ProductProvider>
           </ContentProvider>
         </AuthProvider>
+        <Analytics />
       </body>
     </html>
   );
