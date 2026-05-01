@@ -356,9 +356,10 @@ export const Mystic = ({ state, className, progress = 0 }: Props) => {
             {/* ════════════ SITTING (reactions + default idle) ════════════ */}
             {showSitting && (
                 <g className={isExcited ? 'm-body-celebrate' : isHappy ? 'm-body-bounce' : ''}>
-                    <ellipse cx="70" cy="98" rx="30" ry="3" fill="rgba(0,0,0,0.18)" />
+                    {/* Soft drop shadow */}
+                    <ellipse cx="70" cy="98" rx="32" ry="3.5" fill="rgba(0,0,0,0.14)" />
 
-                    {/* Tail */}
+                    {/* FLUFFY TAIL — thicker base, tapered tip */}
                     <g className={
                         isFire ? 'm-tail-fire' :
                         isExcited ? 'm-tail-excited' :
@@ -367,77 +368,114 @@ export const Mystic = ({ state, className, progress = 0 }: Props) => {
                         isThinking ? 'm-tail-think' :
                         'm-tail-idle'
                     }>
-                        <path d="M 92 80 Q 110 78 108 62 Q 106 52 98 58" stroke={FUR} strokeWidth="6" strokeLinecap="round" fill="none" />
+                        {/* Outer fluff */}
+                        <path d="M 92 80 Q 112 78 110 60 Q 108 50 98 56" stroke={FUR} strokeWidth="10" strokeLinecap="round" fill="none" opacity="0.4" />
+                        {/* Main tail */}
+                        <path d="M 92 80 Q 112 78 110 60 Q 108 50 98 56" stroke={FUR} strokeWidth="7" strokeLinecap="round" fill="none" />
+                        {/* Tail tip darker stripe */}
+                        <circle cx="98" cy="56" r="3.5" fill={FUR_DARK} opacity="0.4" />
+                        <path d="M 100 67 Q 105 65 107 62" stroke={FUR_DARK} strokeWidth="1.3" fill="none" opacity="0.5" />
                     </g>
 
+                    {/* Body with breathing animation */}
                     <g className="m-breath">
-                        <ellipse cx="70" cy="80" rx="22" ry="14" fill={FUR} />
-                        <ellipse cx="70" cy="84" rx="14" ry="7" fill={BELLY} />
+                        <ellipse cx="70" cy="80" rx="23" ry="15" fill={FUR} />
+                        <ellipse cx="70" cy="78" rx="22" ry="13" fill={FUR_LIGHT} opacity="0.5" />
+                        <ellipse cx="70" cy="84" rx="15" ry="8" fill={BELLY} />
                     </g>
-                    <path d="M 55 74 Q 57 80 55 86" stroke={FUR_DARK} strokeWidth="1.5" fill="none" opacity="0.55" />
-                    <path d="M 70 72 Q 70 80 70 88" stroke={FUR_DARK} strokeWidth="1.5" fill="none" opacity="0.55" />
-                    <path d="M 85 74 Q 83 80 85 86" stroke={FUR_DARK} strokeWidth="1.5" fill="none" opacity="0.55" />
+                    {/* Body stripes */}
+                    <path d="M 53 73 Q 56 80 53 87" stroke={FUR_DARK} strokeWidth="1.6" fill="none" opacity="0.55" />
+                    <path d="M 62 70 Q 62 80 62 89" stroke={FUR_DARK} strokeWidth="1.6" fill="none" opacity="0.55" />
+                    <path d="M 78 70 Q 78 80 78 89" stroke={FUR_DARK} strokeWidth="1.6" fill="none" opacity="0.55" />
+                    <path d="M 87 73 Q 84 80 87 87" stroke={FUR_DARK} strokeWidth="1.6" fill="none" opacity="0.55" />
 
-                    {/* Head */}
-                    <circle cx="70" cy="44" r="26" fill={FUR} />
-                    <path d="M 60 28 L 58 34 L 60 30 L 62 34 L 64 28" stroke={FUR_DARK} strokeWidth="1.6" fill="none" opacity="0.6" />
-                    <path d="M 76 28 L 78 34 L 80 30 L 82 34 L 84 28" stroke={FUR_DARK} strokeWidth="1.6" fill="none" opacity="0.6" />
-                    <path d="M 48 48 Q 46 50 48 54" stroke={FUR_DARK} strokeWidth="1.3" fill="none" opacity="0.5" />
-                    <path d="M 92 48 Q 94 50 92 54" stroke={FUR_DARK} strokeWidth="1.3" fill="none" opacity="0.5" />
+                    {/* Head with subtle highlight */}
+                    <circle cx="70" cy="44" r="27" fill={FUR} />
+                    {/* Inner highlight */}
+                    <circle cx="65" cy="38" r="22" fill={FUR_LIGHT} opacity="0.35" />
+                    {/* Tabby M (more refined, like real tabby cats) */}
+                    <path d="M 58 28 L 56 36 M 56 36 L 58 32 M 58 32 L 60 36 M 60 36 L 62 28" stroke={FUR_DARK} strokeWidth="1.7" fill="none" opacity="0.7" strokeLinecap="round" strokeLinejoin="round" />
+                    <path d="M 78 28 L 80 36 M 80 36 L 82 32 M 82 32 L 84 36 M 84 36 L 86 28" stroke={FUR_DARK} strokeWidth="1.7" fill="none" opacity="0.7" strokeLinecap="round" strokeLinejoin="round" />
+                    {/* Cheek stripes */}
+                    <path d="M 47 50 Q 44 52 47 56" stroke={FUR_DARK} strokeWidth="1.4" fill="none" opacity="0.55" strokeLinecap="round" />
+                    <path d="M 93 50 Q 96 52 93 56" stroke={FUR_DARK} strokeWidth="1.4" fill="none" opacity="0.55" strokeLinecap="round" />
+                    <path d="M 50 56 Q 47 58 50 62" stroke={FUR_DARK} strokeWidth="1.2" fill="none" opacity="0.45" strokeLinecap="round" />
+                    <path d="M 90 56 Q 93 58 90 62" stroke={FUR_DARK} strokeWidth="1.2" fill="none" opacity="0.45" strokeLinecap="round" />
 
-                    {/* Ears */}
+                    {/* Ears (fluffier base) */}
                     <g className={isHappy ? 'm-ear-perk' : 'm-ear-l'}>
-                        <path d="M 52 28 L 48 10 L 64 24 Z" fill={FUR} />
-                        <path d="M 53 24 L 52 16 L 59 23 Z" fill={NOSE} opacity="0.6" />
+                        <path d="M 51 28 L 46 8 L 64 24 Z" fill={FUR} />
+                        <path d="M 51 28 L 47 12 L 63 24 Z" fill={FUR_LIGHT} opacity="0.5" />
+                        <path d="M 53 25 L 51 16 L 59 24 Z" fill={NOSE} opacity="0.7" />
+                        {/* Ear tuft */}
+                        <line x1="48" y1="10" x2="46" y2="6" stroke={FUR_DARK} strokeWidth="0.8" strokeLinecap="round" opacity="0.5" />
                     </g>
                     <g className={isHappy ? 'm-ear-perk-r' : 'm-ear-r'}>
-                        <path d="M 88 28 L 92 10 L 76 24 Z" fill={FUR} />
-                        <path d="M 87 24 L 88 16 L 81 23 Z" fill={NOSE} opacity="0.6" />
+                        <path d="M 89 28 L 94 8 L 76 24 Z" fill={FUR} />
+                        <path d="M 89 28 L 93 12 L 77 24 Z" fill={FUR_LIGHT} opacity="0.5" />
+                        <path d="M 87 25 L 89 16 L 81 24 Z" fill={NOSE} opacity="0.7" />
+                        <line x1="92" y1="10" x2="94" y2="6" stroke={FUR_DARK} strokeWidth="0.8" strokeLinecap="round" opacity="0.5" />
                     </g>
 
-                    {/* Eyes */}
+                    {/* Eyes — refined with darker rim, brighter highlight */}
                     {isHappy ? (
                         <>
-                            <path d="M 56 44 Q 62 38 68 44" stroke="#1a1a1a" strokeWidth="2.5" fill="none" strokeLinecap="round" />
-                            <path d="M 72 44 Q 78 38 84 44" stroke="#1a1a1a" strokeWidth="2.5" fill="none" strokeLinecap="round" />
+                            <path d="M 55 46 Q 62 38 69 46" stroke="#1a1a1a" strokeWidth="2.8" fill="none" strokeLinecap="round" />
+                            <path d="M 71 46 Q 78 38 85 46" stroke="#1a1a1a" strokeWidth="2.8" fill="none" strokeLinecap="round" />
+                            {/* Cheek blush */}
+                            <ellipse cx="50" cy="54" rx="4" ry="2" fill="#f9a8a8" opacity="0.5" />
+                            <ellipse cx="90" cy="54" rx="4" ry="2" fill="#f9a8a8" opacity="0.5" />
                             {isExcited && (
                                 <>
-                                    <text x="48" y="52" fontSize="12" fill="#c41e1e" className="m-heart">♥</text>
-                                    <text x="84" y="52" fontSize="12" fill="#c41e1e" className="m-heart" style={{ animationDelay: '0.2s' }}>♥</text>
+                                    <text x="46" y="52" fontSize="14" fill="#c41e1e" className="m-heart">♥</text>
+                                    <text x="86" y="52" fontSize="14" fill="#c41e1e" className="m-heart" style={{ animationDelay: '0.2s' }}>♥</text>
                                 </>
                             )}
                         </>
                     ) : isSad ? (
                         <>
-                            <ellipse cx="62" cy="46" rx="3.5" ry="3" fill="#fff" />
-                            <ellipse cx="78" cy="46" rx="3.5" ry="3" fill="#fff" />
-                            <circle cx="62" cy="47" r="1.7" fill={EYE_GREEN} />
-                            <circle cx="78" cy="47" r="1.7" fill={EYE_GREEN} />
-                            <ellipse cx="58" cy="52" rx="1.5" ry="2.2" fill="#60a5fa" className="m-tear" />
-                            <path d="M 56 38 L 64 41" stroke="#1a1a1a" strokeWidth="2" strokeLinecap="round" />
-                            <path d="M 84 38 L 76 41" stroke="#1a1a1a" strokeWidth="2" strokeLinecap="round" />
+                            {/* Sad: smaller round eyes with downturned brows */}
+                            <ellipse cx="62" cy="46" rx="4" ry="3.5" fill="#fff" />
+                            <ellipse cx="78" cy="46" rx="4" ry="3.5" fill="#fff" />
+                            <ellipse cx="62" cy="46" rx="4" ry="3.5" fill="none" stroke="#1a1a1a" strokeWidth="0.8" />
+                            <ellipse cx="78" cy="46" rx="4" ry="3.5" fill="none" stroke="#1a1a1a" strokeWidth="0.8" />
+                            <circle cx="62" cy="47" r="2" fill={EYE_GREEN} />
+                            <circle cx="78" cy="47" r="2" fill={EYE_GREEN} />
+                            <circle cx="62.7" cy="46.3" r="0.8" fill="#fff" />
+                            <circle cx="78.7" cy="46.3" r="0.8" fill="#fff" />
+                            <ellipse cx="58" cy="52" rx="1.7" ry="2.5" fill="#60a5fa" className="m-tear" />
+                            {/* Sad downturned brows */}
+                            <path d="M 54 38 Q 58 36 65 41" stroke="#1a1a1a" strokeWidth="2.2" strokeLinecap="round" fill="none" />
+                            <path d="M 86 38 Q 82 36 75 41" stroke="#1a1a1a" strokeWidth="2.2" strokeLinecap="round" fill="none" />
                         </>
                     ) : isThinking ? (
                         <>
-                            <ellipse cx="62" cy="44" rx="4" ry="5" fill="#fff" />
-                            <ellipse cx="62" cy="46" rx="1.5" ry="3" fill={EYE_GREEN} className="m-pupil-shifty" />
-                            <circle cx="63" cy="45" r="0.8" fill="#fff" />
-                            <ellipse cx="78" cy="44" rx="4" ry="5" fill="#fff" />
-                            <ellipse cx="78" cy="46" rx="1.5" ry="3" fill={EYE_GREEN} className="m-pupil-shifty m-pupil-shifty-2" />
-                            <circle cx="79" cy="45" r="0.8" fill="#fff" />
-                            <text x="100" y="32" fontSize="14" fill="#9ca3af" className="m-thought" style={{ fontFamily: 'sans-serif' }}>?</text>
+                            <ellipse cx="62" cy="44" rx="4.5" ry="5.5" fill="#fff" />
+                            <ellipse cx="62" cy="44" rx="4.5" ry="5.5" fill="none" stroke="#1a1a1a" strokeWidth="0.8" />
+                            <ellipse cx="62" cy="46" rx="1.7" ry="3.5" fill={EYE_GREEN} className="m-pupil-shifty" />
+                            <circle cx="62.8" cy="44.5" r="0.9" fill="#fff" className="m-pupil-shifty" />
+                            <ellipse cx="78" cy="44" rx="4.5" ry="5.5" fill="#fff" />
+                            <ellipse cx="78" cy="44" rx="4.5" ry="5.5" fill="none" stroke="#1a1a1a" strokeWidth="0.8" />
+                            <ellipse cx="78" cy="46" rx="1.7" ry="3.5" fill={EYE_GREEN} className="m-pupil-shifty m-pupil-shifty-2" />
+                            <circle cx="78.8" cy="44.5" r="0.9" fill="#fff" className="m-pupil-shifty m-pupil-shifty-2" />
+                            <text x="100" y="32" fontSize="16" fill="#9ca3af" className="m-thought" style={{ fontFamily: 'sans-serif', fontWeight: 700 }}>?</text>
                         </>
                     ) : (
                         <>
+                            {/* Idle: detailed rounder eyes with rim, pupil, highlight */}
                             <g className="m-eye-blink" style={{ transformOrigin: '62px 44px' }}>
-                                <ellipse cx="62" cy="44" rx="4" ry="5" fill="#fff" />
-                                <ellipse cx="62.5" cy="45" rx="1.5" ry="3" fill={EYE_GREEN} />
-                                <circle cx="63.5" cy="44" r="0.8" fill="#fff" />
+                                <ellipse cx="62" cy="44" rx="4.5" ry="5.5" fill="#fff" />
+                                <ellipse cx="62" cy="44" rx="4.5" ry="5.5" fill="none" stroke="#1a1a1a" strokeWidth="0.8" />
+                                <ellipse cx="62.5" cy="45" rx="1.7" ry="3.5" fill={EYE_GREEN} />
+                                <ellipse cx="62.5" cy="44" rx="0.8" ry="2" fill={PUPIL} />
+                                <circle cx="63.3" cy="43.8" r="0.9" fill="#fff" />
                             </g>
                             <g className="m-eye-blink m-eye-blink-2" style={{ transformOrigin: '78px 44px' }}>
-                                <ellipse cx="78" cy="44" rx="4" ry="5" fill="#fff" />
-                                <ellipse cx="78.5" cy="45" rx="1.5" ry="3" fill={EYE_GREEN} />
-                                <circle cx="79.5" cy="44" r="0.8" fill="#fff" />
+                                <ellipse cx="78" cy="44" rx="4.5" ry="5.5" fill="#fff" />
+                                <ellipse cx="78" cy="44" rx="4.5" ry="5.5" fill="none" stroke="#1a1a1a" strokeWidth="0.8" />
+                                <ellipse cx="78.5" cy="45" rx="1.7" ry="3.5" fill={EYE_GREEN} />
+                                <ellipse cx="78.5" cy="44" rx="0.8" ry="2" fill={PUPIL} />
+                                <circle cx="79.3" cy="43.8" r="0.9" fill="#fff" />
                             </g>
                         </>
                     )}
@@ -502,6 +540,8 @@ export const Mystic = ({ state, className, progress = 0 }: Props) => {
 export const mysticMessages = {
     correct: ['Shabaash!', 'Bilkul sahi!', 'Hawww!', 'Genius!', 'Wah!', 'NEET ready!', 'Kya baat!', 'Top!', 'Sahi pakdaa!', 'Fadu!'],
     wrong: ['Achha try.', 'Next one!', 'Koi baat nahi.', 'Padh le yaar.', 'Read NCERT!', 'Almost!', 'Try harder!', 'Don\'t worry!'],
+    // PRIYA SIGNATURE — playful threat, used after a streak of wrong answers
+    priya: ['Itna marunga naa!', 'Itna marunga naa! 😼', 'Padh ke aa, itna marunga naa!', 'Bachhe, itna marunga naa!'],
     fire: ['STREAK ON FIRE!', 'Don\'t stop!', 'Kya scene hai!', 'Bachhe, ruk mat!', 'Unstoppable!', 'On a roll!'],
     excited: ['You got this!', 'Keep going!', 'Beast mode!', 'NEET ready!', 'Aur lao!'],
     celebrating: ['Mast hai!', 'Outstanding!', 'Top of the game!', 'Future Doc!'],
@@ -526,6 +566,8 @@ export type MysticEvent =
     | { type: 'return' }
     | { type: 'celebrate' };
 
+export type WrongStreak = { type: 'wrong'; streak: number; wrongStreak: number };
+
 export const getMysticReaction = (event: MysticEvent): { state: MysticState; message: string } => {
     const pick = (arr: string[]) => arr[Math.floor(Math.random() * arr.length)];
     switch (event.type) {
@@ -534,6 +576,11 @@ export const getMysticReaction = (event: MysticEvent): { state: MysticState; mes
             if (event.streak >= 3) return { state: 'fire', message: pick(mysticMessages.fire) };
             return { state: 'happy', message: pick(mysticMessages.correct) };
         case 'wrong':
+            // After 2+ consecutive wrongs, Mystic channels Priya's tagline
+            const ws = (event as any).wrongStreak;
+            if (typeof ws === 'number' && ws >= 2) {
+                return { state: 'sad', message: pick(mysticMessages.priya) };
+            }
             return { state: 'sad', message: pick(mysticMessages.wrong) };
         case 'milestone':
             if (event.count === 5) return { state: 'cheering', message: pick(mysticMessages.milestone5) };

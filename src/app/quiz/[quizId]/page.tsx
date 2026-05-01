@@ -53,6 +53,7 @@ export default function QuizPage({ params }: { params: Promise<{ quizId: string 
     const [activeIndex, setActiveIndex] = useState(0);
     const [answers, setAnswers] = useState<Record<string, AnswerRecord>>({});
     const [streak, setStreak] = useState(0);
+    const [wrongStreak, setWrongStreak] = useState(0);
     const [isFinished, setIsFinished] = useState(false);
     const [score, setScore] = useState(0);
     const [runningScore, setRunningScore] = useState(0);
@@ -152,10 +153,12 @@ export default function QuizPage({ params }: { params: Promise<{ quizId: string 
         if (!currentQ || hasAnswered) return;
         const isCorrect = idx === currentQ.correct_option;
         const newStreak = isCorrect ? streak + 1 : 0;
+        const newWrongStreak = isCorrect ? 0 : wrongStreak + 1;
         const answeredCount = Object.keys(answers).length + 1; // including this one
 
         setAnswers(prev => ({ ...prev, [currentQ.id]: { selected: idx, isCorrect } }));
         setStreak(newStreak);
+        setWrongStreak(newWrongStreak);
 
         // Score
         const delta = isCorrect ? currentQ.marks : -1;
@@ -178,7 +181,7 @@ export default function QuizPage({ params }: { params: Promise<{ quizId: string 
         } else if (isCorrect) {
             reaction = getMysticReaction({ type: 'correct', streak: newStreak });
         } else {
-            reaction = getMysticReaction({ type: 'wrong', streak: newStreak });
+            reaction = getMysticReaction({ type: 'wrong', streak: newStreak, wrongStreak: newWrongStreak } as any);
         }
         setMysticState(reaction.state);
         setMysticMessage(reaction.message);
