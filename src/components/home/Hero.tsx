@@ -114,7 +114,7 @@ const Cloud = ({ top, left, scale, opacity }: { top: string; left: string; scale
 
 export const Hero: React.FC = () => {
   const { user } = useAuth();
-  const neetDate = new Date('2026-05-03T14:00:00+05:30');
+  const neetDate = new Date('2027-05-02T14:00:00+05:30');
   const { days, hours, minutes, seconds } = useCountdown(neetDate);
   const [loaded, setLoaded] = useState(false);
   useEffect(() => { setTimeout(() => setLoaded(true), 150); }, []);

@@ -10,7 +10,7 @@ export default function NeetPage() {
             <div>
                 <h1 style={{ fontSize: '2rem', marginBottom: '8px' }}>NEET Exam Preparation</h1>
                 <p style={{ color: 'var(--text-secondary)' }}>
-                    Comprehensive study material, mock tests, and doubt clearing sessions for NEET 2026.
+                    Comprehensive study material, mock tests, and doubt clearing sessions for NEET 2027 — with NEET 2026 result tracking.
                 </p>
             </div>
 
@@ -21,9 +21,19 @@ export default function NeetPage() {
                         <CalendarRange size={24} color="#DC2626" />
                     </div>
                     <div>
-                        <small style={{ color: '#64748b', fontSize: '0.85rem', fontWeight: 600, textTransform: 'uppercase' }}>Neet 2026 Date</small>
-                        <p style={{ fontWeight: 800, fontSize: '1.1rem', color: '#1f2937' }}>May 03, 2026</p>
-                        <span style={{ fontSize: '0.75rem', color: '#DC2626', fontWeight: 500 }}>Confirmed by NTA</span>
+                        <small style={{ color: '#64748b', fontSize: '0.85rem', fontWeight: 600, textTransform: 'uppercase' }}>NEET 2026 Result</small>
+                        <p style={{ fontWeight: 800, fontSize: '1.1rem', color: '#1f2937' }}>Mid-June 2026</p>
+                        <span style={{ fontSize: '0.75rem', color: '#DC2626', fontWeight: 500 }}>Expected June 13-15 · Answer key late May</span>
+                    </div>
+                </Card>
+                <Card padding="md" style={{ display: 'flex', alignItems: 'center', gap: '16px', borderLeft: '4px solid #2563EB' }}>
+                    <div style={{ padding: '10px', borderRadius: '50%', backgroundColor: '#EFF6FF' }}>
+                        <CalendarRange size={24} color="#2563EB" />
+                    </div>
+                    <div>
+                        <small style={{ color: '#64748b', fontSize: '0.85rem', fontWeight: 600, textTransform: 'uppercase' }}>NEET 2027 Exam</small>
+                        <p style={{ fontWeight: 800, fontSize: '1.1rem', color: '#1f2937' }}>May 02, 2027</p>
+                        <span style={{ fontSize: '0.75rem', color: '#2563EB', fontWeight: 500 }}>Tentative · NTA notification expected Feb 2027</span>
                     </div>
                 </Card>
                 <Card padding="md" style={{ display: 'flex', alignItems: 'center', gap: '16px', borderLeft: '4px solid #10B981' }}>
@@ -31,9 +41,9 @@ export default function NeetPage() {
                         <BookCheck size={24} color="#10B981" />
                     </div>
                     <div>
-                        <small style={{ color: '#64748b', fontSize: '0.85rem', fontWeight: 600, textTransform: 'uppercase' }}>Syllabus Status</small>
-                        <p style={{ fontWeight: 800, fontSize: '1.1rem', color: '#1f2937' }}>Updated (NMC)</p>
-                        <span style={{ fontSize: '0.75rem', color: '#10B981', fontWeight: 500 }}>Latest Pattern</span>
+                        <small style={{ color: '#64748b', fontSize: '0.85rem', fontWeight: 600, textTransform: 'uppercase' }}>Syllabus</small>
+                        <p style={{ fontWeight: 800, fontSize: '1.1rem', color: '#1f2937' }}>NMC Updated</p>
+                        <span style={{ fontSize: '0.75rem', color: '#10B981', fontWeight: 500 }}>NCERT 2025-26 reprint</span>
                     </div>
                 </Card>
             </div>

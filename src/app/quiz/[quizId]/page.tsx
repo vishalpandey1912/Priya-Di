@@ -71,7 +71,7 @@ export default function QuizPage({ params }: { params: Promise<{ quizId: string 
     useEffect(() => {
         if (user) { setLeadCaptured(true); return; }
         try {
-            const stored = localStorage.getItem('de_lead_captured');
+            const stored = sessionStorage.getItem('de_lead_captured');
             setLeadCaptured(!!stored);
         } catch {
             setLeadCaptured(false);

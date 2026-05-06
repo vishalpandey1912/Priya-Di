@@ -45,7 +45,7 @@ export const LeadCaptureGate = ({ quizId, quizTitle, onSuccess }: Props) => {
       }
       // Persist so we don't ask again on this device
       try {
-        localStorage.setItem('de_lead_captured', JSON.stringify({
+        sessionStorage.setItem('de_lead_captured', JSON.stringify({
           name: name.trim(), email: email.trim(), phone: phone.trim(), at: Date.now()
         }));
       } catch {}

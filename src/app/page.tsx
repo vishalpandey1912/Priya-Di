@@ -4,7 +4,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 // ─── CONSTANTS ───
 const BRAND = { red: "#c41e1e", redLight: "#fef2f2", redDark: "#991b1b" };
 const SUBJECT = { bio: "#16a34a", physics: "#2563eb", chemistry: "#d97706" };
-const NEET_DATE = new Date("2026-05-04T09:30:00+05:30");
+const NEET_DATE = new Date("2027-05-02T14:00:00+05:30");
 
 // ─── SVG ICONS ───
 const Icons = {
@@ -502,16 +502,20 @@ export default function DesiEducatorsHome() {
           <Reveal>
             <div style={{display:"inline-flex",alignItems:"center",gap:6,padding:"4px 12px",background:"#f0fdf4",borderRadius:99,marginBottom:20}}>
               <div style={{width:6,height:6,borderRadius:3,background:SUBJECT.bio,animation:"glowPulse 2s infinite"}}/>
-              <span style={{fontSize:12,fontWeight:600,color:SUBJECT.bio}}>NEET 2026 Prep Live</span>
+              <span style={{fontSize:12,fontWeight:600,color:SUBJECT.bio}}>NEET 2027 Prep · Open Now</span>
             </div>
             <h1 className="hero-title" style={{fontFamily:"'Cormorant Garamond',serif",lineHeight:1.05,marginBottom:24}}>Recall. Retain. <span style={{color:BRAND.red}}>Rank.</span></h1>
-            <p style={{fontSize:17,lineHeight:1.7,color:"#6b7280",maxWidth:440,marginBottom:28}}>Biology with Priya Ma'am. 3,700+ NEET MCQs, NCERT accurate audio lessons, and an AI tutor that never sleeps. Built for NEET 2026.</p>
+            <p style={{fontSize:17,lineHeight:1.7,color:"#6b7280",maxWidth:440,marginBottom:28}}>Biology with Priya Ma'am. 4,300+ NEET MCQs, NCERT accurate audio lessons, and an AI tutor that never sleeps. Built for NEET 2027.</p>
             <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:28}}>
               <div style={{display:"flex"}}>{[1,3,5,7,9].map((s,i)=>(<div key={s} style={{marginLeft:i===0?0:-8,border:"2px solid #fff",borderRadius:99}}><StudentAvatar seed={s} size={28}/></div>))}</div>
               <span style={{fontSize:13,color:"#9ca3af"}}><strong style={{color:"#374151"}}>24,000+</strong> engagements on Priya AI</span>
             </div>
+            <div style={{marginBottom:20,padding:'12px 14px',background:'rgba(196,30,30,0.05)',borderRadius:10,border:'1px solid rgba(196,30,30,0.15)'}}>
+              <div style={{fontSize:11,fontWeight:700,color:BRAND.red,letterSpacing:1.5,marginBottom:4}}>NEET 2026 RESULT</div>
+              <div style={{fontSize:14,fontWeight:600,color:'#374151',lineHeight:1.4}}>Expected mid-June 2026 · Answer key late May</div>
+            </div>
             <div style={{marginBottom:28}}>
-              <div style={{fontSize:11,fontWeight:600,color:"#9ca3af",letterSpacing:1.5,marginBottom:8}}>NEET 2026 COUNTDOWN</div>
+              <div style={{fontSize:11,fontWeight:600,color:"#9ca3af",letterSpacing:1.5,marginBottom:8}}>NEET 2027 COUNTDOWN</div>
               <Countdown />
             </div>
             <div style={{display:"flex",gap:12}}>
@@ -814,7 +818,7 @@ export default function DesiEducatorsHome() {
         <Reveal direction="scale">
           <div style={{maxWidth:600,margin:"0 auto",textAlign:"center"}}>
             <h2 className="section-h2-lg" style={{fontFamily:"'Cormorant Garamond',serif",marginBottom:16}}>Your NEET rank starts <span style={{color:BRAND.red}}>here.</span></h2>
-            <p style={{color:"#6b7280",fontSize:16,lineHeight:1.7,marginBottom:32}}>Free to start. No credit card. NEET 2026 cohort: 3,700+ MCQs, gamified quizzes, AI tutor.</p>
+            <p style={{color:"#6b7280",fontSize:16,lineHeight:1.7,marginBottom:32}}>Free to start. No credit card. NEET 2027 cohort: 4,300+ MCQs, gamified quizzes, AI tutor.</p>
             <a href="/neet" className="cta-btn" style={{padding:"16px 40px",background:BRAND.red,color:"#fff",border:"none",borderRadius:12,fontWeight:700,fontSize:17,cursor:"pointer",boxShadow:`0 6px 24px ${BRAND.red}33`,textDecoration:"none",display:"inline-block",animation:"glowPulse 3s ease-in-out infinite"}}>Try a Free Quiz</a>
           </div>
         </Reveal>
