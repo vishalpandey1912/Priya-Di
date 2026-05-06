@@ -548,7 +548,7 @@ export default function DesiEducatorsHome() {
         <div style={{display:"inline-flex",animation:"marquee 30s linear infinite"}}>
           {[...Array(2)].map((_, rep) => (
             <div key={rep} style={{display:"inline-flex",gap:40,paddingRight:40}}>
-              {["NCERT Aligned","Active Recall","Spaced Repetition","22 RTI Filed","30-32 ATP (Corrected)","AI Tutor","130+ Quizzes","3,700+ MCQs","Audio Lessons","XP System","Free to Start"].map(t=>(
+              {["NCERT Aligned","Active Recall","Spaced Repetition","22 RTI Filed","30-32 ATP (Corrected)","AI Tutor","140+ Quizzes","4,300+ MCQs","Audio Lessons","XP System","Free to Start"].map(t=>(
                 <span key={t+rep} style={{fontSize:12,fontWeight:600,color:"rgba(255,255,255,0.5)",letterSpacing:2,textTransform:"uppercase"}}>{t}</span>
               ))}
             </div>
@@ -659,7 +659,7 @@ export default function DesiEducatorsHome() {
               <h2 className="section-h2-m" style={{fontFamily:"'Cormorant Garamond',serif",marginBottom:16}}>Test yourself <span style={{color:BRAND.red}}>now</span></h2>
               <p style={{color:"#6b7280",fontSize:15,lineHeight:1.7,marginBottom:24}}>3 quick questions. Earn 10 XP per correct answer. Build long term memory by retrieving, not rereading.</p>
               <div style={{display:"flex",alignItems:"center",gap:16}}>
-                {[["130+","Quizzes"],["3,700+","MCQs"],["10","XP each"]].map(([n,l])=>(<div key={l} style={{textAlign:"center"}}><div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:24,fontWeight:700,color:BRAND.red}}>{n}</div><div style={{fontSize:10,color:"#9ca3af",fontWeight:600}}>{l}</div></div>))}
+                {[["140+","Quizzes"],["4,300+","MCQs"],["10","XP each"]].map(([n,l])=>(<div key={l} style={{textAlign:"center"}}><div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:24,fontWeight:700,color:BRAND.red}}>{n}</div><div style={{fontSize:10,color:"#9ca3af",fontWeight:600}}>{l}</div></div>))}
               </div>
             </div>
           </Reveal>
