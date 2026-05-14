@@ -59,6 +59,7 @@ export const metadata: Metadata = {
 };
 
 import { Navbar, Footer } from "@/components/layout";
+import TopAlertBanner from "@/components/fixourneet/TopAlertBanner";
 import { AuthProvider } from "@/context/AuthContext";
 import { ContentProvider } from "@/context/ContentContext";
 import { CartProvider } from "@/context/CartContext";
@@ -80,6 +81,7 @@ export default function RootLayout({
             <ProductProvider>
               <CartProvider>
                 <EpisodePlayerProvider>
+                  <TopAlertBanner />
                   <Navbar />
                   <main>
                     {children}

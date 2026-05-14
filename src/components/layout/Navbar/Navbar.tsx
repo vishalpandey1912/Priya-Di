@@ -21,6 +21,7 @@ export const Navbar = () => {
   }, []);
 
   const navLinks = [
+    { name: 'Fix Our NEET', href: '/fixourneet', highlight: true },
     { name: 'Lectures', href: '/neet' },
     { name: 'Episodes', href: '/episodes' },
     { name: 'Pricing', href: '/pricing' },
@@ -37,7 +38,20 @@ export const Navbar = () => {
 
         <div className={styles.desktopNav}>
           {navLinks.map((link) => (
-            <Link key={link.name} href={link.href} className={styles.navLink}>
+            <Link
+              key={link.name}
+              href={link.href}
+              className={styles.navLink}
+              style={(link as any).highlight ? {
+                color: '#fff',
+                background: '#c41e1e',
+                padding: '6px 14px',
+                borderRadius: 8,
+                fontWeight: 700,
+                boxShadow: '0 2px 10px rgba(196,30,30,0.35)',
+                animation: 'fixourneetPulse 2s ease-in-out infinite'
+              } : undefined}
+            >
               {link.name}
             </Link>
           ))}
@@ -78,7 +92,20 @@ export const Navbar = () => {
       {isMenuOpen && (
         <div className={styles.mobileMenu}>
           {navLinks.map((link) => (
-            <Link key={link.name} href={link.href} className={styles.mobileLink} onClick={() => setIsMenuOpen(false)}>
+            <Link
+              key={link.name}
+              href={link.href}
+              className={styles.mobileLink}
+              onClick={() => setIsMenuOpen(false)}
+              style={(link as any).highlight ? {
+                color: '#fff',
+                background: '#c41e1e',
+                fontWeight: 700,
+                borderRadius: 8,
+                margin: '4px 12px',
+                textAlign: 'center'
+              } : undefined}
+            >
               {link.name}
             </Link>
           ))}
