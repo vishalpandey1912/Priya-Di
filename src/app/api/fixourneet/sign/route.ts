@@ -7,8 +7,13 @@ export const dynamic = 'force-dynamic';
 
 /**
  * POST /api/fixourneet/sign
- * Captures a signature for the Fix Our NEET petition.
- * Sends OTP verification email.
+ *
+ * WORKAROUND: Uses the existing `leads` table (anon insert RLS already in place)
+ * with petition data encoded as JSON in `user_agent` column and tagged via
+ * source_path = '/fixourneet'.
+ *
+ * Later, when the proper `signatures` table is created, run the migration script
+ * in scripts/migrate-leads-to-signatures.ts to move rows.
  */
 
 const ALLOWED_STATES = new Set([
@@ -19,6 +24,37 @@ const ALLOWED_STATES = new Set([
     'Andaman and Nicobar Islands','Chandigarh','Dadra and Nagar Haveli and Daman and Diu',
     'Delhi','Jammu and Kashmir','Ladakh','Lakshadweep','Puducherry'
 ]);
+
+const SOURCE_TAG = '/fixourneet';
+
+interface PetitionData {
+    schema: 'fixourneet_v1';
+    role: 'candidate' | 'parent' | 'educator' | 'supporter';
+    city: string;
+    state: string;
+    full_name: string;
+    neet_attempt?: string | null;
+    class_12_passing_year?: number | null;
+    target_year?: number | null;
+    preferred_medium?: string | null;
+    state_board?: string | null;
+    neet_app_number_last4?: string | null;
+    is_minor: boolean;
+    parent_name?: string | null;
+    parent_consent: boolean;
+    desi_educators_optin: boolean;
+    whatsapp_consent: boolean;
+    privacy_consent: boolean;
+    real_user_agent: string | null;
+    ip_hash: string;
+    utm_source?: string | null;
+    utm_medium?: string | null;
+    utm_campaign?: string | null;
+    otp_token: string;
+    otp_sent_at: string;
+    otp_verified: boolean;
+    otp_verified_at: string | null;
+}
 
 function hashIp(ip: string): string {
     const salt = process.env.IP_SALT || 'fixourneet-default-salt-2026';
@@ -51,7 +87,6 @@ If you did not sign the petition, ignore this email; nothing will be added.
 Desi Educators
 fixourneet@desieducators.com`;
 
-    // Try Resend if API key is set
     const resendKey = process.env.RESEND_API_KEY;
     if (resendKey) {
         try {
@@ -62,7 +97,7 @@ fixourneet@desieducators.com`;
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    from: 'Fix Our NEET <fixourneet@desieducators.com>',
+                    from: process.env.RESEND_FROM || 'Fix Our NEET <onboarding@resend.dev>',
                     to: [opts.to],
                     subject,
                     text
@@ -76,8 +111,7 @@ fixourneet@desieducators.com`;
         }
     }
 
-    // Fallback: log the verification URL so it can be manually delivered if email fails.
-    console.warn(`[fixourneet] EMAIL FALLBACK — no working provider. Verify URL for ${opts.to}:`);
+    console.warn(`[fixourneet] EMAIL FALLBACK — verify URL for ${opts.to}:`);
     console.warn(`  ${verifyUrl}`);
     return { sent: false, provider: 'console' };
 }
@@ -86,7 +120,7 @@ export async function POST(req: NextRequest) {
     try {
         const body = await req.json();
 
-        // Required
+        // ── Validation ────────────────────────────────────────────────
         const fullName = (body.full_name || '').trim();
         const email = (body.email || '').trim().toLowerCase();
         const city = (body.city || '').trim();
@@ -99,54 +133,48 @@ export async function POST(req: NextRequest) {
         if (!email || !email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
             return NextResponse.json({ error: 'Please enter a valid email.' }, { status: 400 });
         }
-        if (!city) {
-            return NextResponse.json({ error: 'Please enter your city.' }, { status: 400 });
-        }
-        if (!ALLOWED_STATES.has(state)) {
-            return NextResponse.json({ error: 'Please select your state.' }, { status: 400 });
-        }
+        if (!city) return NextResponse.json({ error: 'Please enter your city.' }, { status: 400 });
+        if (!ALLOWED_STATES.has(state)) return NextResponse.json({ error: 'Please select your state.' }, { status: 400 });
         if (!['candidate','parent','educator','supporter'].includes(role)) {
             return NextResponse.json({ error: 'Please select your role.' }, { status: 400 });
         }
         if (!body.privacy_consent) {
-            return NextResponse.json({ error: 'Privacy consent is required to print your name on the petition.' }, { status: 400 });
+            return NextResponse.json({ error: 'Privacy consent is required.' }, { status: 400 });
         }
 
-        // Candidate-specific validation
-        let candidateFields: any = {};
+        // Candidate fields
+        let neetAttempt: string | null = null;
+        let class12Year: number | null = null;
+        let targetYear: number | null = null;
+        let preferredMedium: string | null = null;
+        let stateBoard: string | null = null;
+        let appNoLast4: string | null = null;
         if (role === 'candidate') {
-            const att = body.neet_attempt;
-            if (!['first','dropper_1','dropper_2plus','repeater'].includes(att)) {
+            neetAttempt = body.neet_attempt;
+            if (!['first','dropper_1','dropper_2plus','repeater'].includes(neetAttempt!)) {
                 return NextResponse.json({ error: 'Please select your NEET attempt status.' }, { status: 400 });
             }
-            const passingYear = parseInt(body.class_12_passing_year);
-            if (!passingYear || passingYear < 2020 || passingYear > 2027) {
+            class12Year = parseInt(body.class_12_passing_year);
+            if (!class12Year || class12Year < 2020 || class12Year > 2027) {
                 return NextResponse.json({ error: 'Please select your Class 12 passing year.' }, { status: 400 });
             }
-            const targetYear = parseInt(body.target_year);
+            targetYear = parseInt(body.target_year);
             if (![2026, 2027].includes(targetYear)) {
                 return NextResponse.json({ error: 'Please select your target year.' }, { status: 400 });
             }
-            candidateFields = {
-                neet_attempt: att,
-                class_12_passing_year: passingYear,
-                target_year: targetYear,
-                preferred_medium: ['english','hindi','other'].includes(body.preferred_medium) ? body.preferred_medium : null,
-                state_board: (body.state_board || '').trim() || null,
-                neet_app_number_last4: typeof body.neet_app_number_last4 === 'string' && /^\d{4}$/.test(body.neet_app_number_last4)
-                    ? body.neet_app_number_last4 : null
-            };
+            preferredMedium = ['english','hindi','other'].includes(body.preferred_medium) ? body.preferred_medium : null;
+            stateBoard = (body.state_board || '').trim() || null;
+            appNoLast4 = typeof body.neet_app_number_last4 === 'string' && /^\d{4}$/.test(body.neet_app_number_last4)
+                ? body.neet_app_number_last4 : null;
         }
 
-        // Minor handling
+        // Minor
         const isMinor = !!body.is_minor;
-        if (isMinor) {
-            if (!body.parent_name || !body.parent_consent) {
-                return NextResponse.json({ error: 'Parent name and consent are required for signatories under 18.' }, { status: 400 });
-            }
+        if (isMinor && (!body.parent_name || !body.parent_consent)) {
+            return NextResponse.json({ error: 'Parent name and consent are required for signatories under 18.' }, { status: 400 });
         }
 
-        // WhatsApp consent
+        // WhatsApp
         const whatsappNumber = (body.whatsapp_number || '').trim() || null;
         if (whatsappNumber && !body.whatsapp_consent) {
             return NextResponse.json({ error: 'Please confirm WhatsApp consent, or leave the number blank.' }, { status: 400 });
@@ -154,28 +182,39 @@ export async function POST(req: NextRequest) {
 
         // Metadata
         const ip = req.headers.get('x-forwarded-for')?.split(',')[0].trim()
-            || req.headers.get('x-real-ip')
-            || '0.0.0.0';
-        const userAgent = req.headers.get('user-agent') || null;
+            || req.headers.get('x-real-ip') || '0.0.0.0';
+        const realUa = req.headers.get('user-agent') || null;
 
-        // Check existing
+        // ── Check existing fixourneet row by email ────────────────────
         const { data: existing } = await supabaseAdmin
-            .from('signatures')
-            .select('id, otp_verified, otp_sent_at')
+            .from('leads')
+            .select('id, user_agent, captured_at')
             .ilike('email', email)
+            .eq('source_path', SOURCE_TAG)
             .maybeSingle();
 
+        const token = generateToken();
+        const now = new Date().toISOString();
+
         if (existing) {
-            if (existing.otp_verified) {
+            // Parse existing petition data
+            let petitionData: PetitionData | null = null;
+            try {
+                const ua = existing.user_agent || '';
+                const idx = ua.indexOf('{"schema":"fixourneet_v1"');
+                if (idx >= 0) petitionData = JSON.parse(ua.slice(idx));
+            } catch {}
+
+            if (petitionData?.otp_verified) {
                 return NextResponse.json({
                     ok: true,
                     alreadyVerified: true,
                     message: 'This email has already verified a signature. Thank you!'
                 });
             }
-            // Rate limit: max 1 resend per 10 min
-            if (existing.otp_sent_at) {
-                const lastSent = new Date(existing.otp_sent_at).getTime();
+            // Rate limit re-sends
+            if (petitionData?.otp_sent_at) {
+                const lastSent = new Date(petitionData.otp_sent_at).getTime();
                 if (Date.now() - lastSent < 10 * 60 * 1000) {
                     return NextResponse.json({
                         ok: true,
@@ -183,11 +222,36 @@ export async function POST(req: NextRequest) {
                     });
                 }
             }
-            // Regenerate token
-            const token = generateToken();
-            await supabaseAdmin.from('signatures').update({
+            // Update with new token
+            const newData: PetitionData = {
+                ...(petitionData || {} as any),
+                schema: 'fixourneet_v1',
+                role: role as any,
+                city, state, full_name: fullName,
+                neet_attempt: neetAttempt, class_12_passing_year: class12Year,
+                target_year: targetYear, preferred_medium: preferredMedium,
+                state_board: stateBoard, neet_app_number_last4: appNoLast4,
+                is_minor: isMinor,
+                parent_name: isMinor ? (body.parent_name || '').trim() : null,
+                parent_consent: isMinor ? !!body.parent_consent : false,
+                desi_educators_optin: !!body.desi_educators_optin,
+                whatsapp_consent: !!body.whatsapp_consent,
+                privacy_consent: true,
+                real_user_agent: realUa,
+                ip_hash: hashIp(ip),
+                utm_source: body.utm_source || null,
+                utm_medium: body.utm_medium || null,
+                utm_campaign: body.utm_campaign || null,
                 otp_token: token,
-                otp_sent_at: new Date().toISOString()
+                otp_sent_at: now,
+                otp_verified: false,
+                otp_verified_at: null
+            };
+            const encodedUa = `${realUa || ''} | PETITION=${JSON.stringify(newData)}`;
+            await supabaseAdmin.from('leads').update({
+                name: fullName,
+                phone: whatsappNumber || '0000000000',
+                user_agent: encodedUa
             }).eq('id', existing.id);
 
             const origin = req.headers.get('origin') || `https://${req.headers.get('host')}`;
@@ -195,34 +259,43 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ ok: true, message: 'Check your inbox to verify your signature.' });
         }
 
-        // Insert new signature
-        const token = generateToken();
-        const insertPayload = {
-            full_name: fullName,
-            email,
-            city,
-            state,
-            role,
-            ...candidateFields,
+        // ── Insert new row ────────────────────────────────────────────
+        const petitionData: PetitionData = {
+            schema: 'fixourneet_v1',
+            role: role as any,
+            city, state, full_name: fullName,
+            neet_attempt: neetAttempt, class_12_passing_year: class12Year,
+            target_year: targetYear, preferred_medium: preferredMedium,
+            state_board: stateBoard, neet_app_number_last4: appNoLast4,
             is_minor: isMinor,
             parent_name: isMinor ? (body.parent_name || '').trim() : null,
             parent_consent: isMinor ? !!body.parent_consent : false,
             desi_educators_optin: !!body.desi_educators_optin,
-            whatsapp_number: whatsappNumber,
             whatsapp_consent: !!body.whatsapp_consent,
             privacy_consent: true,
-            otp_token: token,
-            otp_sent_at: new Date().toISOString(),
+            real_user_agent: realUa,
             ip_hash: hashIp(ip),
-            user_agent: userAgent,
             utm_source: body.utm_source || null,
             utm_medium: body.utm_medium || null,
-            utm_campaign: body.utm_campaign || null
+            utm_campaign: body.utm_campaign || null,
+            otp_token: token,
+            otp_sent_at: now,
+            otp_verified: false,
+            otp_verified_at: null
         };
 
+        const encodedUa = `${realUa || ''} | PETITION=${JSON.stringify(petitionData)}`;
+
         const { data, error } = await supabaseAdmin
-            .from('signatures')
-            .insert(insertPayload)
+            .from('leads')
+            .insert({
+                name: fullName,
+                email,
+                phone: whatsappNumber || '0000000000',
+                source_quiz_id: null,
+                source_path: SOURCE_TAG,
+                user_agent: encodedUa
+            })
             .select('id')
             .single();
 
@@ -239,9 +312,7 @@ export async function POST(req: NextRequest) {
             signature_id: data.id,
             message: emailResult.sent
                 ? 'Check your inbox to verify your signature.'
-                : 'Signature recorded. Verification email is pending — please check back.',
-            // In dev only — never expose token in production payload
-            ...(process.env.NODE_ENV !== 'production' ? { _devToken: token } : {})
+                : 'Signature recorded. Verification email is pending — we will follow up shortly.'
         });
 
     } catch (err: any) {
