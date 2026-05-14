@@ -510,10 +510,38 @@ export default function DesiEducatorsHome() {
               <div style={{display:"flex"}}>{[1,3,5,7,9].map((s,i)=>(<div key={s} style={{marginLeft:i===0?0:-8,border:"2px solid #fff",borderRadius:99}}><StudentAvatar seed={s} size={28}/></div>))}</div>
               <span style={{fontSize:13,color:"#9ca3af"}}><strong style={{color:"#374151"}}>24,000+</strong> engagements on Priya AI</span>
             </div>
-            <div style={{marginBottom:20,padding:'12px 14px',background:'rgba(196,30,30,0.05)',borderRadius:10,border:'1px solid rgba(196,30,30,0.15)'}}>
-              <div style={{fontSize:11,fontWeight:700,color:BRAND.red,letterSpacing:1.5,marginBottom:4}}>NEET 2026 RESULT</div>
-              <div style={{fontSize:14,fontWeight:600,color:'#374151',lineHeight:1.4}}>Expected mid-June 2026 · Answer key late May</div>
-            </div>
+            {/* Fix Our NEET — prominent, non-dismissible hero CTA (urgent campaign live) */}
+            <a href="/fixourneet" style={{
+              display:'block',
+              marginBottom:20,
+              padding:'14px 16px',
+              background:'linear-gradient(135deg, #991b1b 0%, #c41e1e 100%)',
+              borderRadius:12,
+              border:'1px solid rgba(196,30,30,0.4)',
+              boxShadow:'0 6px 20px rgba(196,30,30,0.25)',
+              textDecoration:'none',
+              color:'#fff',
+              animation:'fixourneetPulse 2.5s ease-in-out infinite',
+              cursor:'pointer'
+            }}>
+              <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',gap:12}}>
+                <div>
+                  <div style={{fontSize:10,fontWeight:800,letterSpacing:1.5,opacity:0.85,marginBottom:3}}>🚨 NEET 2026 CANCELLED · CAMPAIGN LIVE</div>
+                  <div style={{fontSize:14,fontWeight:700,lineHeight:1.35}}>Fix Our NEET — sign the petition to MoE</div>
+                  <div style={{fontSize:11,fontWeight:500,opacity:0.85,marginTop:2}}>6 demands. 22.79 lakh students. 25,000 signatures needed.</div>
+                </div>
+                <div style={{
+                  background:'#fff',
+                  color:BRAND.red,
+                  padding:'8px 14px',
+                  borderRadius:8,
+                  fontWeight:800,
+                  fontSize:13,
+                  whiteSpace:'nowrap',
+                  flexShrink:0
+                }}>Sign →</div>
+              </div>
+            </a>
             <div style={{marginBottom:28}}>
               <div style={{fontSize:11,fontWeight:600,color:"#9ca3af",letterSpacing:1.5,marginBottom:8}}>NEET 2027 COUNTDOWN</div>
               <Countdown />
