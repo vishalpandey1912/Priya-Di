@@ -45,7 +45,7 @@ const ASKS = [
     {
         n: 4,
         title: 'An independent observer panel for the re-NEET.',
-        body: 'A panel of three retired High Court judges and three senior medical educators (current or former Deans of government medical colleges) should be constituted to monitor the re-NEET. The panel must have unannounced access to any centre on exam day, with a written report submitted to the Ministry within seven days of the exam.'
+        body: 'A panel of three retired High Court judges, three senior medical educators (current or former Deans of government medical colleges), and at least one cybersecurity and digital-forensics expert should be constituted to monitor the re-NEET. The cybersecurity expert is essential because the 2026 leak was digital in nature — a 410-question document circulated on WhatsApp groups weeks before the exam. The panel must have unannounced access to any centre on exam day, plus end-to-end audit access to the digital paper-handling and result-processing chain, with a written report submitted to the Ministry within seven days of the exam.'
     },
     {
         n: 5,
@@ -595,6 +595,32 @@ export default function FixOurNeetPage() {
                                         </div>
                                     </div>
                                 ))}
+
+                                {/* Suggest an addition — low-friction email link, no form */}
+                                <div style={{
+                                    background: '#fffbeb',
+                                    border: '1px dashed #fbbf24',
+                                    borderRadius: 14,
+                                    padding: '20px 22px',
+                                    fontSize: 14,
+                                    color: '#78350f',
+                                    lineHeight: 1.65
+                                }}>
+                                    <div style={{ fontWeight: 700, fontSize: 13, letterSpacing: 1, color: '#92400e', marginBottom: 8, textTransform: 'uppercase' }}>
+                                        Suggest an addition
+                                    </div>
+                                    This list of asks is the v1, drafted by educators. It will be expanded based on
+                                    input from cybersecurity professionals, medical councils, parent groups, and
+                                    candidates themselves before final submission to the Ministry on 19 May 2026.
+                                    To propose an addition or refinement, email{' '}
+                                    <a
+                                        href="mailto:fixourneet@desieducators.com?subject=Fix%20Our%20NEET%20%E2%80%94%20Suggestion%20for%20the%20demands%20list"
+                                        style={{ color: BRAND.red, fontWeight: 700, textDecoration: 'underline' }}
+                                    >
+                                        fixourneet@desieducators.com
+                                    </a>
+                                    {' '}with your name, professional credentials, and the specific addition.
+                                </div>
                             </div>
                         </div>
 
