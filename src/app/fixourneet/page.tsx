@@ -614,10 +614,10 @@ export default function FixOurNeetPage() {
                                     candidates themselves before final submission to the Ministry on 19 May 2026.
                                     To propose an addition or refinement, email{' '}
                                     <a
-                                        href="mailto:fixourneet@desieducators.com?subject=Fix%20Our%20NEET%20%E2%80%94%20Suggestion%20for%20the%20demands%20list"
+                                        href="mailto:desieducators@outlook.com?subject=Fix%20Our%20NEET%20%E2%80%94%20Suggestion%20for%20the%20demands%20list"
                                         style={{ color: BRAND.red, fontWeight: 700, textDecoration: 'underline' }}
                                     >
-                                        fixourneet@desieducators.com
+                                        desieducators@outlook.com
                                     </a>
                                     {' '}with your name, professional credentials, and the specific addition.
                                 </div>
@@ -734,13 +734,13 @@ export default function FixOurNeetPage() {
                             <strong>Retention:</strong> Records are retained for 30 days after petition submission unless you have opted into Desi Educators updates, in which case email and consent records are retained per Desi Educators' standing privacy policy.
                         </p>
                         <p style={{ marginBottom: 16 }}>
-                            <strong>Your rights under DPDP Act 2023:</strong> You may request access, correction, or deletion of your data at any time by emailing <a href="mailto:privacy@desieducators.com" style={{ color: BRAND.red }}>privacy@desieducators.com</a>. You may withdraw consent for marketing emails using the unsubscribe link in any message.
+                            <strong>Your rights under DPDP Act 2023:</strong> You may request access, correction, or deletion of your data at any time by emailing <a href="mailto:desieducators@outlook.com" style={{ color: BRAND.red }}>desieducators@outlook.com</a>. You may withdraw consent for marketing emails using the unsubscribe link in any message.
                         </p>
                         <p style={{ marginBottom: 16 }}>
                             <strong>No third-party sharing.</strong> Data is not sold, rented, or shared with any third party. The only disclosure is the petition itself, which contains the minimal fields stated above.
                         </p>
                         <p>
-                            <strong>Grievance redressal:</strong> Email <a href="mailto:privacy@desieducators.com" style={{ color: BRAND.red }}>privacy@desieducators.com</a>. Response within 7 days.
+                            <strong>Grievance redressal:</strong> Email <a href="mailto:desieducators@outlook.com" style={{ color: BRAND.red }}>desieducators@outlook.com</a>. Response within 7 days.
                         </p>
                     </div>
                 </div>
@@ -750,7 +750,7 @@ export default function FixOurNeetPage() {
             <footer style={{ padding: '40px 20px', background: '#0f172a', color: '#94a3b8' }}>
                 <div style={{ maxWidth: 1000, margin: '0 auto', fontSize: 14, lineHeight: 1.7 }}>
                     <p style={{ marginBottom: 14 }}>
-                        Fix Our NEET is a citizen representation under Article 19(1)(a) and the right to petition the executive. It is not affiliated with any political party. Inquiries: <a href="mailto:fixourneet@desieducators.com" style={{ color: '#fff' }}>fixourneet@desieducators.com</a>.
+                        Fix Our NEET is a citizen representation under Article 19(1)(a) and the right to petition the executive. It is not affiliated with any political party. Inquiries: <a href="mailto:desieducators@outlook.com" style={{ color: '#fff' }}>desieducators@outlook.com</a>.
                     </p>
                     <p style={{ fontSize: 13, color: '#64748b' }}>
                         © 2026 Desi Educators · <a href="#privacy" style={{ color: '#94a3b8' }}>Privacy</a> · <Link href="/" style={{ color: '#94a3b8' }}>Home</Link>
