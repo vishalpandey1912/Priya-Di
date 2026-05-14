@@ -7,18 +7,19 @@ import { useEffect, useState } from 'react';
 // Dismissible per session so it stops blocking after the user has seen it.
 
 export default function TopAlertBanner() {
+    // Always render on SSR + first client paint so it appears immediately.
+    // Check sessionStorage after mount; if dismissed, hide.
     const [dismissed, setDismissed] = useState(false);
-    const [hidden, setHidden] = useState(true);
 
     useEffect(() => {
-        // Hide if user dismissed in this session
         if (typeof window !== 'undefined') {
-            const wasDismissed = sessionStorage.getItem('fixourneet_banner_dismissed');
-            if (!wasDismissed) setHidden(false);
+            if (sessionStorage.getItem('fixourneet_banner_dismissed')) {
+                setDismissed(true);
+            }
         }
     }, []);
 
-    if (hidden || dismissed) return null;
+    if (dismissed) return null;
 
     const handleDismiss = (e: React.MouseEvent) => {
         e.stopPropagation();
