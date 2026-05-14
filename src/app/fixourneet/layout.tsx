@@ -1,19 +1,30 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-    title: 'Fix Our NEET | desieducators.com',
-    description: '23 lakh students. 10 days to the re-NEET. Six fixes the Ministry can make now. A citizen representation by educators, parents, and NEET 2026 candidates.',
+    title: 'Fix Our NEET — Petition to MoE | desieducators.com',
+    description: '22.79 lakh students. 410 leaked questions. 120 Chemistry questions matched the actual NEET 2026 paper exactly. Sign the petition demanding 6 fixes from the Ministry of Education for the re-NEET.',
+    keywords: 'Fix Our NEET, NEET 2026 cancelled, NEET paper leak, NEET petition, re-NEET, Ministry of Education, NTA, NEET reform',
     openGraph: {
-        title: 'Fix Our NEET',
-        description: 'Add your name to the representation being delivered to the Ministry of Education and NTA.',
+        title: 'Fix Our NEET — Petition to Ministry of Education',
+        description: '22.79 lakh students. 410 leaked questions. 120 matched exactly. 6 specific demands. 25,000 signatures → hand-delivered to MoE by 19 May 2026. Sign in 30 seconds.',
         type: 'website',
-        url: 'https://desieducators.com/fixourneet',
-        siteName: 'Desi Educators'
+        url: 'https://www.desieducators.com/fixourneet',
+        siteName: 'Desi Educators',
+        locale: 'en_IN',
+        images: [
+            {
+                url: 'https://www.desieducators.com/logo-v4.png',
+                width: 800,
+                height: 600,
+                alt: 'Fix Our NEET — Desi Educators'
+            }
+        ]
     },
     twitter: {
         card: 'summary_large_image',
-        title: 'Fix Our NEET',
-        description: 'Six fixes the Ministry can make for the NEET re-exam. Sign in 45 seconds.'
+        title: 'Fix Our NEET — Petition to MoE',
+        description: '22.79 lakh students. 410 leaked questions. 120 matched exactly. Sign in 30 seconds. Spearheaded by Santosh Pandey + India\'s top NEET educators.',
+        images: ['https://www.desieducators.com/logo-v4.png']
     },
     robots: { index: true, follow: true }
 };
