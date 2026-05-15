@@ -514,8 +514,46 @@ export default function FixOurNeetPage() {
                         Add my name to Fix Our NEET →
                     </a>
 
-                    <div style={{ maxWidth: 480 }}>
-                        <LiveCounter />
+                    <div style={{ maxWidth: 600, marginTop: 32 }}>
+                        <div style={{
+                            display: 'flex',
+                            flexWrap: 'wrap',
+                            gap: 20,
+                            justifyContent: 'center'
+                        }}>
+                            <div style={{ textAlign: 'center' }}>
+                                <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 28, fontWeight: 800, color: '#0f172a', lineHeight: 1 }}>22.79L</div>
+                                <div style={{ fontSize: 11, fontWeight: 700, color: '#64748b', letterSpacing: 1, marginTop: 4 }}>STUDENTS AFFECTED</div>
+                            </div>
+                            <div style={{ width: 1, background: '#e5e7eb' }} />
+                            <div style={{ textAlign: 'center' }}>
+                                <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 28, fontWeight: 800, color: BRAND.red, lineHeight: 1 }}>410</div>
+                                <div style={{ fontSize: 11, fontWeight: 700, color: '#64748b', letterSpacing: 1, marginTop: 4 }}>LEAKED QUESTIONS</div>
+                            </div>
+                            <div style={{ width: 1, background: '#e5e7eb' }} />
+                            <div style={{ textAlign: 'center' }}>
+                                <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 28, fontWeight: 800, color: BRAND.red, lineHeight: 1 }}>120</div>
+                                <div style={{ fontSize: 11, fontWeight: 700, color: '#64748b', letterSpacing: 1, marginTop: 4 }}>EXACT MATCHES</div>
+                            </div>
+                            <div style={{ width: 1, background: '#e5e7eb' }} />
+                            <div style={{ textAlign: 'center' }}>
+                                <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 28, fontWeight: 800, color: '#0f172a', lineHeight: 1 }}>19 May</div>
+                                <div style={{ fontSize: 11, fontWeight: 700, color: '#64748b', letterSpacing: 1, marginTop: 4 }}>MINISTRY DELIVERY</div>
+                            </div>
+                        </div>
+                        <div style={{
+                            marginTop: 24,
+                            padding: '14px 18px',
+                            background: '#fffbeb',
+                            border: '1px solid #fde68a',
+                            borderRadius: 10,
+                            fontSize: 13,
+                            color: '#78350f',
+                            lineHeight: 1.5,
+                            textAlign: 'center'
+                        }}>
+                            <strong>Endorsed by</strong> Priya Pandey (MSc Gold Medalist, Biology Educator since 2017) and a coalition of India's top NEET educators. Spearheaded by Santosh Pandey, Solicitor (England and Wales) and Advocate (India).
+                        </div>
                     </div>
                 </div>
             </section>
