@@ -1,7 +1,26 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
+import { MAINTENANCE_HTML } from './maintenance-page'
+
+// ────────────────────────────────────────────────────────────────
+// SITE HALTED — all requests return 503 with a maintenance page.
+// To bring the site back online: delete this block AND the import
+// of MAINTENANCE_HTML above. That is the only change required.
+// ────────────────────────────────────────────────────────────────
+const SITE_HALTED = true;
 
 export async function middleware(request: NextRequest) {
+    if (SITE_HALTED) {
+        return new NextResponse(MAINTENANCE_HTML, {
+            status: 503,
+            headers: {
+                'content-type': 'text/html; charset=utf-8',
+                'cache-control': 'no-store, no-cache, must-revalidate, max-age=0',
+                'x-robots-tag': 'noindex, nofollow',
+            },
+        });
+    }
+
     let response = NextResponse.next({
         request: {
             headers: request.headers,
